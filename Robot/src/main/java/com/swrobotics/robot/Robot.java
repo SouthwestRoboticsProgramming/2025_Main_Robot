@@ -2,6 +2,7 @@ package com.swrobotics.robot;
 
 import com.swrobotics.lib.ThreadUtils;
 
+import com.swrobotics.lib.tunable.LoggedTunableValue;
 import com.swrobotics.robot.logging.Logging;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
@@ -33,6 +34,7 @@ public final class Robot extends LoggedRobot {
     public void robotPeriodic() {
         Threads.setCurrentThreadPriority(true, 99);
 
+        LoggedTunableValue.updateAll();
         ThreadUtils.runMainThreadOperations();
         CommandScheduler.getInstance().run(); // Leave this alone
     }

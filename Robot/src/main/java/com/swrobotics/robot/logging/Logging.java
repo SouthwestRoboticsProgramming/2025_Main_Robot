@@ -29,10 +29,8 @@ public final class Logging {
         } else if (simMode == SimMode.SIMULATE) {
             Logger.addDataReceiver(new NT4Publisher());
         } else if (simMode == SimMode.SIMULATE_AND_LOG) {
-            String path = "logs";
             Logger.addDataReceiver(new NT4Publisher());
             Logger.addDataReceiver(new WPILOGWriter());
-            // Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(path, "_sim")));
         } else {
             // FIXME: findReplayLog() does not work
             String path = LogFileUtil.findReplayLog();

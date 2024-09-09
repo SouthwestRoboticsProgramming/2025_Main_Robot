@@ -17,9 +17,9 @@ public final class SwerveSetpoints {
         return new SwerveSetpoints(new ChassisSpeeds(), null, states);
     }
 
-    public ChassisSpeeds chassisSpeeds;
-    public SwerveModuleState[] desiredModuleStates; // The eventual target state
-    public SwerveModuleState[] moduleStates; // The setpoints for this periodic
+    public final ChassisSpeeds chassisSpeeds;
+    public final SwerveModuleState[] desiredModuleStates; // The eventual target state
+    public final SwerveModuleState[] moduleStates; // The setpoints for this periodic
 
     public SwerveSetpoints(ChassisSpeeds chassisSpeeds, SwerveModuleState[] desiredModuleStates, SwerveModuleState[] initialStates) {
         this.chassisSpeeds = chassisSpeeds;

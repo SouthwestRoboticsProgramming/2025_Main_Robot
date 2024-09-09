@@ -73,10 +73,10 @@ public final class AprilTagEnvironment {
 
     private static final class JsonTag {
         @JsonProperty("ID")
-        public int ID;
+        public final int ID;
 
         @JsonProperty
-        public Pose3d pose;
+        public final Pose3d pose;
 
         @JsonCreator
         public JsonTag(

@@ -48,7 +48,7 @@ public final class PathfindingDebug {
     }
 
     public static final class EnvPolygon {
-        public Triangle[] internalRegion;
+        public final Triangle[] internalRegion;
 
         public EnvPolygon(DoubleInput in) {
             internalRegion = new Triangle[(int) in.next()];

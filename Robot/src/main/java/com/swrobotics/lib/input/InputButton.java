@@ -62,16 +62,13 @@ public final class InputButton implements InputElement {
      * invoked on each periodic where {@link #isRising()} returns {@code true}.
      *
      * @param risingFn function to call
-     * @return this
      */
-    public InputButton onRising(Runnable risingFn) {
+    public void onRising(Runnable risingFn) {
         onRising.add(risingFn);
-        return this;
     }
 
-    public InputButton onRising(Command command) {
+    public void onRising(Command command) {
         onRising(() -> CommandScheduler.getInstance().schedule(command));
-        return this;
     }
 
     /**
@@ -79,25 +76,21 @@ public final class InputButton implements InputElement {
      * invoked on each periodic where {@link #isFalling()} returns {@code true}.
      *
      * @param fallingFn function to call
-     * @return this
      */
-    public InputButton onFalling(Runnable fallingFn) {
+    public void onFalling(Runnable fallingFn) {
         onFalling.add(fallingFn);
-        return this;
     }
 
-    public InputButton onFalling(Command command) {
+    public void onFalling(Command command) {
         onFalling(() -> CommandScheduler.getInstance().schedule(command));
-        return this;
     }
 
-    public InputButton onHeld(Command command, double seconds) {
+    public void onHeld(Command command, double seconds) {
         new Trigger(this::isPressed).debounce(seconds).onTrue(command);
-        return this;
     }
 
-    public InputButton onHeld(Command command) {
-        return onHeld(command, 1.0);
+    public void onHeld(Command command) {
+        onHeld(command, 1.0);
     }
 
     @Override

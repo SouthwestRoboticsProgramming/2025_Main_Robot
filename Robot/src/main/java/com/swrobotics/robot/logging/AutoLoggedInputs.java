@@ -123,47 +123,21 @@ public abstract class AutoLoggedInputs implements LoggableInputs {
                 e.printStackTrace();
                 return;
             }
-            
+
             switch (entry.type) {
-                case Raw:
-                    table.put(name, (byte[]) val);
-                    break;
-                case Boolean:
-                    table.put(name, (boolean) val);
-                    break;
-                case Integer:
-                    table.put(name, (int) val);
-                    break;
-                case Long:
-                    table.put(name, (long) val);
-                    break;
-                case Float:
-                    table.put(name, (float) val);
-                    break;
-                case Double:
-                    table.put(name, (double) val);
-                    break;
-                case String:
-                    table.put(name, (String) val);
-                    break;
-                case BooleanArray:
-                    table.put(name, (boolean[]) val);
-                    break;
-                case IntegerArray:
-                    table.put(name, toLongs((int[]) val));
-                    break;
-                case LongArray:
-                    table.put(name, (long[]) val);
-                    break;
-                case DoubleArray:
-                    table.put(name, (double[]) val);
-                    break;
-                case StringArray:
-                    table.put(name, (String[]) val);
-                    break;
-                case FloatArray:
-                    table.put(name, (float[]) val);
-                    break;
+                case Raw -> table.put(name, (byte[]) val);
+                case Boolean -> table.put(name, (boolean) val);
+                case Integer -> table.put(name, (int) val);
+                case Long -> table.put(name, (long) val);
+                case Float -> table.put(name, (float) val);
+                case Double -> table.put(name, (double) val);
+                case String -> table.put(name, (String) val);
+                case BooleanArray -> table.put(name, (boolean[]) val);
+                case IntegerArray -> table.put(name, toLongs((int[]) val));
+                case LongArray -> table.put(name, (long[]) val);
+                case DoubleArray -> table.put(name, (double[]) val);
+                case StringArray -> table.put(name, (String[]) val);
+                case FloatArray -> table.put(name, (float[]) val);
             }
         }
     }
@@ -172,7 +146,8 @@ public abstract class AutoLoggedInputs implements LoggableInputs {
     public void fromLog(LogTable table) {
         for (LogEntry entry : entries) {
             String name = entry.field.getName();
-            Object val, def = entry.defVal;
+            Object def = entry.defVal;
+            Object val;
             switch (entry.type) {
                 case Raw:
                     val = table.get(name, (byte[]) def);
@@ -181,7 +156,7 @@ public abstract class AutoLoggedInputs implements LoggableInputs {
                     val = table.get(name, (Boolean) def);
                     break;
                 case Integer:
-                    val = (int) table.get(name, (Integer) def);
+                    val = table.get(name, (Integer) def);
                     break;
                 case Long:
                     val = table.get(name, (Long) def);

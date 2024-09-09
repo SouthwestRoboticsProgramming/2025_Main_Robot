@@ -3,8 +3,6 @@ package com.swrobotics.robot.control;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.input.XboxController;
-import com.swrobotics.lib.net.NTBoolean;
-import com.swrobotics.lib.net.NTEntry;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
 import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
@@ -21,6 +19,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 import java.util.Collections;
 
@@ -36,7 +35,7 @@ public final class ControlBoard extends SubsystemBase {
      * nothing!
      */
 
-    private static final NTEntry<Boolean> CHARACTERISE_WHEEL_RADIUS = new NTBoolean("Drive/Characterize Wheel Radius", false);
+    private static final LoggedDashboardBoolean CHARACTERISE_WHEEL_RADIUS = new LoggedDashboardBoolean("Characterize wheel radius", false);
 
     private final RobotContainer robot;
     public final XboxController driver;

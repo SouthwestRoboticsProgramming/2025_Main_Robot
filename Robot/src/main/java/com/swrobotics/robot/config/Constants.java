@@ -5,8 +5,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 import com.swrobotics.lib.field.FieldInfo;
-import com.swrobotics.lib.net.NTDouble;
-import com.swrobotics.lib.net.NTEntry;
+import com.swrobotics.lib.tunable.LoggedTunableDouble;
 import com.swrobotics.robot.subsystems.swerve.SwerveKinematicLimits;
 import com.swrobotics.robot.subsystems.swerve.SwerveModuleInfo;
 import com.swrobotics.robot.subsystems.vision.RawAprilTagSource;
@@ -41,22 +40,22 @@ public final class Constants {
     public static final double kAutoDriveKp = 8;
     public static final double kAutoDriveKd = 0;
 
-    public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Auto/Turn PID/kP", 9).setPersistent();
-    public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Auto/Turn PID/kD", 0.5).setPersistent();
+    public static final LoggedTunableDouble kAutoTurnKp = new LoggedTunableDouble("Auto/Turn PID/kP", 9);
+    public static final LoggedTunableDouble kAutoTurnKd = new LoggedTunableDouble("Auto/Turn PID/kD", 0.5);
 
     // Drive
     private static final double kHalfSpacingX = 55.3 / 100 / 2; // m
     private static final double kHalfSpacingY = 63.0 / 100 / 2; // m
 
-    public static final NTEntry<Double> kFrontLeftOffset = new NTDouble("Drive/Modules/Front Left Offset (rot)", 0).setPersistent();
-    public static final NTEntry<Double> kFrontRightOffset = new NTDouble("Drive/Modules/Front Right Offset (rot)", 0).setPersistent();
-    public static final NTEntry<Double> kBackLeftOffset = new NTDouble("Drive/Modules/Back Left Offset (rot)", 0).setPersistent();
-    public static final NTEntry<Double> kBackRightOffset = new NTDouble("Drive/Modules/Back Right Offset (rot)", 0).setPersistent();
+    public static final LoggedTunableDouble kFrontLeftOffset = new LoggedTunableDouble("Drive/Modules/Front Left Offset (rot)", 0);
+    public static final LoggedTunableDouble kFrontRightOffset = new LoggedTunableDouble("Drive/Modules/Front Right Offset (rot)", 0);
+    public static final LoggedTunableDouble kBackLeftOffset = new LoggedTunableDouble("Drive/Modules/Back Left Offset (rot)", 0);
+    public static final LoggedTunableDouble kBackRightOffset = new LoggedTunableDouble("Drive/Modules/Back Right Offset (rot)", 0);
     public static final SwerveModuleInfo[] kSwerveModuleInfos = {
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_FL, kHalfSpacingX, kHalfSpacingY, Constants.kFrontLeftOffset, "Front Left"),
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_FR, kHalfSpacingX, -kHalfSpacingY, Constants.kFrontRightOffset, "Front Right"),
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BL, -kHalfSpacingX, kHalfSpacingY, Constants.kBackLeftOffset, "Back Left"),
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BR, -kHalfSpacingX, -kHalfSpacingY, Constants.kBackRightOffset, "Back Right")
+            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_FL, kHalfSpacingX, kHalfSpacingY, kFrontLeftOffset, "Front Left"),
+            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_FR, kHalfSpacingX, -kHalfSpacingY, kFrontRightOffset, "Front Right"),
+            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BL, -kHalfSpacingX, kHalfSpacingY, kBackLeftOffset, "Back Left"),
+            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BR, -kHalfSpacingX, -kHalfSpacingY, kBackRightOffset, "Back Right")
     };
 
     public static final double kDriveRadius = Math.hypot(kHalfSpacingX, kHalfSpacingY);

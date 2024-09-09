@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.swrobotics.lib.tunable.LoggedTunableDouble;
+import com.swrobotics.lib.tunable.LoggedTunableValue;
 import com.swrobotics.robot.subsystems.PathfindingTest;
 import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -48,6 +50,8 @@ public class RobotContainer {
     public final MusicSubsystem music;
 
     public final ControlBoard controlboard;
+
+    private final LoggedTunableDouble testValue = new LoggedTunableDouble("Test value", 123);
 
     private Command musicCommand;
 

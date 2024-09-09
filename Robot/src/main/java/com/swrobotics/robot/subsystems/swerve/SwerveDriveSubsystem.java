@@ -1,7 +1,6 @@
 package com.swrobotics.robot.subsystems.swerve;
 
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.pathfinding.PathPlannerPathfinder;
@@ -28,9 +27,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 public final class SwerveDriveSubsystem extends SubsystemBase {
-    private static final NTBoolean CALIBRATE_OFFSETS = new NTBoolean("Drive/Modules/Calibrate", false);
+    private static final LoggedDashboardBoolean CALIBRATE_OFFSETS = new LoggedDashboardBoolean("Drive/Modules/Calibrate", false);
 
     public enum Priority {
         // Priorities defined lower here take precedence

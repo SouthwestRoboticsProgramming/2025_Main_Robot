@@ -10,9 +10,22 @@ import java.io.File;
  * you are doing, do not modify this file except to change the parameter class to the startRobot
  * call.
  */
-@SuppressWarnings("unused")
 public final class Main {
     private Main() {}
+
+    @SuppressWarnings("unused")
+    private static void deleteNetworkTables() {
+        // Delete NetworkTables persistent values
+        File homeDir = Filesystem.getOperatingDirectory();
+        new File(homeDir, "networktables.json").delete();
+        new File(homeDir, "networktables.json.bck").delete();
+        System.out.println("NT data deleted!");
+
+        // Wait (effectively) forever
+        try {
+            Thread.sleep(Integer.MAX_VALUE);
+        } catch (InterruptedException e) {}
+    }
 
     /**
      * Main initialization function. Do not perform any initialization here.
@@ -20,14 +33,7 @@ public final class Main {
      * <p>If you change your main robot class, change the parameter type.
      */
     public static void main(String... args) {
-//         Delete networktables persistent values
-//                File homeDir = Filesystem.getOperatingDirectory();
-//                new File(homeDir, "networktables.json").delete();
-//                new File(homeDir, "networktables.json.bck").delete();
-//                System.out.println("NT data deleted!");
-//                try {
-//                    Thread.sleep(Integer.MAX_VALUE);
-//                } catch (InterruptedException e) {}
+        // deleteNetworkTables();
 
         RobotBase.startRobot(Robot::new);
     }

@@ -30,7 +30,6 @@ import java.util.TreeMap;
  * on the field.
  */
 public final class SwerveEstimator {
-    private final AprilTagEnvironment environment;
     private final List<VisionSource> visionSources;
 
     private Pose2d basePose, latestPose;
@@ -41,6 +40,7 @@ public final class SwerveEstimator {
 
     public SwerveEstimator() {
         // Load AprilTag environment from JSON file
+        AprilTagEnvironment environment;
         try {
             environment = AprilTagEnvironment.load(Constants.kAprilTagJson);
         } catch (IOException e) {
