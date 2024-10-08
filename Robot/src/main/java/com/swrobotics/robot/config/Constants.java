@@ -23,6 +23,16 @@ public final class Constants {
     public static final FieldInfo kField = FieldInfo.CRESCENDO_2024;
     public static final int kEndgameAlertTime = 15;
 
+    // Robot dimensions
+    public static final double kFrameLength = 0.77; // m
+    public static final double kFrameWidth = 0.695; // m
+    public static final double kRobotRadius = 0.6202230647076; // m, diagonal including bumpers
+    public static final double kRobotMass = Units.lbsToKilograms(122 + 14 + 14);
+    // Approximation of robot as uniform cuboid
+    // See https://sleipnirgroup.github.io/Choreo/usage/estimating-moi/
+    // FIXME: Measure in CAD
+    public static final double kRobotMOI = 1.0/12.0 * kRobotMass * (kFrameLength*kFrameLength + kFrameWidth*kFrameWidth);
+
     // Controls
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
@@ -43,31 +53,33 @@ public final class Constants {
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Auto/Turn PID/kD", 0.5).setPersistent();
 
     // Drive
-    private static final double kHalfSpacingX = 55.3 / 100 / 2; // m
-    private static final double kHalfSpacingY = 63.0 / 100 / 2; // m
+    public static final double kDriveWheelSpacingX = 55.3 / 100; // m
+    public static final double kDriveWheelSpacingY = 63.0 / 100; // m
 
     public static final NTEntry<Double> kFrontLeftOffset = new NTDouble("Drive/Modules/Front Left Offset (rot)", 0).setPersistent();
     public static final NTEntry<Double> kFrontRightOffset = new NTDouble("Drive/Modules/Front Right Offset (rot)", 0).setPersistent();
     public static final NTEntry<Double> kBackLeftOffset = new NTDouble("Drive/Modules/Back Left Offset (rot)", 0).setPersistent();
     public static final NTEntry<Double> kBackRightOffset = new NTDouble("Drive/Modules/Back Right Offset (rot)", 0).setPersistent();
     public static final SwerveModuleInfo[] kSwerveModuleInfos = {
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_FL, kHalfSpacingX, kHalfSpacingY, Constants.kFrontLeftOffset, "Front Left"),
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_FR, kHalfSpacingX, -kHalfSpacingY, Constants.kFrontRightOffset, "Front Right"),
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BL, -kHalfSpacingX, kHalfSpacingY, Constants.kBackLeftOffset, "Back Left"),
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BR, -kHalfSpacingX, -kHalfSpacingY, Constants.kBackRightOffset, "Back Right")
+            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_FL, kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2, Constants.kFrontLeftOffset, "Front Left"),
+            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_FR, kDriveWheelSpacingX / 2, -kDriveWheelSpacingY / 2, Constants.kFrontRightOffset, "Front Right"),
+            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BL, -kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2, Constants.kBackLeftOffset, "Back Left"),
+            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BR, -kDriveWheelSpacingX / 2, -kDriveWheelSpacingY / 2, Constants.kBackRightOffset, "Back Right")
     };
 
-    public static final double kDriveRadius = Math.hypot(kHalfSpacingX, kHalfSpacingY);
-    public static final double kMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
+    public static final double kDriveRadius = Math.hypot(kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2);
+    public static final double kDriveWheelCOF = 1.2; // TODO: Measure?
+    public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
 
     public static final double kDriveDriftComp = kPeriodicTime * 2; // dt for chassis speeds discretize  TODO: Tune
 
-    public static final double kDriveCurrentLimit = 40; // A
+    public static final double kDriveStatorCurrentLimit = 60; // A
+    public static final double kDriveSupplyCurrentLimit = 40; // A
     public static final double kDriveCurrentLimitTime = 0.25; // sec
 
     public static final SwerveKinematicLimits kDriveLimits = new SwerveKinematicLimits();
     static {
-        kDriveLimits.kMaxDriveVelocity = kMaxAchievableSpeed;
+        kDriveLimits.kMaxDriveVelocity = kDriveMaxAchievableSpeed;
         kDriveLimits.kMaxDriveAcceleration = kDriveLimits.kMaxDriveVelocity / 0.1;
         kDriveLimits.kMaxSteeringVelocity = Math.toRadians(1500);
     }
@@ -81,14 +93,13 @@ public final class Constants {
             .withDriveMotorGains(new Slot0Configs().withKP(3).withKD(0))
             .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
             .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
-            .withSpeedAt12VoltsMps(kMaxAchievableSpeed)
+            .withSpeedAt12VoltsMps(kDriveMaxAchievableSpeed)
             .withFeedbackSource(SteerFeedbackType.FusedCANcoder)
             .withCouplingGearRatio(50.0 / 16)
             .withSteerMotorInverted(true);
 
     // Pathfinding
     public static final String kPathfindingJson = "crescendo_pathfinding.json";
-    public static final double kRobotRadius = 0.6202230647076; // m
     public static final double kPathfindingTolerance = 0.2; // m
 
     // Vision

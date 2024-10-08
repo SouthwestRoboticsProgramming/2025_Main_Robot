@@ -48,8 +48,8 @@ public final class PathfindingTest extends SubsystemBase {
         Pose2d goal = FieldView.pathfindingGoal.getPose();
 
         PathConstraints constraints = new PathConstraints(
-                    Constants.kMaxAchievableSpeed,
-                    Constants.kMaxAchievableSpeed / 0.7,
+                    Constants.kDriveMaxAchievableSpeed,
+                    Constants.kDriveMaxAchievableSpeed / 0.7,
                     Constants.kDriveControlMaxTurnSpeed,
                     Constants.kDriveControlMaxTurnSpeed / 0.2);
 

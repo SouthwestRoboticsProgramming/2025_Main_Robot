@@ -36,9 +36,10 @@ public final class CtreSwerveModuleIO extends SwerveModuleIO {
         // current to trip the main breaker.
         CurrentLimitsConfigs limits = new CurrentLimitsConfigs();
         limits.SupplyCurrentLimitEnable = true;
-        limits.SupplyCurrentLimit = Constants.kDriveCurrentLimit;
+        limits.SupplyCurrentLimit = Constants.kDriveSupplyCurrentLimit;
         limits.SupplyTimeThreshold = Constants.kDriveCurrentLimitTime;
-        limits.StatorCurrentLimitEnable = false;
+        limits.StatorCurrentLimitEnable = true;
+        limits.StatorCurrentLimit = Constants.kDriveStatorCurrentLimit;
         module.getDriveMotor().getConfigurator().apply(limits);
 
         canCoderPosition = module.getCANcoder().getAbsolutePosition();

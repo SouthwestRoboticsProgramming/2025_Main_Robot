@@ -81,7 +81,7 @@ public final class ControlBoard extends SubsystemBase {
      * @return translation input for the drive base, in meters/sec
      */
     private Translation2d getDriveTranslation() {
-        double maxSpeed = Constants.kMaxAchievableSpeed;
+        double maxSpeed = Constants.kDriveMaxAchievableSpeed;
 
         Translation2d leftStick = driver.getLeftStick();
 

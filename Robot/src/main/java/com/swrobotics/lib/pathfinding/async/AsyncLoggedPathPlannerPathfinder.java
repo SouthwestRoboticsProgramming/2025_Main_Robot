@@ -2,6 +2,8 @@ package com.swrobotics.lib.pathfinding.async;
 
 import java.util.List;
 
+import com.pathplanner.lib.path.Waypoint;
+import com.swrobotics.lib.pathfinding.PathPlannerPathfinder;
 import org.littletonrobotics.junction.Logger;
 
 import com.pathplanner.lib.path.GoalEndState;
@@ -115,7 +117,8 @@ public final class AsyncLoggedPathPlannerPathfinder implements Pathfinder {
         Logger.recordOutput("Pathfinding/Goal Position", goalPosition);
         Logger.recordOutput("Pathfinding/Path", logPath);
 
-        return new PathPlannerPath(bezierPoints, constraints, goalEndState);
+        List<Waypoint> waypoints = PathPlannerPathfinder.bezierPointsToWaypoints(bezierPoints);
+        return new PathPlannerPath(waypoints, constraints, null, goalEndState);
     }
 
     @Override

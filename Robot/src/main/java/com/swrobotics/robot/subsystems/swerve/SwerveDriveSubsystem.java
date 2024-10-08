@@ -1,5 +1,9 @@
 package com.swrobotics.robot.subsystems.swerve;
 
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.robot.config.Constants;
@@ -7,15 +11,14 @@ import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.lib.pathfinding.PathPlannerPathfinder;
 import com.swrobotics.robot.subsystems.swerve.io.*;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.ReplanningConfig;
 import com.swrobotics.lib.field.FieldInfo;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -121,25 +124,52 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
         currentTurnRequest = NULL_TURN;
         limits = Constants.kDriveLimits;
 
+        final int driveMotorsPerModule = 1;
+
+        ModuleConfig ppModuleConfig = new ModuleConfig(
+                Units.inchesToMeters(Constants.kSwerveConstantsFactory.WheelRadius),
+                Constants.kDriveMaxAchievableSpeed,
+                Constants.kDriveWheelCOF,
+                DCMotor.getKrakenX60Foc(driveMotorsPerModule)
+                    .withReduction(Constants.kSwerveConstantsFactory.DriveMotorGearRatio),
+                Constants.kDriveStatorCurrentLimit,
+                driveMotorsPerModule);
+
+        RobotConfig ppRobotConfig = new RobotConfig(
+                Constants.kRobotMass,
+                Constants.kRobotMOI,
+                ppModuleConfig,
+                Constants.kDriveWheelSpacingY,
+                Constants.kDriveWheelSpacingX);
+
+        // TODO: Check GUI settings and make sure they match ppRobotConfig
+
         // Configure PathPlanner
-        AutoBuilder.configureHolonomic(
+        AutoBuilder.configure(
                 this::getEstimatedPose,
                 this::setPose,
                 this::getRobotRelativeSpeeds,
-                (speeds) ->
-                    driveAndTurn(Priority.AUTO, speeds, DriveRequestType.Velocity),
-                new HolonomicPathFollowerConfig(
+                (speeds, feedforwards) -> {
+                    // TODO: Use the feedforwards somehow
+                    driveAndTurn(Priority.AUTO, speeds, DriveRequestType.Velocity);
+                },
+                new PPHolonomicDriveController(
                         new PIDConstants(Constants.kAutoDriveKp, Constants.kAutoDriveKd),
-                        new PIDConstants(Constants.kAutoTurnKp.get(), Constants.kAutoTurnKd.get()),
-                        Constants.kMaxAchievableSpeed,
-                        Constants.kDriveRadius,
-                        new ReplanningConfig(),
-                        Constants.kPeriodicTime),
+                        new PIDConstants(Constants.kAutoTurnKp.get(), Constants.kAutoTurnKd.get())
+                ),
+                ppRobotConfig,
                 () -> FieldInfo.getAlliance() == DriverStation.Alliance.Red,
-                this);
+                this
+        );
 
-        PathPlannerLogging.setLogActivePathCallback(FieldView.pathPlannerPath::setPoses);
-        PathPlannerLogging.setLogTargetPoseCallback(FieldView.pathPlannerSetpoint::setPose);
+        PathPlannerLogging.setLogActivePathCallback((path) -> {
+            FieldView.pathPlannerPath.setPoses(path);
+            Logger.recordOutput("PathPlanner/Active Path", path.toArray(new Pose2d[0]));
+        });
+        PathPlannerLogging.setLogTargetPoseCallback((target) -> {
+            FieldView.pathPlannerSetpoint.setPose(target);
+            Logger.recordOutput("PathPlanner/Target Pose", target);
+        });
 
         Pathfinding.setPathfinder(new PathPlannerPathfinder());
     }

@@ -3,12 +3,14 @@ package com.swrobotics.lib.pathfinding;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.pathfinding.Pathfinder;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,6 +28,32 @@ public final class PathPlannerPathfinder implements Pathfinder {
      */
     public static void setEnvironment(PathEnvironment env) {
         PathPlannerPathfinder.env = env;
+    }
+
+    /**
+     * Converts the bezier points returned from the pathfinder into Waypoints
+     * for PathPlanner.
+     *
+     * @param bezier bezier points from pathfinder
+     * @return waypoints for PathPlanner
+     */
+    public static List<Waypoint> bezierPointsToWaypoints(List<Translation2d> bezier) {
+        // Bezier points alternate A, C, C, A, C, C, A, C, C, A
+
+        int bezierCount = bezier.size();
+        if (bezierCount % 3 != 1)
+            throw new IllegalArgumentException("Bezier path is incomplete");
+
+        List<Waypoint> out = new ArrayList<>();
+        for (int i = -1; i < bezierCount; i += 3) {
+            Translation2d prevControl = i >= 0 ? bezier.get(i) : null;
+            Translation2d anchor = bezier.get(i + 1);
+            Translation2d nextControl = i + 2 < bezierCount ? bezier.get(i + 2) : null;
+
+            out.add(new Waypoint(prevControl, anchor, nextControl));
+        }
+
+        return out;
     }
 
     private Translation2d startPos, goalPos;
@@ -83,7 +111,8 @@ public final class PathPlannerPathfinder implements Pathfinder {
         Logger.recordOutput("Pathfinding/Goal Position", goalPos);
         Logger.recordOutput("Pathfinding/Path", logPath);
 
-        return new PathPlannerPath(bezierPoints, pathConstraints, goalEndState);
+        List<Waypoint> waypoints = bezierPointsToWaypoints(bezierPoints);
+        return new PathPlannerPath(waypoints, pathConstraints, null, goalEndState);
     }
 
     @Override
