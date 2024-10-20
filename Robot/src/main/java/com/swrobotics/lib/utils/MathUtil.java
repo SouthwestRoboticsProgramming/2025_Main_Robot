@@ -59,7 +59,10 @@ public final class MathUtil {
      * @return percentage
      */
     public static double percent(double val, double min, double max) {
-        return (val - min) / (max - min);
+        double delta = max - min;
+        if (delta == 0)
+            return 0;
+        return (val - min) / delta;
     }
 
     /**

@@ -11,7 +11,11 @@ public final class NavXGyroIO implements GyroIO {
 
     public NavXGyroIO() {
         throw new RuntimeException("Uncomment these once Studica fixes the NavX vendordep");
-        // navx = new AHRS(SPI.Port.kMXP);
+
+        // Explicitly set the NavX update rate, workaround for NavX vendordep issue
+        // See https://www.chiefdelphi.com/t/navx2-disconnecting-reconnecting-intermittently-not-browning-out/425487
+        // byte updateRate = (byte) 50;
+        // navx = new AHRS(SPI.Port.kMXP, updateRate);
     }
 
     @Override
