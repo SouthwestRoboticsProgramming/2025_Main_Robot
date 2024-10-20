@@ -9,4 +9,5 @@ Steps to update the project. These are more or less equivalent to what the WPILi
 4. Copy gradlew, gradlew.bat, and the entire gradle folder into the robot project
 5. Copy vendordeps/WPILibNewCommands.json into the robot project
 6. Update the projectYear in .wpilib/wpilib_preferences.json
+7. Update the rest of the vendor dependency JSON files by downloading them fromm the vendors' websites
 7. Fix any compilation errors in the robot code due to library changes

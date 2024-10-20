@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+
 import org.littletonrobotics.junction.LoggedRobot;
 
 /**
@@ -49,7 +50,7 @@ public final class Robot extends LoggedRobot {
                     // does not crash the robot code. Directly adding it to the
                     // sequence would mark the auto command as composed,
                     // causing the second time to throw an exception
-                    Commands.deferredProxy(() -> auto)
+                    auto.asProxy()
             );
         } else {
             autonomousCommand = auto;

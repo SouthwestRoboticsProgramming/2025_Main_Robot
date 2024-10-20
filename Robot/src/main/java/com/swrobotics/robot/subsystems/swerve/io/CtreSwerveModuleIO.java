@@ -5,21 +5,24 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.ParentDevice;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstants;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.Angle;
 
 /**
  * Swerve module implementation using the CTRE swerve API. This is a swerve
  * module with TalonFX motors and a CANcoder absolute encoder.
  */
 public final class CtreSwerveModuleIO extends SwerveModuleIO {
-    private final SwerveModule module;
-    private final StatusSignal<Double> canCoderPosition;
+    private final LegacySwerveModule module;
+    private final StatusSignal<Angle> canCoderPosition;
 
     /**
      * @param name name of this module, for logging and debugging
@@ -27,17 +30,17 @@ public final class CtreSwerveModuleIO extends SwerveModuleIO {
      * @param canBus Name of the CAN bus the devices are wired into. All three
      *               devices must be on the same CAN bus.
      */
-    public CtreSwerveModuleIO(String name, SwerveModuleConstants constants, String canBus) {
+    public CtreSwerveModuleIO(String name, LegacySwerveModuleConstants constants, String canBus) {
         super(name);
-        module = new SwerveModule(constants, canBus);
+        module = new LegacySwerveModule(constants, canBus);
 
         // Limit drive current. This is needed because stalling all four drive
         // motors at full power (such as during heavy defense) consumes enough
         // current to trip the main breaker.
         CurrentLimitsConfigs limits = new CurrentLimitsConfigs();
         limits.SupplyCurrentLimitEnable = true;
-        limits.SupplyCurrentLimit = Constants.kDriveSupplyCurrentLimit;
-        limits.SupplyTimeThreshold = Constants.kDriveCurrentLimitTime;
+        limits.SupplyCurrentLowerLimit = Constants.kDriveSupplyCurrentLimit;
+        limits.SupplyCurrentLowerTime = Constants.kDriveCurrentLimitTime;
         limits.StatorCurrentLimitEnable = true;
         limits.StatorCurrentLimit = Constants.kDriveStatorCurrentLimit;
         module.getDriveMotor().getConfigurator().apply(limits);
@@ -70,7 +73,7 @@ public final class CtreSwerveModuleIO extends SwerveModuleIO {
         inputs.driveVelocity = state.speedMetersPerSecond;
         // Position's angle is latency compensated, so use it instead of state's angle
         inputs.angle = position.angle.getRotations();
-        inputs.canCoderPos = canCoderPosition.getValue();
+        inputs.canCoderPos = canCoderPosition.getValueAsDouble();
     }
 
     @Override
@@ -81,7 +84,7 @@ public final class CtreSwerveModuleIO extends SwerveModuleIO {
     }
 
     @Override
-    public void setTarget(SwerveModuleState state, SwerveModule.DriveRequestType driveRequestType) {
-        module.apply(state, driveRequestType, SwerveModule.SteerRequestType.MotionMagic);
+    public void setTarget(SwerveModuleState state, DriveRequestType driveRequestType) {
+        module.apply(state, driveRequestType, SteerRequestType.MotionMagic);
     }
 }

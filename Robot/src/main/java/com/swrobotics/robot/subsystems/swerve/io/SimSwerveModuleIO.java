@@ -1,6 +1,6 @@
 package com.swrobotics.robot.subsystems.swerve.io;
 
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.config.Constants;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -42,8 +42,10 @@ public final class SimSwerveModuleIO extends SwerveModuleIO {
     }
 
     @Override
-    public void setTarget(SwerveModuleState state, SwerveModule.DriveRequestType driveRequestType) {
+    public void setTarget(SwerveModuleState state, LegacySwerveModule.DriveRequestType driveRequestType) {
         // Set current state directly to target state
-        this.state = SwerveModuleState.optimize(state, this.state.angle);
+        SwerveModuleState copy = new SwerveModuleState(state.speedMetersPerSecond, state.angle);
+        copy.optimize(this.state.angle); // Mutates copy
+        this.state = copy;
     }
 }

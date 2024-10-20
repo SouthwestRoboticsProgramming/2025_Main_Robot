@@ -10,10 +10,7 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
+// TODO: Look into new WPILib LED strip patterns API
 public final class LightsSubsystem extends SubsystemBase {
     private final RobotContainer robot;
     private final AddressableLED leds;

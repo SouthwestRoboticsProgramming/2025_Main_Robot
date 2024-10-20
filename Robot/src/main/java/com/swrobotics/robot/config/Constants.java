@@ -1,9 +1,9 @@
 package com.swrobotics.robot.config;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.ClosedLoopOutputType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstants.SteerFeedbackType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstantsFactory;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.net.NTDouble;
 import com.swrobotics.lib.net.NTEntry;
@@ -84,7 +84,7 @@ public final class Constants {
         kDriveLimits.kMaxSteeringVelocity = Math.toRadians(1500);
     }
 
-    public static final SwerveModuleConstantsFactory kSwerveConstantsFactory = new SwerveModuleConstantsFactory()
+    public static final LegacySwerveModuleConstantsFactory kSwerveConstantsFactory = new LegacySwerveModuleConstantsFactory()
             .withDriveMotorGearRatio((50.0/16) * (16.0/28) * (45.0/15))
             .withSteerMotorGearRatio(150.0 / 7)
             .withWheelRadius(1.9) // Inches

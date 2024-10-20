@@ -15,8 +15,8 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstants;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.swrobotics.lib.field.FieldInfo;
@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
+// TODO: This whole subsystem needs a rewrite due to CTRE swerve API changes
 public final class SwerveDriveSubsystem extends SubsystemBase {
     private static final NTBoolean CALIBRATE_OFFSETS = new NTBoolean("Drive/Modules/Calibrate", false);
 
@@ -99,7 +100,7 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
             SwerveModuleInfo info = infos[i];
 
             if (RobotBase.isReal()) {
-                SwerveModuleConstants moduleConstants = Constants.kSwerveConstantsFactory.createModuleConstants(
+                LegacySwerveModuleConstants moduleConstants = Constants.kSwerveConstantsFactory.createModuleConstants(
                         info.turnId(), info.driveId(), info.encoderId(),
                         info.offset().get(),
                         info.position().getX(), info.position().getY(),

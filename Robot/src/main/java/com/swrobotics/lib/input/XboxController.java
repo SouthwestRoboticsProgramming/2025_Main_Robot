@@ -44,8 +44,8 @@ public final class XboxController extends InputSource {
         start = new InputButton(xbox::getStartButton);
         leftStickButton = new InputButton(xbox::getLeftStickButton);
         rightStickButton = new InputButton(xbox::getRightStickButton);
-        leftBumper = new InputButton(xbox::getLeftBumper);
-        rightBumper = new InputButton(xbox::getRightBumper);
+        leftBumper = new InputButton(xbox::getLeftBumperButton);
+        rightBumper = new InputButton(xbox::getRightBumperButton);
 
         leftStickX = new InputAxis(xbox::getLeftX, deadband);
         leftStickY = new InputAxis(xbox::getLeftY, deadband);

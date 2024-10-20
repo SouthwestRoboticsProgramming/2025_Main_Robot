@@ -4,6 +4,9 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +16,9 @@ public final class RealMotorTrackerIO implements MotorTrackerIO {
     private record TrackedMotor(
             String name,
             String canBus,
-            StatusSignal<Double> tempStatus,
-            StatusSignal<Double> supplyCurrentStatus,
-            StatusSignal<Double> statorCurrentStatus) {}
+            StatusSignal<Temperature> tempStatus,
+            StatusSignal<Current> supplyCurrentStatus,
+            StatusSignal<Current> statorCurrentStatus) {}
 
     private final List<TrackedMotor> motors = new ArrayList<>();
     private BaseStatusSignal[][] allSignals = null;
@@ -55,9 +58,9 @@ public final class RealMotorTrackerIO implements MotorTrackerIO {
         for (int i = 0; i < count; i++) {
             TrackedMotor motor = motors.get(i);
             inputs.names[i] = motor.name();
-            inputs.temperatures[i] = motor.tempStatus().getValue();
-            inputs.supplyCurrents[i] = motor.supplyCurrentStatus().getValue();
-            inputs.statorCurrents[i] = motor.statorCurrentStatus().getValue();
+            inputs.temperatures[i] = motor.tempStatus().getValueAsDouble(); // Celsius
+            inputs.supplyCurrents[i] = motor.supplyCurrentStatus().getValueAsDouble(); // Amps
+            inputs.statorCurrents[i] = motor.statorCurrentStatus().getValueAsDouble(); // Amps
         }
     }
 
@@ -66,9 +69,9 @@ public final class RealMotorTrackerIO implements MotorTrackerIO {
         if (allSignals != null)
             throw new IllegalStateException("Can only add motors in robotInit()");
 
-        StatusSignal<Double> tempStatus = motor.getDeviceTemp();
-        StatusSignal<Double> supplyCurrentStatus = motor.getSupplyCurrent();
-        StatusSignal<Double> statorCurrentStatus = motor.getStatorCurrent();
+        StatusSignal<Temperature> tempStatus = motor.getDeviceTemp();
+        StatusSignal<Current> supplyCurrentStatus = motor.getSupplyCurrent();
+        StatusSignal<Current> statorCurrentStatus = motor.getStatorCurrent();
 
         StatusSignal.setUpdateFrequencyForAll(
                 4, // 4 Hz is minimum update frequency supported

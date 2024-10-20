@@ -1,6 +1,6 @@
 package com.swrobotics.robot.subsystems.swerve.io;
 
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.DriveRequestType;
 import com.swrobotics.robot.logging.AutoLoggedInputs;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -28,7 +28,7 @@ public abstract class SwerveModuleIO {
      * @param state target module state
      * @param driveRequestType type of drive request to use
      */
-    public abstract void setTarget(SwerveModuleState state, SwerveModule.DriveRequestType driveRequestType);
+    public abstract void setTarget(SwerveModuleState state, DriveRequestType driveRequestType);
 
     public String getName() {
         return name;

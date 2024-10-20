@@ -1,6 +1,6 @@
 package com.swrobotics.robot.control;
 
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.DriveRequestType;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.input.XboxController;
 import com.swrobotics.lib.net.NTBoolean;
