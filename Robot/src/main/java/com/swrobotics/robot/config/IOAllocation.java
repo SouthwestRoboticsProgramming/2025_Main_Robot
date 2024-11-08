@@ -8,16 +8,19 @@ import edu.wpi.first.wpilibj.RobotBase;
  * Describes the IDs of the various devices within the robot.
  */
 // For now, IDs are set such that this code can run on the 2024 robot
+// TODO: Switch back to ints for IDs
 public final class IOAllocation {
     public static final class CAN {
         private static final String RIO = "";
         public static final String GERALD = "Gerald";
 
         // All on Gerald
+        public static final String SWERVE_BUS = GERALD;
         public static final SwerveIDs SWERVE_FL = new SwerveIDs(9, 5, 1);
         public static final SwerveIDs SWERVE_FR = new SwerveIDs(10, 6, 2);
         public static final SwerveIDs SWERVE_BL = new SwerveIDs(11, 7, 3);
         public static final SwerveIDs SWERVE_BR = new SwerveIDs(12, 8, 4);
+        public static final CanId PIGEON2 = new CanId(13, GERALD);
 
         public static final CanId PDP = new CanId(62, RIO);
     }

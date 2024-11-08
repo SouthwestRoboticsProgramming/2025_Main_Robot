@@ -1,6 +1,6 @@
 package com.swrobotics.robot.control;
 
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.input.XboxController;
 import com.swrobotics.lib.net.NTBoolean;
@@ -11,11 +11,9 @@ import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
 import com.swrobotics.robot.commands.LightCommands;
 import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
-import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -52,8 +50,8 @@ public final class ControlBoard extends SubsystemBase {
         operator = new XboxController(Constants.kOperatorControllerPort, Constants.kDeadband);
 
         // Gyro reset buttons
-        driver.start.onReleased(() -> robot.drive.setRotation(new Rotation2d()));
-        driver.back.onReleased(() -> robot.drive.setRotation(new Rotation2d())); // Two buttons to reset gyro so the driver can't get confused
+        driver.start.onReleased(() -> robot.drive.resetRotation(new Rotation2d()));
+        driver.back.onReleased(() -> robot.drive.resetRotation(new Rotation2d())); // Two buttons to reset gyro so the driver can't get confused
 
         // Test LEDs
         driver.a.onPressed(LightCommands.blink(robot.lights, Color.kCyan));
@@ -122,13 +120,9 @@ public final class ControlBoard extends SubsystemBase {
         Translation2d translation = getDriveTranslation();
         Rotation2d rotation = getDriveRotation();
 
-        ChassisSpeeds chassisRequest = ChassisSpeeds.fromFieldRelativeSpeeds(
-                        translation.getX(),
-                        translation.getY(),
-                        rotation.getRadians(),
-                        robot.drive.getEstimatedPose().getRotation());
-
-        // TODO: Check if Velocity request type actually uses velocity control
-        robot.drive.driveAndTurn(SwerveDriveSubsystem.Priority.DRIVER, chassisRequest, DriveRequestType.Velocity);
+        robot.drive.setControl(new SwerveRequest.FieldCentric()
+                .withVelocityX(translation.getX())
+                .withVelocityY(translation.getY())
+                .withRotationalRate(rotation.getRadians()));
     }
 }

@@ -1,17 +1,27 @@
 package com.swrobotics.robot.config;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.ClosedLoopOutputType;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstants.SteerFeedbackType;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstantsFactory;
+import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.net.NTDouble;
 import com.swrobotics.lib.net.NTEntry;
-import com.swrobotics.robot.subsystems.swerve.SwerveKinematicLimits;
 import com.swrobotics.robot.subsystems.swerve.SwerveModuleInfo;
 import com.swrobotics.robot.subsystems.vision.RawAprilTagSource;
 import com.swrobotics.robot.subsystems.vision.tagtracker.TagTrackerCaptureProperties;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+
+import static edu.wpi.first.units.Units.*;
 
 // Use NTEntry when you want tunable
 // Use double when value has been tuned in so it can't accidentally change
@@ -48,13 +58,24 @@ public final class Constants {
     // Auto (TODO: Tune)
     public static final double kAutoDriveKp = 8;
     public static final double kAutoDriveKd = 0;
-
     public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Auto/Turn PID/kP", 9).setPersistent();
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Auto/Turn PID/kD", 0.5).setPersistent();
 
     // Drive
+    public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
+
+    public static final double kOdometryUpdateFreq = 200; // Hz
+    public static final Matrix<N3, N1> kOdometryStdDevs = VecBuilder.fill(0.005, 0.005, 0.001);
+
+    public static final double kDriveStatorCurrentLimit = 60; // A
+    public static final double kDriveSupplyCurrentLimit = 40; // A
+    public static final double kDriveCurrentLimitTime = 0.25; // sec
+
+    public static final double kDriveWheelCOF = 1.2; // TODO: Measure?
+
     public static final double kDriveWheelSpacingX = 55.3 / 100; // m
     public static final double kDriveWheelSpacingY = 63.0 / 100; // m
+    public static final double kDriveRadius = Math.hypot(kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2);
 
     public static final NTEntry<Double> kFrontLeftOffset = new NTDouble("Drive/Modules/Front Left Offset (rot)", 0).setPersistent();
     public static final NTEntry<Double> kFrontRightOffset = new NTDouble("Drive/Modules/Front Right Offset (rot)", 0).setPersistent();
@@ -67,36 +88,28 @@ public final class Constants {
             new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BR, -kDriveWheelSpacingX / 2, -kDriveWheelSpacingY / 2, Constants.kBackRightOffset, "Back Right")
     };
 
-    public static final double kDriveRadius = Math.hypot(kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2);
-    public static final double kDriveWheelCOF = 1.2; // TODO: Measure?
-    public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
-
-    public static final double kDriveDriftComp = kPeriodicTime * 2; // dt for chassis speeds discretize  TODO: Tune
-
-    public static final double kDriveStatorCurrentLimit = 60; // A
-    public static final double kDriveSupplyCurrentLimit = 40; // A
-    public static final double kDriveCurrentLimitTime = 0.25; // sec
-
-    public static final SwerveKinematicLimits kDriveLimits = new SwerveKinematicLimits();
-    static {
-        kDriveLimits.kMaxDriveVelocity = kDriveMaxAchievableSpeed;
-        kDriveLimits.kMaxDriveAcceleration = kDriveLimits.kMaxDriveVelocity / 0.1;
-        kDriveLimits.kMaxSteeringVelocity = Math.toRadians(1500);
-    }
-
-    public static final LegacySwerveModuleConstantsFactory kSwerveConstantsFactory = new LegacySwerveModuleConstantsFactory()
+    public static final SwerveDrivetrainConstants kDrivetrainConstants = new SwerveDrivetrainConstants()
+            .withCANBusName(IOAllocation.CAN.SWERVE_BUS)
+            .withPigeon2Id(IOAllocation.CAN.PIGEON2.id())
+            .withPigeon2Configs(new Pigeon2Configuration());
+    public static final SwerveModuleConstantsFactory kModuleConstantsFactory = new SwerveModuleConstantsFactory()
             .withDriveMotorGearRatio((50.0/16) * (16.0/28) * (45.0/15))
             .withSteerMotorGearRatio(150.0 / 7)
-            .withWheelRadius(1.9) // Inches
-            .withSlipCurrent(300) // A  TODO Tune
-            .withSteerMotorGains(new Slot0Configs().withKP(100).withKD(0.05))
-            .withDriveMotorGains(new Slot0Configs().withKP(3).withKD(0))
+            .withCouplingGearRatio(50.0 / 16)
+            .withWheelRadius(Inches.of(1.9))
+            // Gains taken from 254 2024 robot code
+            .withSteerMotorGains(new Slot0Configs().withKP(100).withKD(0.2).withKV(1.5))
+            .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(12.0 / 88.2142857143))
+            // TODO: Torque current FOC
             .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
             .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
-            .withSpeedAt12VoltsMps(kDriveMaxAchievableSpeed)
+            .withSlipCurrent(Amps.of(80))
+            .withSpeedAt12Volts(MetersPerSecond.of(kDriveMaxAchievableSpeed))
             .withFeedbackSource(SteerFeedbackType.FusedCANcoder)
-            .withCouplingGearRatio(50.0 / 16)
-            .withSteerMotorInverted(true);
+            .withDriveMotorInitialConfigs(new TalonFXConfiguration())
+            .withSteerMotorInitialConfigs(new TalonFXConfiguration())
+            .withCANcoderInitialConfigs(new CANcoderConfiguration());
+    // Simulation constants left at defaults for now
 
     // Pathfinding
     public static final String kPathfindingJson = "crescendo_pathfinding.json";
@@ -122,13 +135,6 @@ public final class Constants {
             .setFieldBorderMargin(0.5)
             .setZMargin(0.75)
             .setMaxTrustDistance(Double.POSITIVE_INFINITY);
-
-    public static final double[] kVisionStateStdDevs = {0.005, 0.005, 0.001};
-    public static final double kVisionHistoryTime = 0.3; // Secs
-    // Time at beginning of teleop where vision angle is trusted more
-    // Only applies when NOT on competition field!
-    public static final double kVisionInitialTrustTime = 5; // Secs
-    public static final double kVisionInitialAngleStdDev = 0.2;
 
     // Lights
     public static final int kLedStripLength = 22;

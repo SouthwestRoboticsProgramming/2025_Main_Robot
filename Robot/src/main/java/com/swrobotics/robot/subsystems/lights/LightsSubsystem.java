@@ -4,7 +4,6 @@ import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.IOAllocation;
-import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
@@ -77,8 +76,6 @@ public final class LightsSubsystem extends SubsystemBase {
             applySolid(commandRequest);
         } else if (DriverStation.isDisabled()) {
             prideSequencer.apply(this);
-        } else if (robot.drive.getLastSelectedPriority() == SwerveDriveSubsystem.Priority.AUTO) {
-            showAutoDriving();
         } else {
             showIdle();
         }
