@@ -4,7 +4,6 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstantsFactory;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
@@ -13,8 +12,6 @@ import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.net.NTDouble;
 import com.swrobotics.lib.net.NTEntry;
 import com.swrobotics.robot.subsystems.swerve.SwerveModuleInfo;
-import com.swrobotics.robot.subsystems.vision.RawAprilTagSource;
-import com.swrobotics.robot.subsystems.vision.tagtracker.TagTrackerCaptureProperties;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
@@ -116,25 +113,13 @@ public final class Constants {
     public static final double kPathfindingTolerance = 0.2; // m
 
     // Vision
-    public static final String kAprilTagJson = "crescendo_apriltag.json";
+    // These were tuned at MURA using red alliance speaker AprilTags
+    public static final double kVisionXYStdDevCoeffMT1 = 0.00197;
+    public static final double kVisionXYStdDevCoeffMT2 = 0.00117;
+    public static final double kVisionThetaStdDevCoeffMT1 = 0.002;
 
-    // These need to be tuned during field calibration time at every event.
-    // They can be adjusted manually in NetworkTables at TagTracker/<Camera>/Config/...
-    // Don't forget to set your adjusted values here! The NetworkTables values
-    // do not save.
-    public static final TagTrackerCaptureProperties kTagTrackerCaptureProps = new TagTrackerCaptureProperties()
-            .setAutoExposure(false)
-            .setExposure(20)
-            .setGain(1)
-            .setTargetFps(50);
-
-    public static final RawAprilTagSource.FilterParameters kTagTrackerFilterParams = new RawAprilTagSource.FilterParameters()
-            .setAmbiguityThreshold(0.9)
-            .setXYStdDevCoefficient(0.01)
-            .setThetaStdDevCoefficient(0.01)
-            .setFieldBorderMargin(0.5)
-            .setZMargin(0.75)
-            .setMaxTrustDistance(Double.POSITIVE_INFINITY);
+    public static final double kVisionMT2SpeedThreshold = 0.2; // m/s
+    public static final double kVisionMT1MaxDistance = 4; // m
 
     // Lights
     public static final int kLedStripLength = 22;

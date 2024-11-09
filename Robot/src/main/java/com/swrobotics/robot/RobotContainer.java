@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.PathfindingTest;
+import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -47,6 +48,8 @@ public class RobotContainer {
     public final LoggedPowerDistribution pdp;
     public final MotorTrackerSubsystem motorTracker;
     public final SwerveDriveSubsystem drive;
+    public final VisionSubsystem vision;
+
     public final PathfindingTest pathfindingTest;
 
     public final LightsSubsystem lights;
@@ -66,6 +69,7 @@ public class RobotContainer {
 
         pdp = LoggedPowerDistribution.getInstance(IOAllocation.CAN.PDP.id(), PowerDistribution.ModuleType.kRev);
         drive = new SwerveDriveSubsystem();
+        vision = new VisionSubsystem(drive);
         lights = new LightsSubsystem(this);
 
         pathfindingTest = new PathfindingTest(drive);

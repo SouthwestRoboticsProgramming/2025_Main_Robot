@@ -1,6 +1,7 @@
 package com.swrobotics.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -101,7 +102,7 @@ public class CtreSwerveIO implements SwerveIO {
 
     @Override
     public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> stdDevs) {
-        drivetrain.addVisionMeasurement(pose, timestamp, stdDevs);
+        drivetrain.addVisionMeasurement(pose, Utils.fpgaToCurrentTime(timestamp), stdDevs);
     }
 
     @Override
