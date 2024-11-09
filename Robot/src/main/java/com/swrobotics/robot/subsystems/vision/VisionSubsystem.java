@@ -18,7 +18,10 @@ public final class VisionSubsystem extends SubsystemBase {
         this.drive = drive;
 
         cameras = List.of(
-                new LimelightCamera("limelight")
+                new LimelightCamera(
+                        "limelight",
+                        Constants.kLimelightLocation,
+                        Constants.kLimelightConfig)
                 // Add more cameras here...
         );
     }

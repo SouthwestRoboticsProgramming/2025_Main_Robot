@@ -12,6 +12,7 @@ import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.net.NTDouble;
 import com.swrobotics.lib.net.NTEntry;
 import com.swrobotics.robot.subsystems.swerve.SwerveModuleInfo;
+import com.swrobotics.robot.subsystems.vision.limelight.LimelightCamera;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
@@ -113,13 +114,22 @@ public final class Constants {
     public static final double kPathfindingTolerance = 0.2; // m
 
     // Vision
-    // These were tuned at MURA using red alliance speaker AprilTags
-    public static final double kVisionXYStdDevCoeffMT1 = 0.00197;
-    public static final double kVisionXYStdDevCoeffMT2 = 0.00117;
-    public static final double kVisionThetaStdDevCoeffMT1 = 0.002;
-
     public static final double kVisionMT2SpeedThreshold = 0.2; // m/s
-    public static final double kVisionMT1MaxDistance = 4; // m
+
+    public static final LimelightCamera.MountingLocation kLimelightLocation = new LimelightCamera.MountingLocation(
+            0, 0, 0,
+            0, 0, 0
+    );
+
+    // This will be different for each lens type, cameras with same lens should
+    // have the same config
+    public static final LimelightCamera.Config kLimelightConfig = new LimelightCamera.Config(
+            // These were tuned at MURA using red alliance speaker AprilTags
+            4,
+            0.00197,
+            0.002,
+            0.00117
+    );
 
     // Lights
     public static final int kLedStripLength = 22;

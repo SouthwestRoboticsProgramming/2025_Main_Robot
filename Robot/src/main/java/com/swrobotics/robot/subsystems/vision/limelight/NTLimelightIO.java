@@ -6,19 +6,26 @@ public final class NTLimelightIO implements LimelightIO {
     private static final String MEGATAG_1_NAME = "botpose_wpiblue";
     private static final String MEGATAG_2_NAME = "botpose_orb_wpiblue";
     private static final String ORIENTATION_NAME = "robot_orientation_set";
+    private static final String LOCATION_NAME = "camerapose_robotspace_set";
 
     private final DoubleArraySubscriber mt1EstimateSub;
     private final DoubleArraySubscriber mt2EstimateSub;
 
     private final DoubleArrayPublisher robotOrientationPub;
 
-    public NTLimelightIO(String limelightName) {
+    public NTLimelightIO(String limelightName, LimelightCamera.MountingLocation location) {
         NetworkTable table = NetworkTableInstance.getDefault().getTable(limelightName);
 
         mt1EstimateSub = table.getDoubleArrayTopic(MEGATAG_1_NAME).subscribe(new double[0]);
         mt2EstimateSub = table.getDoubleArrayTopic(MEGATAG_2_NAME).subscribe(new double[0]);
 
         robotOrientationPub = table.getDoubleArrayTopic(ORIENTATION_NAME).publish();
+
+        DoubleArrayPublisher mountingLocationPub = table.getDoubleArrayTopic(LOCATION_NAME).publish();
+        mountingLocationPub.set(new double[] {
+                location.forward(), location.right(), location.up(),
+                location.roll(), location.pitch(), location.yaw()
+        });
     }
 
     private void updateEstimateInput(EstimateInputs inputs, DoubleArraySubscriber sub) {

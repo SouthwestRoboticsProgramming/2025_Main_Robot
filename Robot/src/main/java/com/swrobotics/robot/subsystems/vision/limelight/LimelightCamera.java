@@ -1,8 +1,6 @@
 package com.swrobotics.robot.subsystems.vision.limelight;
 
 import com.swrobotics.lib.utils.MathUtil;
-import com.swrobotics.robot.config.Constants;
-import com.swrobotics.robot.logging.FieldView;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,20 +13,34 @@ import org.littletonrobotics.junction.Logger;
 import java.util.List;
 
 public final class LimelightCamera {
+    // forward, right, up in meters; pitch, yaw, roll in degrees CCW
+    public static record MountingLocation(
+            double forward, double right, double up,
+            double roll, double pitch, double yaw) {}
+
+    public static record Config(
+            double mt1MaxDistance,
+            double xyStdDevCoeffMT1,
+            double thetaStdDevCoeffMT1,
+            double xyStdDevCoeffMT2) {}
+
     public static record Update(Pose2d pose, double timestamp, Matrix<N3, N1> stdDevs) {}
 
     private static record PoseEstimate(Pose2d pose, double timestamp, int tagCount, double avgTagDist) {}
 
     private final String name;
+    private final Config config;
+
     private final LimelightIO io;
     private final LimelightIO.Inputs inputs;
 
     private double prevUpdateTimestamp;
 
-    public LimelightCamera(String name) {
+    public LimelightCamera(String name, MountingLocation location, Config config) {
         this.name = name;
+        this.config = config;
 
-        io = new NTLimelightIO(name);
+        io = new NTLimelightIO(name, location);
         inputs = new LimelightIO.Inputs();
 
         prevUpdateTimestamp = Double.NaN;
@@ -54,7 +66,7 @@ public final class LimelightCamera {
 
         // If too far away, use MegaTag 2 estimate instead. MegaTag 1 estimate
         // is too unstable at far distances
-        if (!useMegaTag2 && est.avgTagDist > Constants.kVisionMT1MaxDistance) {
+        if (!useMegaTag2 && est.avgTagDist > config.mt1MaxDistance) {
             processEstimate(updatesOut, true);
             return;
         }
@@ -70,12 +82,12 @@ public final class LimelightCamera {
         // Calculate standard deviations by linear regressions on distance^2
         double xyStdDev, thetaStdDev;
         if (useMegaTag2) {
-            xyStdDev = baseStdDev * Constants.kVisionXYStdDevCoeffMT2;
+            xyStdDev = baseStdDev * config.xyStdDevCoeffMT2;
             // Don't trust MT2 theta at all, it's just gyro theta but with latency
             thetaStdDev = 99999999999999.0;
         } else {
-            xyStdDev = baseStdDev * Constants.kVisionXYStdDevCoeffMT1;
-            thetaStdDev = baseStdDev * Constants.kVisionThetaStdDevCoeffMT1;
+            xyStdDev = baseStdDev * config.xyStdDevCoeffMT1;
+            thetaStdDev = baseStdDev * config.thetaStdDevCoeffMT1;
         }
 
         updatesOut.add(new Update(
