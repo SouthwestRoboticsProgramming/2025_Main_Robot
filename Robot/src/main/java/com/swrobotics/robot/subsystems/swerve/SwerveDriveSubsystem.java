@@ -60,7 +60,7 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
                 this::resetPose,
                 this::getRobotRelativeSpeeds,
                 (speeds, feedforwards) -> {
-                    setControl(new SwerveRequest.ApplyChassisSpeeds()
+                    setControl(new SwerveRequest.ApplyRobotSpeeds()
                             .withSpeeds(speeds)
                             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
@@ -104,7 +104,7 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public void resetRotation(Rotation2d robotRotation) {
-        resetPose(new Pose2d(inputs.estPose.getTranslation(), robotRotation));
+        io.resetRotation(robotRotation);
     }
 
     public void resetPose(Pose2d robotPose) {

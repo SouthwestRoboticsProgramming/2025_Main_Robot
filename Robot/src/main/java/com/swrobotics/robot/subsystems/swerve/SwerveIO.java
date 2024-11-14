@@ -58,6 +58,8 @@ public interface SwerveIO {
 
     void resetPose(Pose2d pose);
 
+    void resetRotation(Rotation2d rotation);
+
     void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3, N1> stdDevs);
 
     void calibrateModuleOffsets();

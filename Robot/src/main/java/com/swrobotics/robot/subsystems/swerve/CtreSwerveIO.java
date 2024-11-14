@@ -97,7 +97,12 @@ public class CtreSwerveIO implements SwerveIO {
 
     @Override
     public void resetPose(Pose2d pose) {
-        drivetrain.seedFieldRelative(pose);
+        drivetrain.resetPose(pose);
+    }
+
+    @Override
+    public void resetRotation(Rotation2d rotation) {
+        drivetrain.resetRotation(rotation);
     }
 
     @Override
