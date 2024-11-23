@@ -38,7 +38,8 @@ public class CtreSwerveIO implements SwerveIO {
                     info.position().getX(),
                     info.position().getY(),
                     false,
-                    true
+                    true,
+                    false
             );
         }
 
