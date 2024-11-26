@@ -31,9 +31,9 @@ public final class PrideSequencer {
             createFlag("fcf431,ffffff,9d59d2,000000", 2), // Nonbinary
             createFlag("3da542,a7d379,ffffff,a9a9a9,000000", 2), // Aromantic
             createFlag("078d70,26ceaa,98e8c1,ffffff,7bade2,5049cc,3d1a78", 2), // Gay
+            createFlag("fa4288,ffffff,71197f,000000,071195", 2), // Genderfluid
 
             createFlag("000000,bcc6c7,ffffff,a6fa6e,ffffff,bcc6c7,000000"), // Agender
-            createFlag("fa4288,ffffff,71197f,000000,071195"), // Genderfluid
             createFlag("d42c00,fd9855,ffffff,d161a2,a20161"), // Lesbian
             createFlag("b57edc,ffffff,4a8122"), // Bigender
             createFlag("ffffff*4,7e287f,a3a3a3*4"), // Demisexual
@@ -123,7 +123,7 @@ public final class PrideSequencer {
         for (int i = 0; i < REPEAT; i++) {
             System.arraycopy(flagStripes, 0, current, i * flagStripes.length, flagStripes.length);
         }
-        currentStartTimestamp = Timer.getFPGATimestamp();
+        currentStartTimestamp = Timer.getTimestamp();
     }
 
     // Makes a copy of the pattern with darker colors
@@ -145,7 +145,7 @@ public final class PrideSequencer {
     // Don't have to care about running quickly here, since it's in disabled
     // We can have whatever fancy effects we want
     public void apply(LightsSubsystem lights) {
-        double time = Timer.getFPGATimestamp();
+        double time = Timer.getTimestamp();
         double elapsed = time - currentStartTimestamp;
 
         // Reached the end of the flag time, start a new one

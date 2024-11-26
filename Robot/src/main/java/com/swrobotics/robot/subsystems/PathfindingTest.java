@@ -9,6 +9,7 @@ import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -64,10 +65,10 @@ public final class PathfindingTest extends SubsystemBase {
         Pose2d goal = FieldView.pathfindingGoal.getPose();
         Translation2d goalPos = goal.getTranslation();
 
-        double startTime = Logger.getRealTimestamp();
+        double startTime = Timer.getFPGATimestamp();
         List<Translation2d> path = environment.findPath(drive.getEstimatedPose().getTranslation(), goalPos);
 
-        double endTime = Logger.getRealTimestamp(); // Gives time in microseconds
+        double endTime = Timer.getFPGATimestamp(); // Gives time in microseconds
         Logger.recordOutput("Pathfinding/Calc time (ms)", (endTime - startTime) / 1000);
 
         if (path != null) {

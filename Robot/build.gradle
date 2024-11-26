@@ -57,16 +57,6 @@ repositories {
     }
 }
 
-configurations.all {
-    exclude group: "edu.wpi.first.wpilibj"
-}
-
-task(checkAkitInstall, dependsOn: "classes", type: JavaExec) {
-    mainClass = "org.littletonrobotics.junction.CheckInstall"
-    classpath = sourceSets.main.runtimeClasspath
-}
-compileJava.finalizedBy checkAkitInstall
-
 task buildPathfindingRoborioRelease(type: Exec) {
     commandLine 'cross', 'build', '--release', '--target', 'arm-unknown-linux-gnueabi'
 }

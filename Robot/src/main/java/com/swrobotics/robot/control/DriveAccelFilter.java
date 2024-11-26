@@ -40,7 +40,7 @@ public final class DriveAccelFilter {
         }
 
         // Find how much time has passed since the last call to this method
-        double time = Timer.getFPGATimestamp();
+        double time = Timer.getTimestamp();
         double delta = 0;
         if (!Double.isNaN(prevTimestamp))
             delta = time - prevTimestamp;

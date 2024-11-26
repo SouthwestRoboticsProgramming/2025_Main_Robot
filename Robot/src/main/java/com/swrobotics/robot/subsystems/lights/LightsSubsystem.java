@@ -36,12 +36,12 @@ public final class LightsSubsystem extends SubsystemBase {
 
     private void showOverheating() {
         // Flashing red lights
-        applySolid(Timer.getFPGATimestamp() % 0.4 > 0.2 ? Color.kRed : Color.kBlack);
+        applySolid(Timer.getTimestamp() % 0.4 > 0.2 ? Color.kRed : Color.kBlack);
     }
 
     private void showLowBattery() {
         // Flashing orange lights
-        applySolid(Timer.getFPGATimestamp() % 0.4 > 0.2 ? Color.kOrange : Color.kBlack);
+        applySolid(Timer.getTimestamp() % 0.4 > 0.2 ? Color.kOrange : Color.kBlack);
     }
 
     private void showAutoDriving() {
@@ -62,13 +62,10 @@ public final class LightsSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        boolean overCurrent = robot.pdp.getInputs().pdpTotalCurrent > Constants.kLedCurrentShutoffThreshold;
         boolean overheating = robot.motorTracker.isOverheating();
         boolean batteryLow = RobotController.getBatteryVoltage() < Constants.kLowBatteryThreshold;
 
-        if (overCurrent) {
-            applySolid(Color.kBlack); // Black means LEDs off
-        } else if (overheating) {
+        if (overheating) {
             showOverheating();
         } else if (batteryLowDebounce.calculate(batteryLow)) {
             showLowBattery();
@@ -110,7 +107,7 @@ public final class LightsSubsystem extends SubsystemBase {
             scroll = 0;
             wrapColor = stripes[stripes.length - 1].color;
         } else {
-            scroll = (float) (Timer.getFPGATimestamp() / scrollSpeed) % 1;
+            scroll = (float) (Timer.getTimestamp() / scrollSpeed) % 1;
             wrapColor = stripes[0].color;
         }
 
