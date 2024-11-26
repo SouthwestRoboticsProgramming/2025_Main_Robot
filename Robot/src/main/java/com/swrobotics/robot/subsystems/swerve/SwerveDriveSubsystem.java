@@ -15,6 +15,7 @@ import com.swrobotics.robot.logging.FieldView;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
@@ -48,12 +49,16 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
                 Constants.kDriveStatorCurrentLimit,
                 driveMotorsPerModule);
 
+        Translation2d[] positions = new Translation2d[Constants.kSwerveModuleInfos.length];
+        for (int i = 0; i < positions.length; i++) {
+            positions[i] = Constants.kSwerveModuleInfos[i].position();
+        }
+
         RobotConfig ppRobotConfig = new RobotConfig(
                 Constants.kRobotMass,
                 Constants.kRobotMOI,
                 ppModuleConfig,
-                Constants.kDriveWheelSpacingY,
-                Constants.kDriveWheelSpacingX);
+                positions);
 
         AutoBuilder.configure(
                 this::getEstimatedPose,
