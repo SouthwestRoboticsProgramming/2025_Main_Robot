@@ -48,7 +48,7 @@ public final class PathfindingJNI {
         ROBORIO {
             @Override
             Path getLibraryPath() {
-                return new File(Filesystem.getDeployDirectory(), "lib" + LIBRARY_NAME + ".so").toPath();
+                return Paths.get("/home/lvuser/lib" + LIBRARY_NAME + ".so");
             }
         },
         SIMULATION_WINDOWS {

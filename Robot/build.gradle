@@ -34,6 +34,13 @@ deploy {
                     files = project.fileTree('src/main/deploy')
                     directory = '/home/lvuser/deploy'
                 }
+
+                // Pathfinding binary artifact
+                pathfindingLibDeploy(getArtifactTypeClass('FileArtifact')) {
+                    dependsOn('buildPathfindingRoborioRelease')
+                    file = project.file('target/arm-unknown-linux-gnueabi/release/libpathfinding_jni.so')
+                    filename = 'libpathfinding_jni.so'
+                }
             }
         }
     }
@@ -60,13 +67,6 @@ repositories {
 task buildPathfindingRoborioRelease(type: Exec) {
     commandLine 'cross', 'build', '--release', '--target', 'arm-unknown-linux-gnueabi'
 }
-// TODO: Figure out how to make DeployUtils deploy the compiled binary "properly"
-//  For now just copy the binary into deploy folder so it gets deployed as a resource
-task copyPathfindingRoborioReleaseToDeploy(type: Copy) {
-    from file('target/arm-unknown-linux-gnueabi/release/libpathfinding_jni.so')
-    into file('src/main/deploy')
-    dependsOn buildPathfindingRoborioRelease
-}
 task buildPathfindingSimDebug(type: Exec) {
     commandLine 'cargo', 'build'
 }
@@ -74,7 +74,6 @@ task buildPathfindingSimRelease(type: Exec) {
     commandLine 'cargo', 'build', '--release'
 }
 
-deployfrcStaticFileDeployroborio.dependsOn(copyPathfindingRoborioReleaseToDeploy)
 simulateJavaDebug.dependsOn(buildPathfindingSimDebug)
 simulateJavaRelease.dependsOn(buildPathfindingSimRelease)
 
