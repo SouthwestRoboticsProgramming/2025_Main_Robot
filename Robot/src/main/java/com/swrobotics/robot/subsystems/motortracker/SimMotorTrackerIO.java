@@ -18,6 +18,8 @@ public final class SimMotorTrackerIO implements MotorTrackerIO {
         inputs.temperatures = new double[names.size()];
         inputs.supplyCurrents = new double[names.size()];
         inputs.statorCurrents = new double[names.size()];
+        inputs.faults = new int[names.size()];
+        inputs.stickyFaults = new int[names.size()];
         Arrays.fill(inputs.temperatures, TEMP + 5 * Math.random());
     }
 

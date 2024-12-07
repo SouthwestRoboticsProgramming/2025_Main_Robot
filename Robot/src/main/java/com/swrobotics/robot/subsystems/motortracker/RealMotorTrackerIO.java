@@ -18,7 +18,9 @@ public final class RealMotorTrackerIO implements MotorTrackerIO {
             String canBus,
             StatusSignal<Temperature> tempStatus,
             StatusSignal<Current> supplyCurrentStatus,
-            StatusSignal<Current> statorCurrentStatus) {}
+            StatusSignal<Current> statorCurrentStatus,
+            StatusSignal<Integer> faultsStatus,
+            StatusSignal<Integer> stickyFaultsStatus) {}
 
     private final List<TrackedMotor> motors = new ArrayList<>();
     private BaseStatusSignal[][] allSignals = null;
@@ -48,6 +50,8 @@ public final class RealMotorTrackerIO implements MotorTrackerIO {
             inputs.temperatures = new double[count];
             inputs.supplyCurrents = new double[count];
             inputs.statorCurrents = new double[count];
+            inputs.faults = new int[count];
+            inputs.stickyFaults = new int[count];
         }
 
         // Refresh all status signals grouped by CAN bus
@@ -61,6 +65,8 @@ public final class RealMotorTrackerIO implements MotorTrackerIO {
             inputs.temperatures[i] = motor.tempStatus().getValueAsDouble(); // Celsius
             inputs.supplyCurrents[i] = motor.supplyCurrentStatus().getValueAsDouble(); // Amps
             inputs.statorCurrents[i] = motor.statorCurrentStatus().getValueAsDouble(); // Amps
+            inputs.faults[i] = motor.faultsStatus().getValue();
+            inputs.stickyFaults[i] = motor.stickyFaultsStatus().getValue();
         }
     }
 
@@ -72,13 +78,26 @@ public final class RealMotorTrackerIO implements MotorTrackerIO {
         StatusSignal<Temperature> tempStatus = motor.getDeviceTemp();
         StatusSignal<Current> supplyCurrentStatus = motor.getSupplyCurrent();
         StatusSignal<Current> statorCurrentStatus = motor.getStatorCurrent();
+        StatusSignal<Integer> faultsStatus = motor.getFaultField();
+        StatusSignal<Integer> stickyFaultsStatus = motor.getStickyFaultField();
 
         StatusSignal.setUpdateFrequencyForAll(
                 4, // 4 Hz is minimum update frequency supported
+                tempStatus,
                 supplyCurrentStatus,
-                statorCurrentStatus
+                statorCurrentStatus,
+                faultsStatus,
+                stickyFaultsStatus
         );
 
-        motors.add(new TrackedMotor(name, motor.getNetwork(), tempStatus, supplyCurrentStatus, statorCurrentStatus));
+        motors.add(new TrackedMotor(
+                name,
+                motor.getNetwork(),
+                tempStatus,
+                supplyCurrentStatus,
+                statorCurrentStatus,
+                faultsStatus,
+                stickyFaultsStatus
+        ));
     }
 }
