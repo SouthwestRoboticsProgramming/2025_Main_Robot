@@ -2,6 +2,7 @@ package com.swrobotics.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.swerve.*;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -9,6 +10,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.swrobotics.lib.field.FieldInfo;
+import com.swrobotics.lib.pathfinding.PathEnvironment;
 import com.swrobotics.lib.pathfinding.PathPlannerPathfinder;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.logging.FieldView;
@@ -24,6 +26,8 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -90,6 +94,8 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
         });
 
         Pathfinding.setPathfinder(new PathPlannerPathfinder());
+        PathPlannerPathfinder.setEnvironment(PathEnvironment.EMPTY);
+        PathfindingCommand.warmupCommand().schedule();
     }
 
     public void setControl(SwerveRequest request) {

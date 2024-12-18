@@ -3,6 +3,7 @@ package com.swrobotics.lib.pathfinding;
 import edu.wpi.first.math.geometry.Translation2d;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,6 +12,8 @@ import java.util.Objects;
  * the pathfinder to avoid.
  */
 public final class PathEnvironment {
+    public static final PathEnvironment EMPTY = new PathEnvironment(Collections.emptyList(), 0);
+
     private final List<Obstacle> obstacles;
     private final long handle;
 
