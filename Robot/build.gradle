@@ -1,6 +1,6 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.1.1-beta-2"
+    id "edu.wpi.first.GradleRIO" version "2025.1.1"
 }
 
 java {
@@ -33,14 +33,16 @@ deploy {
                 frcStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
                     files = project.fileTree('src/main/deploy')
                     directory = '/home/lvuser/deploy'
+                    deleteOldFiles = false // Change to true to delete files on roboRIO that no
+                                           // longer exist in deploy directory of this project
                 }
 
-                // Pathfinding binary artifact
-                pathfindingLibDeploy(getArtifactTypeClass('FileArtifact')) {
-                    dependsOn('buildPathfindingRoborioRelease')
-                    file = project.file('target/arm-unknown-linux-gnueabi/release/libpathfinding_jni.so')
-                    filename = 'libpathfinding_jni.so'
-                }
+                // // Pathfinding binary artifact
+                // pathfindingLibDeploy(getArtifactTypeClass('FileArtifact')) {
+                //     dependsOn('buildPathfindingRoborioRelease')
+                //     file = project.file('target/arm-unknown-linux-gnueabi/release/libpathfinding_jni.so')
+                //     filename = 'libpathfinding_jni.so'
+                // }
             }
         }
     }
@@ -90,8 +92,9 @@ test {
 }
 
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
-// Also defines JUnit 4.
+// Also defines JUnit 5.
 dependencies {
+    annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
@@ -108,6 +111,14 @@ dependencies {
     nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
 }
 
 // Simulation configuration (e.g. environment variables).
@@ -119,6 +130,7 @@ wpi.sim.addDriverstation()
 // knows where to look for our Robot Class.
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    from sourceSets.main.allSource
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
