@@ -5,6 +5,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -22,12 +23,12 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
 
 public class CtreSwerveIO implements SwerveIO {
-    private final SwerveDrivetrain drivetrain;
+    private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
     private final StatusSignal<Angle> rawGyroAngleSignal;
 
     public CtreSwerveIO() {
         int kModuleCount = Constants.kSwerveModuleInfos.length;
-        SwerveModuleConstants[] moduleConstants = new SwerveModuleConstants[kModuleCount];
+        var moduleConstants = new SwerveModuleConstants[kModuleCount];
         for (int i = 0; i < kModuleCount; i++) {
             SwerveModuleInfo info = Constants.kSwerveModuleInfos[i];
             moduleConstants[i] = Constants.kModuleConstantsFactory.createModuleConstants(
@@ -43,7 +44,8 @@ public class CtreSwerveIO implements SwerveIO {
             );
         }
 
-        drivetrain = new SwerveDrivetrain(
+        drivetrain = new SwerveDrivetrain<>(
+                TalonFX::new, TalonFX::new, CANcoder::new,
                 Constants.kDrivetrainConstants,
                 Constants.kOdometryUpdateFreq,
                 Constants.kOdometryStdDevs,
@@ -56,7 +58,7 @@ public class CtreSwerveIO implements SwerveIO {
         for (int i = 0; i < kModuleCount; i++) {
             String name = Constants.kSwerveModuleInfos[i].name();
 
-            SwerveModule module = drivetrain.getModule(i);
+            SwerveModule<TalonFX, TalonFX, CANcoder> module = drivetrain.getModule(i);
             MotorTrackerSubsystem.getInstance().addMotor(name + " Drive", module.getDriveMotor());
             MotorTrackerSubsystem.getInstance().addMotor(name + " Steer", module.getSteerMotor());
             MusicSubsystem.getInstance().addInstrument(module.getDriveMotor());
@@ -113,9 +115,9 @@ public class CtreSwerveIO implements SwerveIO {
 
     @Override
     public void calibrateModuleOffsets() {
-        SwerveModule[] modules = drivetrain.getModules();
+        SwerveModule<TalonFX, TalonFX, CANcoder>[] modules = drivetrain.getModules();
         for (int i = 0; i < modules.length; i++) {
-            CANcoder canCoder = modules[i].getCANcoder();
+            CANcoder canCoder = modules[i].getEncoder();
             NTEntry<Double> offset = Constants.kSwerveModuleInfos[i].offset();
 
             double position = canCoder
@@ -127,7 +129,7 @@ public class CtreSwerveIO implements SwerveIO {
         }
     }
 
-    public SwerveDrivetrain getDrivetrain() {
+    public SwerveDrivetrain<TalonFX, TalonFX, CANcoder> getDrivetrain() {
         return drivetrain;
     }
 }

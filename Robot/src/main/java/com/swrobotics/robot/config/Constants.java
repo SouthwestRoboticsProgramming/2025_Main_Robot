@@ -90,23 +90,24 @@ public final class Constants {
             .withCANBusName(IOAllocation.CAN.SWERVE_BUS)
             .withPigeon2Id(IOAllocation.CAN.PIGEON2.id())
             .withPigeon2Configs(new Pigeon2Configuration());
-    public static final SwerveModuleConstantsFactory kModuleConstantsFactory = new SwerveModuleConstantsFactory()
-            .withDriveMotorGearRatio((50.0/16) * (16.0/28) * (45.0/15))
-            .withSteerMotorGearRatio(150.0 / 7)
-            .withCouplingGearRatio(50.0 / 16)
-            .withWheelRadius(Inches.of(1.9))
-            // Gains taken from 254 2024 robot code
-            .withSteerMotorGains(new Slot0Configs().withKP(100).withKD(0.2).withKV(1.5))
-            .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(12.0 / 88.2142857143))
-            // TODO: Torque current FOC
-            .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
-            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
-            .withSlipCurrent(Amps.of(80))
-            .withSpeedAt12Volts(MetersPerSecond.of(kDriveMaxAchievableSpeed))
-            .withFeedbackSource(SteerFeedbackType.FusedCANcoder)
-            .withDriveMotorInitialConfigs(new TalonFXConfiguration())
-            .withSteerMotorInitialConfigs(new TalonFXConfiguration())
-            .withCANcoderInitialConfigs(new CANcoderConfiguration());
+    public static final SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> kModuleConstantsFactory =
+            new SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>()
+                    .withDriveMotorGearRatio((50.0/16) * (16.0/28) * (45.0/15))
+                    .withSteerMotorGearRatio(150.0 / 7)
+                    .withCouplingGearRatio(50.0 / 16)
+                    .withWheelRadius(Inches.of(1.9))
+                    // Gains taken from 254 2024 robot code
+                    .withSteerMotorGains(new Slot0Configs().withKP(100).withKD(0.2).withKV(1.5))
+                    .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(12.0 / 88.2142857143))
+                    // TODO: Torque current FOC
+                    .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
+                    .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
+                    .withSlipCurrent(Amps.of(80))
+                    .withSpeedAt12Volts(MetersPerSecond.of(kDriveMaxAchievableSpeed))
+                    .withFeedbackSource(SteerFeedbackType.FusedCANcoder)
+                    .withDriveMotorInitialConfigs(new TalonFXConfiguration())
+                    .withSteerMotorInitialConfigs(new TalonFXConfiguration())
+                    .withEncoderInitialConfigs(new CANcoderConfiguration());
     // Simulation constants left at defaults for now
 
     // Pathfinding
