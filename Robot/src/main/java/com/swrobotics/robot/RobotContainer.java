@@ -8,14 +8,12 @@ import java.util.List;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.PathfindingTest;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
-import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.swrobotics.robot.commands.PlaySongCommand;
-import com.swrobotics.robot.config.IOAllocation;
 import com.swrobotics.robot.control.ControlBoard;
 import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.logging.Logging;
@@ -24,7 +22,6 @@ import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -45,7 +42,6 @@ public class RobotContainer {
     private final LoggedDashboardChooser<Command> autoSelector;
     private final LoggedDashboardChooser<Double> autoDelaySelector;
 
-    public final LoggedPowerDistribution pdp;
     public final MotorTrackerSubsystem motorTracker;
     public final SwerveDriveSubsystem drive;
     public final VisionSubsystem vision;
@@ -67,7 +63,6 @@ public class RobotContainer {
         music = new MusicSubsystem();
         motorTracker = new MotorTrackerSubsystem();
 
-        pdp = LoggedPowerDistribution.getInstance(IOAllocation.CAN.PDP.id(), PowerDistribution.ModuleType.kRev);
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
         lights = new LightsSubsystem(this);
