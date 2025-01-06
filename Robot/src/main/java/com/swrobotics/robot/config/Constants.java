@@ -27,9 +27,8 @@ public final class Constants {
     public static final int kPeriodicFreq = 50; // Hz
     public static final double kPeriodicTime = 1.0 / kPeriodicFreq;
 
-    // We don't know what the 2025 field is yet :(
-    public static final FieldInfo kField = FieldInfo.CRESCENDO_2024;
-    public static final int kEndgameAlertTime = 15;
+    public static final FieldInfo kField = FieldInfo.REEFSCAPE_2025;
+    public static final int kEndgameAlertTime = 20;
 
     // Robot dimensions
     public static final double kFrameLength = 0.77; // m

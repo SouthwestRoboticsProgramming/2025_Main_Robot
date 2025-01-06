@@ -15,6 +15,10 @@ public final class FieldInfo {
     public static final FieldInfo CRESCENDO_2024 =
             new FieldInfo(16.541, 8.211, FieldSymmetry.LATERAL);
 
+    /** Information for the 2025 Reefscape field */
+    public static final FieldInfo REEFSCAPE_2025 =
+            new FieldInfo(17.548, 8.052, FieldSymmetry.ROTATIONAL);
+
     public static DriverStation.Alliance getAlliance() {
         return DriverStation.getAlliance().orElse(null);
     }
