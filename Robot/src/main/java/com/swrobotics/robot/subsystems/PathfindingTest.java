@@ -39,7 +39,7 @@ public final class PathfindingTest extends SubsystemBase {
             throw new RuntimeException(e);
         }
 
-//        environment.getDebug().plot(FieldView.pathfindingDebug);
+        environment.getDebug().plot(FieldView.pathfindingDebug);
 
         FieldView.pathfindingGoal.setPose(new Pose2d(new Translation2d(2, 2), new Rotation2d()));
     }

@@ -110,7 +110,7 @@ public final class Constants {
     // Simulation constants left at defaults for now
 
     // Pathfinding
-    public static final String kPathfindingJson = "crescendo_pathfinding.json";
+    public static final String kPathfindingJson = "reefscape_pathfinding.json";
     public static final double kPathfindingTolerance = 0.2; // m
 
     // Vision
