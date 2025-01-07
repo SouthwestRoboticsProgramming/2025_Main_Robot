@@ -64,6 +64,18 @@ public final class PathEnvironment {
         return new PathfindingDebug(obstacles, PathfindingJNI.getDebugData(handle));
     }
 
+    public List<Translation2d> debugFindSafe(Translation2d point) {
+        double[] result = PathfindingJNI.debugFindSafe(handle, point.getX(), point.getY());
+        
+        List<Translation2d> points = new ArrayList<>();
+        for (int i = 0; i < result.length; i += 2) {
+            double x = result[i];
+            double y = result[i + 1];
+            points.add(new Translation2d(x, y));
+        }
+        return points;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

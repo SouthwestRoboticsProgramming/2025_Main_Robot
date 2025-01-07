@@ -624,20 +624,38 @@ impl Environment {
             }
         }
         for arc in &self.arcs {
-            // If the point is inside the sector spanned by the arc, project to be along the arc
             let rel = point - arc.center;
-            if rel.length_sq() < arc.radius * arc.radius {
-                let angle = angle_to_arc(arc, point);
-                if arc.contains_angle(angle) {
-                    let proj_point = arc.center + (rel.norm() * arc.radius);
-                    let dist = point.distance_sq(proj_point);
+            let angle = angle_to_arc(arc, point);
 
-                    if match nearest {
-                        Some((d, _)) => dist < d,
-                        None => true,
-                    } {
-                        nearest = Some((dist, proj_point));
-                    }
+            if rel.length_sq() < arc.radius * arc.radius && arc.contains_angle(angle) {
+                // If the point is inside the sector spanned by the arc, project to be along the arc
+                let proj_point = arc.center + (rel.norm() * arc.radius);
+                let dist = point.distance_sq(proj_point);
+
+                if match nearest {
+                    Some((d, _)) => dist < d,
+                    None => true,
+                } {
+                    nearest = Some((dist, proj_point));
+                }
+            } else {
+                // Not inside the sector, but bounds may still be closest point so check both
+                let proj_min = arc.center + Vec2f::new_angle(arc.radius, arc.min_angle);
+                let proj_max = arc.center + Vec2f::new_angle(arc.radius, arc.max_angle);
+                let dist_min = point.distance_sq(proj_min);
+                let dist_max = point.distance_sq(proj_max);
+
+                if match nearest {
+                    Some((d, _)) => dist_min < d,
+                    None => true,
+                } {
+                    nearest = Some((dist_min, proj_min));
+                }
+                if match nearest {
+                    Some((d, _)) => dist_max < d,
+                    None => true,
+                } {
+                    nearest = Some((dist_max, proj_max));
                 }
             }
         }
@@ -646,6 +664,32 @@ impl Environment {
             Some((_, proj_point)) => Some(proj_point + (proj_point - point).norm() * 0.05),
             None => return None,
         }
+    }
+
+    pub fn debug_find_safe(&self, mut start: Vec2f) -> Vec<Vec2f> {
+        let mut out = Vec::new();
+
+        let mut tangents: ArrayVec<_, 2> = ArrayVec::new();
+        'outer: for _ in 0..MAX_UNSTUCK_ATTEMPTS {
+            // Check if we are inside the field bounds
+            for (arc_id, arc) in self.arcs.iter().enumerate() {
+                self.find_point_to_arc_tangents(start, &arc, arc_id, &mut tangents);
+                if !tangents.is_empty() {
+                    break 'outer;
+                }
+            }
+
+            match self.move_towards_safety(start) {
+                Some(new_start) => {
+                    start = new_start;
+                    out.push(new_start);
+                    println!("New start: {new_start:?}");
+                }
+                None => return out,
+            }
+        }
+
+        out
     }
 
     pub fn find_path(&self, mut start: Vec2f, mut goal: Vec2f) -> Option<PathResult> {

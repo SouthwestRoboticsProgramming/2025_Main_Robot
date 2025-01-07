@@ -42,6 +42,7 @@ public final class PathfindingJNI {
     public static native double[] findPath(long envHandle, double startX, double startY, double goalX, double goalY);
 
     public static native double[] getDebugData(long envHandle);
+    public static native double[] debugFindSafe(long envHandle, double startX, double startY);
 
     // Not perfect platform compatibility, but good enough for our uses
     private enum RuntimeType {

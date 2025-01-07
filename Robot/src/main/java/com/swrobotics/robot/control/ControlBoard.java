@@ -11,6 +11,8 @@ import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
 import com.swrobotics.robot.commands.LightCommands;
 import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
+import com.swrobotics.robot.logging.FieldView;
+import com.swrobotics.robot.subsystems.pathfinding.PathEnvironments;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -21,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import java.util.Collections;
+import java.util.List;
 
 public final class ControlBoard extends SubsystemBase {
     /**
@@ -73,6 +76,13 @@ public final class ControlBoard extends SubsystemBase {
         new Trigger(CHARACTERISE_WHEEL_RADIUS::get).whileTrue(new CharacterizeWheelsCommand(robot.drive));
 
         driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
+    
+        driver.y.onPressed(() -> {
+            Translation2d prev = robot.drive.getEstimatedPose().getTranslation();
+            List<Translation2d> points = PathEnvironments.kFieldWithAutoGamePieces.debugFindSafe(prev);
+            points.add(0, prev);
+            FieldView.pathfindingDebug.plotLines(points, Color.kOrange);
+        });
     }
 
     /**

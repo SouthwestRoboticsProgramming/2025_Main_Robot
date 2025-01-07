@@ -134,6 +134,25 @@ pub extern "system" fn Java_com_swrobotics_lib_pathfinding_PathfindingJNI_getDeb
     into_java_array(&mut env, data).unwrap()
 }
 
+#[no_mangle]
+pub extern "system" fn Java_com_swrobotics_lib_pathfinding_PathfindingJNI_debugFindSafe<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    env_handle: jlong,
+    start_x: jdouble,
+    start_y: jdouble,
+) -> jdoubleArray {
+    let environment = unsafe { &mut *(env_handle as *mut pathfinding::Environment) };
+    let data = environment.debug_find_safe(Vec2f::new(start_x, start_y));
+
+    let mut values = Vec::with_capacity(data.len() * 2);
+    for vertex in data {
+        values.push(vertex.x);
+        values.push(vertex.y);
+    }
+    into_java_array(&mut env, values).unwrap()
+}
+
 fn into_java_array(env: &mut JNIEnv, values: Vec<f64>) -> Result<jdoubleArray, jni::errors::Error> {
     let results = env.new_double_array(values.len() as i32)?;
     env.set_double_array_region(&results, 0, &values)?;

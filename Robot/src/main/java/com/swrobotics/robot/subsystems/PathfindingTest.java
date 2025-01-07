@@ -5,6 +5,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.lib.pathfinding.*;
+import com.swrobotics.robot.subsystems.pathfinding.PathEnvironments;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,25 +22,11 @@ import java.util.List;
 
 public final class PathfindingTest extends SubsystemBase {
     private final SwerveDriveSubsystem drive;
-    public final PathEnvironment environment;
 
     public PathfindingTest(SwerveDriveSubsystem drive) {
         this.drive = drive;
 
-        try {
-            List<Obstacle> obstacles = Obstacle.loadObstaclesFromJson(Constants.kPathfindingJson);
-            // Test overlapping obstacles
-//            obstacles.add(new Rectangle(
-//                    new Translation2d(8, 4),
-//                    new Translation2d(6, 4),
-//                    0));
-            environment = new PathEnvironment(obstacles, Constants.kRobotRadius +
-                    Constants.kPathfindingTolerance);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        environment.getDebug().plot(FieldView.pathfindingDebug);
+       PathEnvironments.kFieldWithAutoGamePieces.getDebug().plot(FieldView.pathfindingDebug);
 
         FieldView.pathfindingGoal.setPose(new Pose2d(new Translation2d(2, 2), new Rotation2d()));
     }
@@ -55,7 +42,7 @@ public final class PathfindingTest extends SubsystemBase {
                     Constants.kDriveControlMaxTurnSpeed / 0.2);
 
         return Commands.sequence(
-            Commands.runOnce(() -> PathPlannerPathfinder.setEnvironment(environment)),
+            Commands.runOnce(() -> PathPlannerPathfinder.setEnvironment(PathEnvironments.kFieldWithAutoGamePieces)),
             AutoBuilder.pathfindToPose(goal, constraints)
         );
     }
@@ -65,8 +52,14 @@ public final class PathfindingTest extends SubsystemBase {
         Pose2d goal = FieldView.pathfindingGoal.getPose();
         Translation2d goalPos = goal.getTranslation();
 
+        // Failing case
+        Translation2d debugStartPos = new Translation2d(1.189, 1.838);
+        Translation2d debugGoalPos = new Translation2d(1.239, 7.148);
+
         double startTime = Timer.getFPGATimestamp();
-        List<Translation2d> path = environment.findPath(drive.getEstimatedPose().getTranslation(), goalPos);
+        List<Translation2d> path = PathEnvironments.kFieldWithAutoGamePieces
+                // .findPath(debugStartPos, debugGoalPos);
+               .findPath(drive.getEstimatedPose().getTranslation(), goalPos);
 
         double endTime = Timer.getFPGATimestamp(); // Gives time in microseconds
         Logger.recordOutput("Pathfinding/Calc time (ms)", (endTime - startTime) / 1000);

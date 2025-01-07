@@ -21,26 +21,29 @@ public abstract class Obstacle {
      *
      * @param fileName path to the file in the deploy directory
      * @return loaded obstacles
-     * @throws IOException if the file loading fails
      */
-    public static List<Obstacle> loadObstaclesFromJson(String fileName) throws IOException {
+    public static List<Obstacle> loadObstaclesFromJson(String fileName) {
         ObjectMapper mapper = new ObjectMapper();
 
         File file = new File(Filesystem.getDeployDirectory(), fileName);
         List<Obstacle> obstacles = new ArrayList<>();
 
-        JsonNode rootNode = mapper.readTree(file);
-        for (Iterator<JsonNode> iter = rootNode.elements(); iter.hasNext();) {
-            JsonNode node = iter.next();
-            String type = node.get("type").asText();
+        try {
+            JsonNode rootNode = mapper.readTree(file);
+            for (Iterator<JsonNode> iter = rootNode.elements(); iter.hasNext(); ) {
+                JsonNode node = iter.next();
+                String type = node.get("type").asText();
 
-            Obstacle obs = switch (type) {
-                case "Circle" -> mapper.treeToValue(node, Circle.class);
-                case "Rectangle" -> mapper.treeToValue(node, Rectangle.class);
-                case "Polygon" -> mapper.treeToValue(node, Polygon.class);
-                default -> throw new IOException("Unknown obstacle type: " + type);
-            };
-            obstacles.add(obs);
+                Obstacle obs = switch (type) {
+                    case "Circle" -> mapper.treeToValue(node, Circle.class);
+                    case "Rectangle" -> mapper.treeToValue(node, Rectangle.class);
+                    case "Polygon" -> mapper.treeToValue(node, Polygon.class);
+                    default -> throw new IOException("Unknown obstacle type: " + type);
+                };
+                obstacles.add(obs);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load obstacle JSON from " + fileName, e);
         }
 
         return obstacles;
