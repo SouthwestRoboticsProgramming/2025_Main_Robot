@@ -8,7 +8,11 @@ use super::{
 };
 
 pub fn to_bezier(result: &PathResult, start: Vec2f, goal: Vec2f) -> Vec<Vec2f> {
-    let PathResult { path, moved_start } = result;
+    let PathResult {
+        path,
+        moved_start,
+        moved_goal,
+    } = result;
 
     let mut bezier_pts = Vec::new();
     let mut last_pt = start;
@@ -108,6 +112,13 @@ pub fn to_bezier(result: &PathResult, start: Vec2f, goal: Vec2f) -> Vec<Vec2f> {
         }
 
         last_pt = out_pt;
+    }
+
+    if let Some(moved_goal) = moved_goal {
+        bezier_pts.push(last_pt);
+        bezier_pts.push(last_pt.lerp(*moved_goal, 1.0 / 3.0));
+        bezier_pts.push(last_pt.lerp(*moved_goal, 2.0 / 3.0));
+        last_pt = *moved_goal;
     }
 
     bezier_pts.push(last_pt);

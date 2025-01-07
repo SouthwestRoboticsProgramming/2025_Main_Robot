@@ -501,6 +501,7 @@ fn calc_turn_cost(incoming_angle: f64, outgoing_angle: f64, radius: f64, dir: Wi
 
 pub struct PathResult {
     pub moved_start: Option<Vec2f>,
+    pub moved_goal: Option<Vec2f>,
     pub path: Vec<PathArc>,
 }
 
@@ -586,7 +587,95 @@ impl Environment {
         data
     }
 
-    pub fn find_path(&self, mut start: Vec2f, goal: Vec2f) -> Option<PathResult> {
+    // Moves an invalid/unreachable point towards the nearest reachable area.
+    // May take multiple iterations to actually become reachable.
+    fn move_towards_safety(&self, point: Vec2f) -> Option<Vec2f> {
+        let mut nearest = None;
+        for segment in &self.segments {
+            // Check if the start is on the "inside" of this edge (i.e. to
+            // the left of the edge)
+            let delta = segment.to - segment.from;
+            let perp = Vec2f::new(delta.y, -delta.x);
+            let rel = point - segment.from;
+            if rel.dot(perp) < 0.0 {
+                continue;
+            }
+
+            let p1 = segment.from;
+            let p2 = segment.to;
+            let l2 = p2.distance_sq(p1);
+
+            // Project the current position onto the segment
+            let proj_point = if l2 == 0.0 {
+                p1
+            } else {
+                let t = ((point.x - p1.x) * (p2.x - p1.x) + (point.y - p1.y) * (p2.y - p1.y)) / l2;
+                // TODO: These bounds should be determined by the actual corner angles
+                let t = t.clamp(0.1, 0.9); // Not 0 to 1 to prevent getting trapped in acute concave corners
+                p1.lerp(p2, t)
+            };
+            let dist = point.distance_sq(proj_point);
+
+            if match nearest {
+                Some((d, _)) => dist < d,
+                None => true,
+            } {
+                nearest = Some((dist, proj_point));
+            }
+        }
+        for arc in &self.arcs {
+            // If the point is inside the sector spanned by the arc, project to be along the arc
+            let rel = point - arc.center;
+            if rel.length_sq() < arc.radius * arc.radius {
+                let angle = angle_to_arc(arc, point);
+                if arc.contains_angle(angle) {
+                    let proj_point = arc.center + (rel.norm() * arc.radius);
+                    let dist = point.distance_sq(proj_point);
+
+                    if match nearest {
+                        Some((d, _)) => dist < d,
+                        None => true,
+                    } {
+                        nearest = Some((dist, proj_point));
+                    }
+                }
+            }
+        }
+
+        match nearest {
+            Some((_, proj_point)) => Some(proj_point + (proj_point - point).norm() * 0.05),
+            None => return None,
+        }
+    }
+
+    pub fn find_path(&self, mut start: Vec2f, mut goal: Vec2f) -> Option<PathResult> {
+        // Check if the goal is unreachable, since if we try to search for unreachable
+        // goal it will loop forever
+        let mut tangents: ArrayVec<_, 2> = ArrayVec::new();
+        let mut goal_changed = false;
+        let mut goal_reachable = false;
+        'goal_loop: for _ in 0..MAX_UNSTUCK_ATTEMPTS {
+            for (arc_id, arc) in self.arcs.iter().enumerate() {
+                self.find_point_to_arc_tangents(goal, arc, arc_id, &mut tangents);
+                if !tangents.is_empty() {
+                    goal_reachable = true;
+                    break 'goal_loop;
+                }
+            }
+
+            match self.move_towards_safety(goal) {
+                Some(new_goal) => {
+                    goal = new_goal;
+                    goal_changed = true;
+                }
+                None => return None,
+            }
+        }
+        if !goal_reachable {
+            return None;
+        }
+
+        // Check straight-line case first, very likely to be possible
         if self.is_segment_passable(
             &Segment {
                 from: start,
@@ -598,23 +687,9 @@ impl Environment {
             // Straight line from start to goal
             return Some(PathResult {
                 moved_start: None,
+                moved_goal: if goal_changed { Some(goal) } else { None },
                 path: Vec::new(),
             });
-        }
-
-        // Check if the goal is unreachable, since if we try to search for unreachable
-        // goal it will loop forever
-        let mut tangents: ArrayVec<_, 2> = ArrayVec::new();
-        let mut goal_reachable = false;
-        for (arc_id, arc) in self.arcs.iter().enumerate() {
-            self.find_point_to_arc_tangents(goal, arc, arc_id, &mut tangents);
-            if !tangents.is_empty() {
-                goal_reachable = true;
-                break;
-            }
-        }
-        if !goal_reachable {
-            return None;
         }
 
         let mut frontier = BinaryHeap::new();
@@ -639,61 +714,9 @@ impl Environment {
                 break;
             }
 
-            let mut nearest = None;
-            for segment in &self.segments {
-                // Check if the start is on the "inside" of this edge (i.e. to
-                // the left of the edge)
-                let delta = segment.to - segment.from;
-                let perp = Vec2f::new(delta.y, -delta.x);
-                let rel = start - segment.from;
-                if rel.dot(perp) < 0.0 {
-                    continue;
-                }
-
-                let p1 = segment.from;
-                let p2 = segment.to;
-                let l2 = p2.distance_sq(p1);
-
-                // Project the current position onto the segment
-                let proj_point = if l2 == 0.0 {
-                    p1
-                } else {
-                    let t =
-                        ((start.x - p1.x) * (p2.x - p1.x) + (start.y - p1.y) * (p2.y - p1.y)) / l2;
-                    let t = t.clamp(0.1, 0.9); // Not 0 to 1 to prevent getting trapped in acute concave corners
-                    p1.lerp(p2, t)
-                };
-                let dist = start.distance_sq(proj_point);
-
-                if match nearest {
-                    Some((d, _)) => dist < d,
-                    None => true,
-                } {
-                    nearest = Some((dist, proj_point));
-                }
-            }
-            for arc in &self.arcs {
-                // If the point is inside the sector spanned by the arc, project to be along the arc
-                let rel = start - arc.center;
-                if rel.length_sq() < arc.radius * arc.radius {
-                    let angle = angle_to_arc(arc, start);
-                    if arc.contains_angle(angle) {
-                        let proj_point = arc.center + (rel.norm() * arc.radius);
-                        let dist = start.distance_sq(proj_point);
-
-                        if match nearest {
-                            Some((d, _)) => dist < d,
-                            None => true,
-                        } {
-                            nearest = Some((dist, proj_point));
-                        }
-                    }
-                }
-            }
-
-            match nearest {
-                Some((_, proj_point)) => {
-                    start = proj_point + (proj_point - start).norm() * 0.05;
+            match self.move_towards_safety(start) {
+                Some(new_start) => {
+                    start = new_start;
                     start_changed = true;
                 }
                 None => return None,
@@ -717,7 +740,8 @@ impl Environment {
             ) {
                 // Straight line from start to goal
                 return Some(PathResult {
-                    moved_start: Some(start),
+                    moved_start: if start_changed { Some(start) } else { None },
+                    moved_goal: if goal_changed { Some(goal) } else { None },
                     path: Vec::new(),
                 });
             }
@@ -749,6 +773,7 @@ impl Environment {
 
                 return Some(PathResult {
                     moved_start: if start_changed { Some(start) } else { None },
+                    moved_goal: if goal_changed { Some(goal) } else { None },
                     path: out,
                 });
             }
