@@ -103,6 +103,8 @@ pub extern "system" fn Java_com_swrobotics_lib_pathfinding_PathfindingJNI_findPa
         .find_path(start, goal)
         .map(|result| pathfinding::to_bezier(&result, start, goal));
 
+    // println!("Path: {path:?}");
+
     match path {
         Some(path) => {
             let mut values = Vec::with_capacity(path.len() * 2);
@@ -145,12 +147,12 @@ pub extern "system" fn Java_com_swrobotics_lib_pathfinding_PathfindingJNI_debugF
     let environment = unsafe { &mut *(env_handle as *mut pathfinding::Environment) };
     let data = environment.debug_find_safe(Vec2f::new(start_x, start_y));
 
-    let mut values = Vec::with_capacity(data.len() * 2);
-    for vertex in data {
-        values.push(vertex.x);
-        values.push(vertex.y);
-    }
-    into_java_array(&mut env, values).unwrap()
+    // let mut values = Vec::with_capacity(data.len() * 2);
+    // for vertex in data {
+    //     values.push(vertex.x);
+    //     values.push(vertex.y);
+    // }
+    into_java_array(&mut env, data).unwrap()
 }
 
 fn into_java_array(env: &mut JNIEnv, values: Vec<f64>) -> Result<jdoubleArray, jni::errors::Error> {

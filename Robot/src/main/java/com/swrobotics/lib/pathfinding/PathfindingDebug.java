@@ -62,6 +62,7 @@ public final class PathfindingDebug {
     public final Arc[] arcs;
     public final Segment[] segments;
     public final EnvPolygon[] envPolygons;
+    public final Segment[] visibility;
 
     /**
      * Decodes the pathfinding debug data array provided.
@@ -88,6 +89,11 @@ public final class PathfindingDebug {
         envPolygons = new EnvPolygon[(int) in.next()];
         for (int i = 0; i < envPolygons.length; i++) {
             envPolygons[i] = new EnvPolygon(in);
+        }
+
+        visibility = new Segment[(int) in.next()];
+        for (int i = 0; i < visibility.length; i++) {
+            visibility[i] = new Segment(in);
         }
     }
 
@@ -167,6 +173,12 @@ public final class PathfindingDebug {
                         arc.centerY + arc.radius * Math.sin(angle)));
             }
             g.plotLines(points, Color.kYellow);
+        }
+
+        for (Segment seg : visibility) {
+            g.plotLines(List.of(
+                    new Translation2d(seg.x1, seg.y1),
+                    new Translation2d(seg.x2, seg.y2)), Color.kBlue);
         }
     }
 }

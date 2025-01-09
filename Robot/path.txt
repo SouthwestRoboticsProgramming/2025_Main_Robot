@@ -1,0 +1,12 @@
+[
+BAD PathArc {
+  center: Vec2f { x: 16.328799999999998, y: 4.026 }, radius: 1.0234230647076001,
+  incoming_angle: -3.1689354900142286, outgoing_angle: 3.141592653589793,
+  direction: Clockwise
+},
+OK PathArc {
+  center: Vec2f { x: 16.328799999999998, y: 5.8548 }, radius: 1.0234230647076001,
+  incoming_angle: 3.141592653589793, outgoing_angle: 2.2034144106411864,
+  direction: Clockwise
+}
+]

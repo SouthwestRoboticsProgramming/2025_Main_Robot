@@ -1,5 +1,7 @@
 use std::{cmp::Ordering, collections::BinaryHeap, f64::consts::PI, rc::Rc};
 
+// BUG: I think visibility is not taking arc limits into account
+
 use arrayvec::ArrayVec;
 use itertools::Itertools;
 use lerp::Lerp;
@@ -422,7 +424,7 @@ pub struct VisibilityEdge {
     pub dest: ArcContext,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PathArc {
     pub center: Vec2f,
     pub radius: f64,
@@ -584,6 +586,17 @@ impl Environment {
 
         data.extend(self.gen_debug.iter());
 
+        let mut vis_data: Vec<f64> = Vec::new();
+        for vis_set in &self.visibility {
+            for vis_edge in vis_set {
+                let seg = &vis_edge.segment;
+
+                vis_data.extend([seg.from.x, seg.from.y, seg.to.x, seg.to.y].iter());
+            }
+        }
+        data.push((vis_data.len() / 4) as f64);
+        data.extend(vis_data);
+
         data
     }
 
@@ -666,9 +679,10 @@ impl Environment {
         }
     }
 
-    pub fn debug_find_safe(&self, mut start: Vec2f) -> Vec<Vec2f> {
+    pub fn debug_find_safe(&self, mut start: Vec2f) -> Vec<f64> {
         let mut out = Vec::new();
 
+        let mut safe_data: Vec<f64> = Vec::new();
         let mut tangents: ArrayVec<_, 2> = ArrayVec::new();
         'outer: for _ in 0..MAX_UNSTUCK_ATTEMPTS {
             // Check if we are inside the field bounds
@@ -682,13 +696,27 @@ impl Environment {
             match self.move_towards_safety(start) {
                 Some(new_start) => {
                     start = new_start;
-                    out.push(new_start);
+                    safe_data.push(new_start.x);
+                    safe_data.push(new_start.y);
                     println!("New start: {new_start:?}");
                 }
-                None => return out,
+                None => break 'outer,
             }
         }
 
+        let mut vis_data: Vec<f64> = Vec::new();
+        for (arc_id, arc) in self.arcs.iter().enumerate() {
+            self.find_point_to_arc_tangents(start, &arc, arc_id, &mut tangents);
+            for tangent in &tangents {
+                let seg = &tangent.segment;
+                vis_data.extend([seg.from.x, seg.from.y, seg.to.x, seg.to.y].iter());
+            }
+        }
+
+        out.push((safe_data.len() / 2) as f64);
+        out.append(&mut safe_data);
+        out.push((vis_data.len() / 4) as f64);
+        out.append(&mut vis_data);
         out
     }
 
@@ -791,11 +819,16 @@ impl Environment {
             }
         }
 
+        println!("Searching from {start:?} to {goal:?}");
+
         while let Some(current) = frontier.pop() {
             if current.is_goal {
                 let mut node = current;
                 let mut out = Vec::new();
+                println!("Path cost progress (REVERSED):");
                 loop {
+                    println!("Cost = {}", node.cost_so_far);
+
                     let outgoing = node.parent_outgoing_angle;
                     match &node.came_from {
                         None => break,
@@ -814,6 +847,8 @@ impl Environment {
                 }
 
                 out.reverse();
+
+                println!("Path arcs: {out:?}");
 
                 return Some(PathResult {
                     moved_start: if start_changed { Some(start) } else { None },

@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -79,9 +80,26 @@ public final class ControlBoard extends SubsystemBase {
     
         driver.y.onPressed(() -> {
             Translation2d prev = robot.drive.getEstimatedPose().getTranslation();
-            List<Translation2d> points = PathEnvironments.kFieldWithAutoGamePieces.debugFindSafe(prev);
-            points.add(0, prev);
-            FieldView.pathfindingDebug.plotLines(points, Color.kOrange);
+            double[] data = PathEnvironments.kFieldWithAutoGamePieces.debugFindSafe(prev);
+            
+            int safeCount = (int) data[0];
+            List<Translation2d> safe = new ArrayList<>();
+            safe.add(prev);
+            for (int i = 0; i < safeCount; i++) {
+                safe.add(new Translation2d(data[i*2 + 1], data[i*2 + 2]));
+            }
+
+            int base = safeCount*2 + 1;
+            int visCount = (int) data[base];
+
+            FieldView.pathfindingDebug.plotLines(safe, Color.kOrange);
+            for (int i = 0; i < visCount; i++) {
+                double x1 = data[base + i*4 + 1];
+                double y1 = data[base + i*4 + 2];
+                double x2 = data[base + i*4 + 3];
+                double y2 = data[base + i*4 + 4];
+                FieldView.pathfindingDebug.plotLines(List.of(new Translation2d(x1, y1), new Translation2d(x2, y2)), Color.kCyan);
+            }
         });
     }
 
