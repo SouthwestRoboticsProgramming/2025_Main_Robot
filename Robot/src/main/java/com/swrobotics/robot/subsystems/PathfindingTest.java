@@ -26,7 +26,7 @@ public final class PathfindingTest extends SubsystemBase {
     public PathfindingTest(SwerveDriveSubsystem drive) {
         this.drive = drive;
 
-       PathEnvironments.kFieldWithAutoGamePieces.getDebug().plot(FieldView.pathfindingDebug);
+//       PathEnvironments.kFieldWithAutoGamePieces.getDebug().plot(FieldView.pathfindingDebug);
 
         FieldView.pathfindingGoal.setPose(new Pose2d(new Translation2d(2, 2), new Rotation2d()));
     }

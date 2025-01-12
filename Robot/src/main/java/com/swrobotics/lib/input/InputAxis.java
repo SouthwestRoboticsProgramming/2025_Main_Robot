@@ -1,6 +1,7 @@
 package com.swrobotics.lib.input;
 
 import com.swrobotics.lib.utils.MathUtil;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import java.util.function.Supplier;
 
@@ -9,10 +10,9 @@ import java.util.function.Supplier;
  * that most analog inputs have a slight "drift", where the value will not be exactly zero when not
  * touching the input.
  */
-public final class InputAxis implements InputElement {
+public final class InputAxis implements Supplier<Double> {
     private final Supplier<Double> getter;
     private final double deadband;
-    private double value;
 
     /**
      * Creates a new input axis that reads its value from a given getter function.
@@ -22,7 +22,6 @@ public final class InputAxis implements InputElement {
     public InputAxis(Supplier<Double> getter, double deadband) {
         this.getter = getter;
         this.deadband = deadband;
-        value = getter.get();
     }
 
     /**
@@ -30,8 +29,9 @@ public final class InputAxis implements InputElement {
      *
      * @return deadbanded value
      */
-    public double get() {
-        return MathUtil.deadband(value, deadband);
+    @Override
+    public Double get() {
+        return MathUtil.deadband(getter.get(), deadband);
     }
 
     /**
@@ -40,7 +40,7 @@ public final class InputAxis implements InputElement {
      * @return raw value
      */
     public double getRaw() {
-        return value;
+        return getter.get();
     }
 
     /**
@@ -48,11 +48,14 @@ public final class InputAxis implements InputElement {
      * @return whether the current position is outside of the range
      */
     public boolean isOutside(double range) {
-        return Math.abs(value) > range;
+        return Math.abs(getter.get()) > range;
     }
 
-    @Override
-    public void update() {
-        value = getter.get();
+    /**
+     * @param range range to check, centered around 0
+     * @return trigger of whether the current position is outside of the range
+     */
+    public Trigger triggerOutside(double range) {
+        return new Trigger(() -> isOutside(range));
     }
 }

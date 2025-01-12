@@ -31,9 +31,13 @@ public final class Constants {
     public static final int kEndgameAlertTime = 20;
 
     // Robot dimensions
-    public static final double kFrameLength = 0.77; // m
-    public static final double kFrameWidth = 0.695; // m
-    public static final double kRobotRadius = 0.6202230647076; // m, diagonal including bumpers
+    public static final double kFrameLength = Units.inchesToMeters(30); // m
+    public static final double kFrameWidth = Units.inchesToMeters(27); // m
+
+    public static final double kBumperThickness = Units.inchesToMeters(3); // FIXME
+    public static final double kRobotLength = kFrameLength + kBumperThickness * 2;
+    public static final double kRobotWidth = kFrameWidth + kBumperThickness * 2;
+    public static final double kRobotRadius = Math.hypot(kRobotLength /2, kRobotWidth /2);
     public static final double kRobotMass = Units.lbsToKilograms(122 + 14 + 14);
     // Approximation of robot as uniform cuboid
     // See https://sleipnirgroup.github.io/Choreo/usage/estimating-moi/
@@ -57,6 +61,13 @@ public final class Constants {
     public static final double kAutoDriveKd = 0;
     public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Auto/Turn PID/kP", 9).setPersistent();
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Auto/Turn PID/kD", 0.5).setPersistent();
+
+    public static final NTEntry<Double> kSnapMaxSpeed = new NTDouble("Snap/Max Speed (m/s)", 1.5).setPersistent();
+    public static final NTEntry<Double> kSnapMaxTurnSpeed = new NTDouble("Snap/Max Turn Speed (rot/s)", 1.2).setPersistent();
+    public static final NTEntry<Double> kSnapDriveKp = new NTDouble("Snap/Drive kP", 8).setPersistent();
+    public static final NTEntry<Double> kSnapDriveKd = new NTDouble("Snap/Drive kD", 0).setPersistent();
+    public static final NTEntry<Double> kSnapTurnKp = new NTDouble("Snap/Turn kP", 12).setPersistent();
+    public static final NTEntry<Double> kSnapTurnKd = new NTDouble("Snap/Turn kD", 0).setPersistent();
 
     // Drive
     public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
