@@ -10,6 +10,7 @@ import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -35,10 +36,10 @@ public final class PathfindingTest extends SubsystemBase {
         Pose2d goal = FieldView.pathfindingGoal.getPose();
 
         PathConstraints constraints = new PathConstraints(
-                    Constants.kDriveMaxAchievableSpeed,
-                    Constants.kDriveMaxAchievableSpeed / 0.7,
-                    Constants.kDriveControlMaxTurnSpeed,
-                    Constants.kDriveControlMaxTurnSpeed / 0.2);
+                Constants.kDriveMaxAchievableSpeed,
+                Constants.kDriveControlMaxAccel,
+                Units.rotationsToRadians(Constants.kDriveControlMaxTurnSpeed),
+                Units.rotationsToRadians(Constants.kDriveControlMaxTurnSpeed / 0.3));
 
         return Commands.sequence(
             Commands.runOnce(() -> PathPlannerPathfinder.setEnvironment(PathEnvironments.kFieldWithAutoGamePieces)),
