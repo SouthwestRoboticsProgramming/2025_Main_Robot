@@ -92,30 +92,6 @@ public final class ControlBoard extends SubsystemBase {
 
         driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
 
-        driver.y.onPressed(() -> {
-            Translation2d prev = robot.drive.getEstimatedPose().getTranslation();
-            double[] data = PathEnvironments.kFieldWithAutoGamePieces.debugFindSafe(prev);
-            
-            int safeCount = (int) data[0];
-            List<Translation2d> safe = new ArrayList<>();
-            safe.add(prev);
-            for (int i = 0; i < safeCount; i++) {
-                safe.add(new Translation2d(data[i*2 + 1], data[i*2 + 2]));
-            }
-
-            int base = safeCount*2 + 1;
-            int visCount = (int) data[base];
-
-            FieldView.pathfindingDebug.plotLines(safe, Color.kOrange);
-            for (int i = 0; i < visCount; i++) {
-                double x1 = data[base + i*4 + 1];
-                double y1 = data[base + i*4 + 2];
-                double x2 = data[base + i*4 + 3];
-                double y2 = data[base + i*4 + 4];
-                FieldView.pathfindingDebug.plotLines(List.of(new Translation2d(x1, y1), new Translation2d(x2, y2)), Color.kCyan);
-            }
-        });
-
         driver.b.trigger()
                 .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(
                         robot.drive,

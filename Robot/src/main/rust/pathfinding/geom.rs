@@ -326,7 +326,7 @@ fn clip_arc(to_clip: Arc, poly: &EnvPolygon, out: &mut Vec<Arc>) {
                 center: prev_part.center,
                 radius: prev_part.radius,
                 min_angle: prev_part.min_angle,
-                max_angle: part.max_angle
+                max_angle: part.max_angle,
             };
         } else {
             out.push(prev_part);
@@ -746,7 +746,6 @@ impl Environment {
         let mut goal_changed = false;
         let mut goal_reachable = false;
         'goal_loop: for _ in 0..MAX_UNSTUCK_ATTEMPTS {
-            println!("Begin goal search");
             for (arc_id, arc) in self.arcs.iter().enumerate() {
                 self.find_point_to_arc_tangents(goal, arc, arc_id, &mut tangents);
                 if !tangents.is_empty() {
@@ -763,7 +762,6 @@ impl Environment {
                 None => return None,
             }
         }
-        println!("End goal search");
         if !goal_reachable {
             return None;
         }
@@ -840,8 +838,6 @@ impl Environment {
             }
         }
 
-        println!("Searching from {start:?} to {goal:?}");
-
         fn can_leave_from(arc: &Arc, arc_dir: WindingDir, in_angle: f64, out_angle: f64) -> bool {
             if arc.min_angle == arc.max_angle {
                 return true;
@@ -859,7 +855,7 @@ impl Environment {
 
             match arc_dir {
                 WindingDir::Clockwise => rel_out <= rel_in,
-                WindingDir::Counterclockwise => rel_out >= rel_in
+                WindingDir::Counterclockwise => rel_out >= rel_in,
             }
         }
 
@@ -867,10 +863,7 @@ impl Environment {
             if current.is_goal {
                 let mut node = current;
                 let mut out = Vec::new();
-                println!("Path cost progress (REVERSED):");
                 loop {
-                    println!("Cost = {}", node.cost_so_far);
-
                     let outgoing = node.parent_outgoing_angle;
                     match &node.came_from {
                         None => break,
@@ -890,8 +883,6 @@ impl Environment {
 
                 out.reverse();
 
-                println!("Path arcs: {out:?}");
-
                 return Some(PathResult {
                     moved_start: if start_changed { Some(start) } else { None },
                     moved_goal: if goal_changed { Some(goal) } else { None },
@@ -905,7 +896,12 @@ impl Environment {
 
             for edge in &self.visibility[current.context.0] {
                 if !current.has_visited(edge.dest) {
-                    if !can_leave_from(current_arc, current_dir, current.incoming_angle, edge.from_angle) {
+                    if !can_leave_from(
+                        current_arc,
+                        current_dir,
+                        current.incoming_angle,
+                        edge.from_angle,
+                    ) {
                         continue;
                     }
 
@@ -934,7 +930,12 @@ impl Environment {
                     continue;
                 }
 
-                if !can_leave_from(current_arc, current_dir, current.incoming_angle, tangent.arc_angle) {
+                if !can_leave_from(
+                    current_arc,
+                    current_dir,
+                    current.incoming_angle,
+                    tangent.arc_angle,
+                ) {
                     continue;
                 }
 
@@ -983,17 +984,13 @@ impl Environment {
         let cw_angle = base_angle - angle_offset;
         let ccw_angle = base_angle + angle_offset;
 
-        println!("P2A tangents: P={point} A={arc:?} cw={cw_angle} ccw={ccw_angle}");
-
         if arc.contains_angle(cw_angle) {
             let cw = Segment {
                 from: point,
                 to: arc.center + Vec2f::new_angle(arc.radius, cw_angle),
             };
-            println!("CW contained seg={cw:?}");
 
             if self.is_segment_passable(&cw, Some(arc_id), None) {
-                println!("CW segment passable");
                 out.push(PointToArcTangent {
                     segment: cw,
                     arc_angle: cw_angle,
@@ -1007,10 +1004,8 @@ impl Environment {
                 from: point,
                 to: arc.center + Vec2f::new_angle(arc.radius, ccw_angle),
             };
-            println!("CCW contained seg={ccw:?}");
 
             if self.is_segment_passable(&ccw, Some(arc_id), None) {
-                println!("CCW segment passable");
                 out.push(PointToArcTangent {
                     segment: ccw,
                     arc_angle: ccw_angle,
@@ -1139,7 +1134,9 @@ impl Environment {
 
             fn arc_contains_point(arc: &Arc, point: Vec2f) -> bool {
                 let dist_sq = arc.center.distance_sq(point);
-                dist_sq == 0.0 || (dist_sq < arc.radius * arc.radius && arc.contains_angle(angle_to_arc(arc, point)))
+                dist_sq == 0.0
+                    || (dist_sq < arc.radius * arc.radius
+                        && arc.contains_angle(angle_to_arc(arc, point)))
             }
 
             if arc_contains_point(arc, seg.from) {
