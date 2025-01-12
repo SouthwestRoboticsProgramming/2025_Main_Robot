@@ -59,16 +59,20 @@ impl Vec2f {
         dx * dx + dy * dy
     }
 
-    pub fn segment_dist_sq(self, p1: Vec2f, p2: Vec2f) -> f64 {
+    pub fn closest_along_segment(self, p1: Vec2f, p2: Vec2f) -> Vec2f {
         let l2 = p1.distance_sq(p2);
         if l2 == 0.0 {
-            return self.distance_sq(p1);
+            return p1;
         }
 
         let t = ((self.x - p1.x) * (p2.x - p1.x) + (self.y - p1.y) * (p2.y - p1.y)) / l2;
         let t = t.clamp(0.0, 1.0);
 
-        self.distance_sq(p1.lerp(p2, t))
+        p1.lerp(p2, t)
+    }
+
+    pub fn segment_dist_sq(self, p1: Vec2f, p2: Vec2f) -> f64 {
+        self.distance_sq(self.closest_along_segment(p1, p2))
     }
 
     pub fn norm(self) -> Self {

@@ -1,7 +1,5 @@
 use std::{cmp::Ordering, collections::BinaryHeap, f64::consts::PI, rc::Rc};
 
-// BUG: I think visibility is not taking arc limits into account
-
 use arrayvec::ArrayVec;
 use itertools::Itertools;
 use lerp::Lerp;
@@ -16,7 +14,7 @@ use super::{
 // Maximum number of attempts made to get back into safe area if inside an obstacle
 const MAX_UNSTUCK_ATTEMPTS: usize = 8;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Arc {
     pub center: Vec2f,
     pub radius: f64,
@@ -29,6 +27,7 @@ impl Arc {
         Self {
             center,
             radius,
+            // Guaranteed not ambiguous, starts at min, goes CCW to max
             min_angle: math::wrap_angle(min_angle),
             max_angle: math::wrap_angle(max_angle),
         }
@@ -281,6 +280,7 @@ fn clip_arc(to_clip: Arc, poly: &EnvPolygon, out: &mut Vec<Arc>) {
         to_clip_max_angle += PI * 2.0;
     }
 
+    let mut parts = Vec::new();
     for i in 0..(intersect_angles.len() + 1) {
         let min_angle = if i == 0 {
             to_clip.min_angle
@@ -305,13 +305,32 @@ fn clip_arc(to_clip: Arc, poly: &EnvPolygon, out: &mut Vec<Arc>) {
 
         if !poly.is_inside(test_point) {
             // Outside the polygon, keep this piece of the arc
-            // FIXME: If the previous arc was also kept, they must be merged
-            out.push(Arc {
+            parts.push(Arc {
                 center: to_clip.center,
                 radius: to_clip.radius,
                 min_angle: math::wrap_angle(min_angle),
                 max_angle: math::wrap_angle(max_angle),
             });
+        }
+    }
+
+    if parts.len() == 0 {
+        return;
+    }
+
+    // Merge arcs that share an endpoint
+    let mut prev_part = parts[parts.len() - 1].clone();
+    for part in &parts {
+        if part.min_angle == prev_part.max_angle {
+            prev_part = Arc {
+                center: prev_part.center,
+                radius: prev_part.radius,
+                min_angle: prev_part.min_angle,
+                max_angle: part.max_angle
+            };
+        } else {
+            out.push(prev_part);
+            prev_part = part.clone();
         }
     }
 }
@@ -727,6 +746,7 @@ impl Environment {
         let mut goal_changed = false;
         let mut goal_reachable = false;
         'goal_loop: for _ in 0..MAX_UNSTUCK_ATTEMPTS {
+            println!("Begin goal search");
             for (arc_id, arc) in self.arcs.iter().enumerate() {
                 self.find_point_to_arc_tangents(goal, arc, arc_id, &mut tangents);
                 if !tangents.is_empty() {
@@ -743,6 +763,7 @@ impl Environment {
                 None => return None,
             }
         }
+        println!("End goal search");
         if !goal_reachable {
             return None;
         }
@@ -821,6 +842,27 @@ impl Environment {
 
         println!("Searching from {start:?} to {goal:?}");
 
+        fn can_leave_from(arc: &Arc, arc_dir: WindingDir, in_angle: f64, out_angle: f64) -> bool {
+            if arc.min_angle == arc.max_angle {
+                return true;
+            }
+
+            // Align angles to arc range
+            let mut rel_in = math::wrap_angle(in_angle);
+            if rel_in < arc.min_angle {
+                rel_in += PI * 2.0;
+            }
+            let mut rel_out = math::wrap_angle(out_angle);
+            if rel_out < arc.min_angle {
+                rel_out += PI * 2.0;
+            }
+
+            match arc_dir {
+                WindingDir::Clockwise => rel_out <= rel_in,
+                WindingDir::Counterclockwise => rel_out >= rel_in
+            }
+        }
+
         while let Some(current) = frontier.pop() {
             if current.is_goal {
                 let mut node = current;
@@ -863,6 +905,10 @@ impl Environment {
 
             for edge in &self.visibility[current.context.0] {
                 if !current.has_visited(edge.dest) {
+                    if !can_leave_from(current_arc, current_dir, current.incoming_angle, edge.from_angle) {
+                        continue;
+                    }
+
                     let distance_cost = edge.segment.length();
                     let turn_cost = calc_turn_cost(
                         current.incoming_angle,
@@ -888,6 +934,10 @@ impl Environment {
                     continue;
                 }
 
+                if !can_leave_from(current_arc, current_dir, current.incoming_angle, tangent.arc_angle) {
+                    continue;
+                }
+
                 let distance_cost = tangent.segment.length();
                 let turn_cost = calc_turn_cost(
                     current.incoming_angle,
@@ -897,7 +947,7 @@ impl Environment {
                 );
 
                 frontier.push(Rc::new(SearchNode {
-                    context: ArcContext(0), // FIXME: Restructure type so this can be omitted
+                    context: ArcContext(0),
                     is_goal: true,
                     came_from: Some(current.clone()),
                     incoming_angle: 0.0,
@@ -933,13 +983,17 @@ impl Environment {
         let cw_angle = base_angle - angle_offset;
         let ccw_angle = base_angle + angle_offset;
 
+        println!("P2A tangents: P={point} A={arc:?} cw={cw_angle} ccw={ccw_angle}");
+
         if arc.contains_angle(cw_angle) {
             let cw = Segment {
                 from: point,
                 to: arc.center + Vec2f::new_angle(arc.radius, cw_angle),
             };
+            println!("CW contained seg={cw:?}");
 
             if self.is_segment_passable(&cw, Some(arc_id), None) {
+                println!("CW segment passable");
                 out.push(PointToArcTangent {
                     segment: cw,
                     arc_angle: cw_angle,
@@ -953,8 +1007,10 @@ impl Environment {
                 from: point,
                 to: arc.center + Vec2f::new_angle(arc.radius, ccw_angle),
             };
+            println!("CCW contained seg={ccw:?}");
 
             if self.is_segment_passable(&ccw, Some(arc_id), None) {
+                println!("CCW segment passable");
                 out.push(PointToArcTangent {
                     segment: ccw,
                     arc_angle: ccw_angle,
@@ -1080,10 +1136,16 @@ impl Environment {
 
             // Due to allowing nearly tangent segments, cases where an endpoint
             // is slightly inside an arc are missed, so we need to check those
-            if arc.center.distance_sq(seg.from) < arc.radius * arc.radius {
+
+            fn arc_contains_point(arc: &Arc, point: Vec2f) -> bool {
+                let dist_sq = arc.center.distance_sq(point);
+                dist_sq == 0.0 || (dist_sq < arc.radius * arc.radius && arc.contains_angle(angle_to_arc(arc, point)))
+            }
+
+            if arc_contains_point(arc, seg.from) {
                 return false;
             }
-            if arc.center.distance_sq(seg.to) < arc.radius * arc.radius {
+            if arc_contains_point(arc, seg.to) {
                 return false;
             }
         }

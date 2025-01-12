@@ -26,7 +26,7 @@ public final class PathfindingTest extends SubsystemBase {
     public PathfindingTest(SwerveDriveSubsystem drive) {
         this.drive = drive;
 
-//       PathEnvironments.kFieldWithAutoGamePieces.getDebug().plot(FieldView.pathfindingDebug);
+       PathEnvironments.kFieldWithAutoGamePieces.getDebug().plot(FieldView.pathfindingDebug);
 
         FieldView.pathfindingGoal.setPose(new Pose2d(new Translation2d(2, 2), new Rotation2d()));
     }
@@ -46,7 +46,25 @@ public final class PathfindingTest extends SubsystemBase {
             AutoBuilder.pathfindToPose(goal, constraints)
         );
     }
+    /*
 
+     */
+// PROBLEM IS: Clipping duplicates arcs, having multiple arcs in same spot causes is_segment_passable to fail due to only ignoring one
+    // SOLUTION: Fix duplicating arcs
+    /*
+    Begin goal search
+P2A tangents: P=(13.261876106262207, 1.4572594165802002) A=Arc { center: Vec2f { x: 16.328799999999998, y: 2.1971999999999996 }, radius: 1.0234230647113989, min_angle: -3.141592653589793, max_angle: -1.8490724094145665 } cw=-4.14528242664394 ccw=-1.6644218970211682
+P2A tangents: P=(13.261876106262207, 1.4572594165802002) A=Arc { center: Vec2f { x: 16.328799999999998, y: 2.1971999999999996 }, radius: 1.0234230647113989, min_angle: 2.0365749458849844, max_angle: -3.141592653589793 } cw=-4.14528242664394 ccw=-1.6644218970211682
+P2A tangents: P=(13.261876106262207, 1.4572594165802002) A=Arc { center: Vec2f { x: 16.328799999999998, y: 4.026 }, radius: 1.0234230647113989, min_angle: -3.141592653589793, max_angle: -2.036574945884984 } cw=-3.7564639307353467 ccw=-1.132263338534691
+* P2A tangents: P=(13.261876106262207, 1.4572594165802002) A=Arc { center: Vec2f { x: 16.328799999999998, y: 4.026 }, radius: 1.0234230647113989, min_angle: 1.1703324517928593, max_angle: -3.141592653589793 } cw=-3.7564639307353467 ccw=-1.132263338534691
+Begin goal search
+P2A tangents: P=(15.352389842233839, 2.214223119002058) A=Arc { center: Vec2f { x: 16.328799999999998, y: 4.026 }, radius: 1.0234230647113989, min_angle: -3.141592653589793, max_angle: -2.036574945884984 } cw=-3.1154571203775427 ccw=-1.0147352576291926
+P2A tangents: P=(15.352389842233839, 2.214223119002058) A=Arc { center: Vec2f { x: 16.328799999999998, y: 4.026 }, radius: 1.0234230647113989, min_angle: 1.1703324517928593, max_angle: -3.141592653589793 } cw=-3.1154571203775427 ccw=-1.0147352576291926
+Begin goal search
+P2A tangents: P=(15.255540035914654, 2.215911636645166) A=Arc { center: Vec2f { x: 16.328799999999998, y: 2.1971999999999996 }, radius: 1.0234230647113989, min_angle: -3.141592653589793, max_angle: -1.8490724094145665 } cw=2.8177415790880915 ccw=3.4305784731376456
+P2A tangents: P=(15.255540035914654, 2.215911636645166) A=Arc { center: Vec2f { x: 16.328799999999998, y: 2.1971999999999996 }, radius: 1.0234230647113989, min_angle: 2.0365749458849844, max_angle: -3.141592653589793 } cw=2.8177415790880915 ccw=3.4305784731376456
+End goal search
+     */
     @Override
     public void periodic() {
         Pose2d goal = FieldView.pathfindingGoal.getPose();
