@@ -1,9 +1,8 @@
-package com.swrobotics.robot.subsystems.pathfinding;
+package com.swrobotics.robot.config;
 
 import com.swrobotics.lib.pathfinding.Circle;
 import com.swrobotics.lib.pathfinding.Obstacle;
 import com.swrobotics.lib.pathfinding.PathEnvironment;
-import com.swrobotics.robot.config.Constants;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
