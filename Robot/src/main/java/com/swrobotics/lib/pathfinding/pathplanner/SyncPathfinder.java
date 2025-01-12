@@ -59,12 +59,28 @@ public final class SyncPathfinder implements PathfinderExt {
             goalPositions.add(pose.getTranslation());
         }
 
-        PathResult result = environment.findPathToClosest(startPos, goalPositions);
-
+        int goalIndex = 0;
+        List<Translation2d> bezierPoints;
         Translation2d[] logPath;
+
+        PathResult result = environment.findPathToClosest(startPos, goalPositions);
         if (result == null) {
-            throw new RuntimeException("TODO: Straight line to closest goal");
+            double closestDist = Double.POSITIVE_INFINITY;
+            for (int i = 0; i < goalPositions.size(); i++) {
+                double dist = startPos.getDistance(goalPositions.get(i));
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    goalIndex = i;
+                }
+            }
+
+            // Fall back to straight line
+            Translation2d goal = goalPositions.get(goalIndex);
+            bezierPoints = List.of(startPos, startPos, goal, goal);
+            logPath = new Translation2d[0];
         } else {
+            goalIndex = result.goalIndex();
+            bezierPoints = result.bezierPoints();
             logPath = new Translation2d[result.bezierPoints().size()];
             result.bezierPoints().toArray(logPath);
         }
@@ -76,8 +92,8 @@ public final class SyncPathfinder implements PathfinderExt {
         Logger.recordOutput("Pathfinding/Goal Poses", logGoalPoses);
         Logger.recordOutput("Pathfinding/Path", logPath);
 
-        List<Waypoint> waypoints = bezierPointsToWaypoints(result.bezierPoints());
-        Rotation2d goalRotation = goalPoses.get(result.goalIndex()).getRotation();
+        List<Waypoint> waypoints = bezierPointsToWaypoints(bezierPoints);
+        Rotation2d goalRotation = goalPoses.get(goalIndex).getRotation();
 
         return new PathPlannerPath(waypoints, pathConstraints, null, new GoalEndState(goalVelocityMPS, goalRotation));
     }
