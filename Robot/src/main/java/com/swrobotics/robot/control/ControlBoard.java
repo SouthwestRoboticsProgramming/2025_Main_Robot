@@ -12,6 +12,7 @@ import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.SnapTargets;
 
+import com.swrobotics.robot.logging.FieldView;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -85,6 +86,7 @@ public final class ControlBoard extends SubsystemBase {
 //        driver.b.onPressed(RumblePatternCommands.endgameAlert(driver, 0.75));
 
         driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
+        driver.y.onPressed(() -> FieldView.pathfindingGoal.setPose(robot.drive.getEstimatedPose()));
 
         driver.b.trigger()
                 .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(

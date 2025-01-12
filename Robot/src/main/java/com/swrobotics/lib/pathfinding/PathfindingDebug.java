@@ -105,8 +105,8 @@ public final class PathfindingDebug {
         for (Obstacle obs : obstacles) {
             if (obs instanceof Circle circle) {
                 List<Translation2d> points = new ArrayList<>();
-                for (int i = 0; i <= 10; i++) {
-                    double angle = i / 10.0 * Math.PI * 2;
+                for (int i = 0; i <= 8; i++) {
+                    double angle = i / 8.0 * Math.PI * 2;
 
                     points.add(new Translation2d(
                             circle.getCenter().getX() + circle.getRadius() * Math.cos(angle),
@@ -147,8 +147,8 @@ public final class PathfindingDebug {
         // Arc boundaries
         // for (Arc arc : arcs) {
         //     List<Translation2d> points = new ArrayList<>();
-        //     for (int i = 0; i <= 20; i++) {
-        //         double angle = (i / 20.0) * MathUtil.TAU;
+        //     for (int i = 0; i <= 8; i++) {
+        //         double angle = (i / 8.0) * MathUtil.TAU;
 
         //         points.add(new Translation2d(
         //                 arc.centerX + arc.radius * Math.cos(angle),
@@ -164,8 +164,8 @@ public final class PathfindingDebug {
                 max += Math.PI * 2;
 
             List<Translation2d> points = new ArrayList<>();
-            for (int i = 0; i <= 20; i++) {
-                double f = i / 20.0;
+            for (int i = 0; i <= 8; i++) {
+                double f = i / 8.0f;
                 double angle = MathUtil.lerp(arc.minAngle, max, f);
 
                 points.add(new Translation2d(

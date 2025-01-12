@@ -56,8 +56,8 @@ public final class PathfindingTest extends SubsystemBase {
         List<Translation2d> path = PathEnvironments.kFieldWithAutoGamePieces
                .findPath(drive.getEstimatedPose().getTranslation(), goalPos);
 
-        double endTime = Timer.getFPGATimestamp(); // Gives time in microseconds
-        Logger.recordOutput("Pathfinding/Calc time (ms)", (endTime - startTime) / 1000);
+        double endTime = Timer.getFPGATimestamp();
+        Logger.recordOutput("Pathfinding/Calc time (ms)", (endTime - startTime) * 1000);
 
         if (path != null) {
             List<Pose2d> poses = new ArrayList<>();
