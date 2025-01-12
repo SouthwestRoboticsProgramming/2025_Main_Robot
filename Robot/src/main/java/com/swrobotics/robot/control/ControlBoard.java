@@ -11,6 +11,7 @@ import com.swrobotics.robot.commands.DriveCommands;
 import com.swrobotics.robot.commands.LightCommands;
 import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
+import com.swrobotics.robot.config.SnapTargets;
 import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.subsystems.pathfinding.PathEnvironments;
 
@@ -83,8 +84,8 @@ public final class ControlBoard extends SubsystemBase {
         // Everything past here is for testing and should eventually be removed
 
         // Test LEDs
-        driver.a.onPressed(LightCommands.blink(robot.lights, Color.kCyan));
-        driver.a.onHeld(LightCommands.blink(robot.lights, Color.kYellow));
+//        driver.a.onPressed(LightCommands.blink(robot.lights, Color.kCyan));
+//        driver.a.onHeld(LightCommands.blink(robot.lights, Color.kYellow));
 
 //        driver.b.onPressed(RumblePatternCommands.endgameAlert(driver, 0.75));
 
@@ -102,6 +103,12 @@ public final class ControlBoard extends SubsystemBase {
                         robot.drive,
                         this::getDriveTranslation,
                         () -> Rotation2d.fromDegrees(90)
+                ));
+
+        driver.a.trigger()
+                .whileTrue(DriveCommands.snapToPose(
+                        robot.drive,
+                        () -> SnapTargets.getClosestTarget(robot.drive.getEstimatedPose())
                 ));
     }
 

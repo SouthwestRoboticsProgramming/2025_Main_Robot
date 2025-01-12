@@ -100,7 +100,7 @@ public final class DriveCommands {
                         yOutput *= scale;
                     }
 
-                    double maxTurnSpeed = Constants.kSnapMaxTurnSpeed.get();
+                    double maxTurnSpeed = Units.rotationsToRadians(Constants.kSnapMaxTurnSpeed.get());
                     rotOutput = MathUtil.clamp(rotOutput, -maxTurnSpeed, maxTurnSpeed);
 
                     drive.setControl(new SwerveRequest.FieldCentric()
