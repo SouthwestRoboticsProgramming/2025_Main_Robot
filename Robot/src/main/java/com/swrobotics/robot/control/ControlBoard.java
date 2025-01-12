@@ -10,7 +10,7 @@ import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
 import com.swrobotics.robot.commands.DriveCommands;
 import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
-import com.swrobotics.robot.config.SnapTargets;
+import com.swrobotics.robot.config.FieldPositions;
 
 import com.swrobotics.robot.logging.FieldView;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -85,20 +85,20 @@ public final class ControlBoard extends SubsystemBase {
 
 //        driver.b.onPressed(RumblePatternCommands.endgameAlert(driver, 0.75));
 
-        driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
-        driver.y.onPressed(() -> FieldView.pathfindingGoal.setPose(robot.drive.getEstimatedPose()));
+//        driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
+//        driver.y.onPressed(() -> FieldView.pathfindingGoal.setPose(robot.drive.getEstimatedPose()));
 
         driver.b.trigger()
                 .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(
                         robot.drive,
                         this::getDriveTranslation,
-                        () -> Rotation2d.fromDegrees(90)
+                        () -> FieldPositions.getClosestCoralStationAngle(robot.drive.getEstimatedPose())
                 ));
 
         driver.a.trigger()
                 .whileTrue(DriveCommands.snapToPose(
                         robot.drive,
-                        () -> SnapTargets.getClosestTarget(robot.drive.getEstimatedPose())
+                        () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
     }
 

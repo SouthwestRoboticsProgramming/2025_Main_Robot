@@ -1,17 +1,14 @@
 package com.swrobotics.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.swerve.*;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.swrobotics.lib.field.FieldInfo;
-import com.swrobotics.lib.pathfinding.PathEnvironment;
-import com.swrobotics.lib.pathfinding.PathPlannerPathfinder;
+import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
+import com.swrobotics.lib.pathfinding.pathplanner.SyncPathfinder;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.logging.FieldView;
 import edu.wpi.first.math.Matrix;
@@ -62,7 +59,7 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
                 ppModuleConfig,
                 positions);
 
-        AutoBuilder.configure(
+        AutoBuilderExt.configure(
                 this::getEstimatedPose,
                 this::resetPose,
                 this::getRobotRelativeSpeeds,
@@ -79,6 +76,7 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
                 ),
                 ppRobotConfig,
                 () -> FieldInfo.getAlliance() == DriverStation.Alliance.Red,
+                new SyncPathfinder(),
                 this
         );
 
@@ -90,10 +88,6 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
             FieldView.pathPlannerSetpoint.setPose(target);
             Logger.recordOutput("PathPlanner/Target Pose", target);
         });
-
-        Pathfinding.setPathfinder(new PathPlannerPathfinder());
-        PathPlannerPathfinder.setEnvironment(PathEnvironment.EMPTY);
-        PathfindingCommand.warmupCommand().schedule();
     }
 
     public void setControl(SwerveRequest request) {

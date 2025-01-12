@@ -41,8 +41,8 @@ public final class FieldInfo {
      */
     public static Rotation2d getAllianceForwardAngle() {
         return getAlliance() == DriverStation.Alliance.Blue
-                ? new Rotation2d(0)
-                : new Rotation2d(Math.PI);
+                ? Rotation2d.kZero
+                : Rotation2d.kPi;
     }
 
     /**
@@ -61,8 +61,8 @@ public final class FieldInfo {
      */
     public static Rotation2d getAllianceReverseAngle() {
         return getAlliance() == DriverStation.Alliance.Blue
-                ? new Rotation2d(Math.PI)
-                : new Rotation2d(0);
+                ? Rotation2d.kPi
+                : Rotation2d.kZero;
     }
 
     private final Translation2d size;

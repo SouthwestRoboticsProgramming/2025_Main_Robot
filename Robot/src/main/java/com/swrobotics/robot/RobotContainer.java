@@ -5,9 +5,17 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.pathplanner.lib.path.PathConstraints;
+import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
+import com.swrobotics.robot.config.Constants;
+import com.swrobotics.robot.config.FieldPositions;
+import com.swrobotics.robot.config.PathEnvironments;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.PathfindingTest;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -46,7 +54,7 @@ public class RobotContainer {
     public final SwerveDriveSubsystem drive;
     public final VisionSubsystem vision;
 
-    public final PathfindingTest pathfindingTest;
+//    public final PathfindingTest pathfindingTest;
 
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
@@ -67,7 +75,7 @@ public class RobotContainer {
         vision = new VisionSubsystem(drive);
         lights = new LightsSubsystem(this);
 
-        pathfindingTest = new PathfindingTest(drive);
+//        pathfindingTest = new PathfindingTest(drive);
 
         // ControlBoard must be initialized last
         controlboard = new ControlBoard(this);
@@ -80,7 +88,7 @@ public class RobotContainer {
         autos.sort(Comparator.comparing(AutoEntry::name, String.CASE_INSENSITIVE_ORDER));
         autoSelector = new LoggedDashboardChooser<>("Auto Selector");
         autoSelector.addDefaultOption("None", Commands.none());
-        autoSelector.addOption("Test", Commands.print("Test worked!"));
+        autoSelector.addOption("Test", testAutoCommand());
         for (AutoEntry auto : autos)
             autoSelector.addOption(auto.name(), auto.cmd());
 
@@ -100,6 +108,39 @@ public class RobotContainer {
     }
 
     private static final record AutoEntry(String name, Command cmd) {}
+
+    private Command testAutoCommand() {
+        Pose2d coralStation = new Pose2d(
+                new Translation2d(1.775/2, 1.289/2),
+                FieldPositions.getBlueCoralStationAngle(FieldPositions.CoralStation.RIGHT)
+        );
+        Pose2d coralStation2 = new Pose2d(
+                new Translation2d(1.775/2, 8.052 - 1.289/2),
+                FieldPositions.getBlueCoralStationAngle(FieldPositions.CoralStation.LEFT)
+        );
+
+        PathConstraints constraints = new PathConstraints(
+                Constants.kDriveMaxAchievableSpeed,
+                Constants.kDriveControlMaxAccel,
+                Units.rotationsToRadians(Constants.kDriveControlMaxTurnSpeed),
+                Units.rotationsToRadians(Constants.kDriveControlMaxTurnSpeed / 0.3));
+
+        List<Command> sequence = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            sequence.add(AutoBuilderExt.pathfindToClosestPoseFlipped(
+                    PathEnvironments.kFieldWithAutoGamePieces,
+                    List.of(coralStation, coralStation2),
+                    constraints
+            ));
+            sequence.add(AutoBuilderExt.pathfindToPoseFlipped(
+                    PathEnvironments.kFieldWithAutoGamePieces,
+                    FieldPositions.getBlueReefScoringTarget(i),
+                    constraints
+            ));
+        }
+
+        return Commands.sequence(sequence.toArray(new Command[0]));
+    }
 
     private static List<AutoEntry> buildPathPlannerAutos() {
         if (!AutoBuilder.isConfigured()) {

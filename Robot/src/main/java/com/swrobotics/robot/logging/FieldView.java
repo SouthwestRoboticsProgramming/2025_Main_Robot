@@ -19,6 +19,7 @@ public final class FieldView {
     public static final FieldObject2d pathPlannerSetpoint = field.getObject("PathPlanner setpoint");
 
     public static final FieldObject2d pathfindingGoal = field.getObject("Pathfinding goal");
+    public static final FieldObject2d pathfindingGoal2 = field.getObject("Pathfinding goal 2");
     public static final FieldObject2d pathfindingPath = field.getObject("Pathfinding path");
 
     public static final DebugGraphics pathfindingDebug = new DebugGraphics(

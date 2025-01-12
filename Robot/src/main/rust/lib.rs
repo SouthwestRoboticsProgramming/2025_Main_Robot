@@ -91,24 +91,32 @@ pub extern "system" fn Java_com_swrobotics_lib_pathfinding_PathfindingJNI_findPa
     env_handle: jlong,
     start_x: jdouble,
     start_y: jdouble,
-    goal_x: jdouble,
-    goal_y: jdouble,
+    goals_data: JDoubleArray<'local>,
 ) -> jdoubleArray {
     let environment = unsafe { &mut *(env_handle as *mut pathfinding::Environment) };
 
     let start = Vec2f::new(start_x, start_y);
-    let goal = Vec2f::new(goal_x, goal_y);
 
-    let path = environment
-        .find_path(start, goal)
-        .map(|result| pathfinding::to_bezier(&result, start, goal));
+    let goals_elems = unsafe {
+        env.get_array_elements(&goals_data, jni::objects::ReleaseMode::NoCopyBack)
+            .unwrap()
+    };
 
-    // println!("Path: {path:?}");
+    let goals = goals_elems
+        .iter()
+        .tuples()
+        .map(|(&x, &y)| Vec2f::new(x, y))
+        .collect_vec();
 
-    match path {
-        Some(path) => {
-            let mut values = Vec::with_capacity(path.len() * 2);
-            for vertex in path {
+    let result = environment.find_path(start, goals);
+
+    match result {
+        Some(result) => {
+            let bezier = pathfinding::to_bezier(&result, start);
+
+            let mut values = Vec::with_capacity(bezier.len() * 2 + 1);
+            values.push(result.goal_idx as f64);
+            for vertex in bezier {
                 values.push(vertex.x);
                 values.push(vertex.y);
             }

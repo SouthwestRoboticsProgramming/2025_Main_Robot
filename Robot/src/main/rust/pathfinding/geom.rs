@@ -454,7 +454,7 @@ pub struct PathArc {
 
 struct SearchNode {
     pub context: ArcContext,
-    pub is_goal: bool,
+    pub goal: Option<(Vec2f, Option<Vec2f>, usize)>,
 
     // TODO: Should probably not allocate every node on heap
     pub came_from: Option<Rc<SearchNode>>,
@@ -522,7 +522,9 @@ fn calc_turn_cost(incoming_angle: f64, outgoing_angle: f64, radius: f64, dir: Wi
 
 pub struct PathResult {
     pub moved_start: Option<Vec2f>,
-    pub moved_goal: Option<Vec2f>,
+    pub goal: Vec2f,
+    pub original_goal: Option<Vec2f>,
+    pub goal_idx: usize,
     pub path: Vec<PathArc>,
 }
 
@@ -739,61 +741,60 @@ impl Environment {
         out
     }
 
-    pub fn find_path(&self, mut start: Vec2f, mut goal: Vec2f) -> Option<PathResult> {
-        // Check if the goal is unreachable, since if we try to search for unreachable
-        // goal it will loop forever
+    pub fn find_path(&self, mut start: Vec2f, goals_in: Vec<Vec2f>) -> Option<PathResult> {
         let mut tangents: ArrayVec<_, 2> = ArrayVec::new();
-        let mut goal_changed = false;
-        let mut goal_reachable = false;
-        'goal_loop: for _ in 0..MAX_UNSTUCK_ATTEMPTS {
-            for (arc_id, arc) in self.arcs.iter().enumerate() {
-                self.find_point_to_arc_tangents(goal, arc, arc_id, &mut tangents);
-                if !tangents.is_empty() {
-                    goal_reachable = true;
-                    break 'goal_loop;
+
+        // TODO: This check fails when there's no arcs in the environment.
+        //   1. Measure performance difference between checking with this and with EnvPolygons
+        //   2. Either always use EnvPolygons or only when empty
+        let mut goals = Vec::new();
+        for (goal_idx, mut goal) in goals_in.into_iter().enumerate() {
+            let original_goal = goal;
+
+            // Check if the goal is unreachable, since if we try to search for unreachable
+            // goal it will loop forever
+            let mut goal_changed = false;
+            let mut goal_reachable = false;
+            'goal_loop: for _ in 0..MAX_UNSTUCK_ATTEMPTS {
+                for (arc_id, arc) in self.arcs.iter().enumerate() {
+                    self.find_point_to_arc_tangents(goal, arc, arc_id, &mut tangents);
+                    if !tangents.is_empty() {
+                        goal_reachable = true;
+                        break 'goal_loop;
+                    }
+                }
+
+                match self.move_towards_safety(goal) {
+                    Some(new_goal) => {
+                        goal = new_goal;
+                        goal_changed = true;
+                    }
+                    None => return None,
                 }
             }
 
-            match self.move_towards_safety(goal) {
-                Some(new_goal) => {
-                    goal = new_goal;
-                    goal_changed = true;
-                }
-                None => return None,
+            if goal_reachable {
+                goals.push(if goal_changed {
+                    (goal, Some(original_goal), goal_idx)
+                } else {
+                    (goal, None, goal_idx)
+                });
             }
         }
-        if !goal_reachable {
+        if goals.is_empty() {
             return None;
-        }
-
-        // Check straight-line case first, very likely to be possible
-        if self.is_segment_passable(
-            &Segment {
-                from: start,
-                to: goal,
-            },
-            None,
-            None,
-        ) {
-            // Straight line from start to goal
-            return Some(PathResult {
-                moved_start: None,
-                moved_goal: if goal_changed { Some(goal) } else { None },
-                path: Vec::new(),
-            });
         }
 
         let mut frontier = BinaryHeap::new();
         let mut start_changed = false;
         for _ in 0..MAX_UNSTUCK_ATTEMPTS {
-            // Check if we are inside the field bounds
             for (arc_id, arc) in self.arcs.iter().enumerate() {
                 self.find_point_to_arc_tangents(start, &arc, arc_id, &mut tangents);
                 for tangent in &tangents {
                     let cost = tangent.segment.length();
                     frontier.push(Rc::new(SearchNode {
                         context: ArcContext::new(arc_id, tangent.arc_dir),
-                        is_goal: false,
+                        goal: None,
                         came_from: None,
                         incoming_angle: tangent.arc_angle,
                         parent_outgoing_angle: 0.0,
@@ -801,6 +802,29 @@ impl Environment {
                     }));
                 }
             }
+
+            for &(goal, original_goal, goal_idx) in &goals {
+                if self.is_segment_passable(
+                    &Segment {
+                        from: start,
+                        to: goal,
+                    },
+                    None,
+                    None,
+                ) {
+                    let distance_cost = start.distance_sq(goal).sqrt();
+
+                    frontier.push(Rc::new(SearchNode {
+                        context: ArcContext(0),
+                        goal: Some((goal, original_goal, goal_idx)),
+                        came_from: None,
+                        incoming_angle: 0.0,
+                        parent_outgoing_angle: 0.0,
+                        cost_so_far: distance_cost,
+                    }));
+                }
+            }
+
             if !frontier.is_empty() {
                 break;
             }
@@ -817,25 +841,6 @@ impl Environment {
         if frontier.is_empty() {
             // Couldn't find a way back to safe area
             return None;
-        }
-
-        // Try straight line again if it changed
-        if start_changed {
-            if self.is_segment_passable(
-                &Segment {
-                    from: start,
-                    to: goal,
-                },
-                None,
-                None,
-            ) {
-                // Straight line from start to goal
-                return Some(PathResult {
-                    moved_start: if start_changed { Some(start) } else { None },
-                    moved_goal: if goal_changed { Some(goal) } else { None },
-                    path: Vec::new(),
-                });
-            }
         }
 
         fn can_leave_from(arc: &Arc, arc_dir: WindingDir, in_angle: f64, out_angle: f64) -> bool {
@@ -860,7 +865,7 @@ impl Environment {
         }
 
         while let Some(current) = frontier.pop() {
-            if current.is_goal {
+            if let Some((goal, original_goal, goal_idx)) = current.goal {
                 let mut node = current;
                 let mut out = Vec::new();
                 loop {
@@ -885,7 +890,9 @@ impl Environment {
 
                 return Some(PathResult {
                     moved_start: if start_changed { Some(start) } else { None },
-                    moved_goal: if goal_changed { Some(goal) } else { None },
+                    goal,
+                    original_goal,
+                    goal_idx,
                     path: out,
                 });
             }
@@ -915,7 +922,7 @@ impl Environment {
 
                     frontier.push(Rc::new(SearchNode {
                         context: edge.dest,
-                        is_goal: false,
+                        goal: None,
                         came_from: Some(current.clone()),
                         incoming_angle: edge.to_angle,
                         parent_outgoing_angle: edge.from_angle,
@@ -924,37 +931,39 @@ impl Environment {
                 }
             }
 
-            self.find_point_to_arc_tangents(goal, current_arc, current_arc_id, &mut tangents);
-            for tangent in &tangents {
-                if current_dir == tangent.arc_dir {
-                    continue;
+            for &(goal, original_goal, goal_idx) in &goals {
+                self.find_point_to_arc_tangents(goal, current_arc, current_arc_id, &mut tangents);
+                for tangent in &tangents {
+                    if current_dir == tangent.arc_dir {
+                        continue;
+                    }
+
+                    if !can_leave_from(
+                        current_arc,
+                        current_dir,
+                        current.incoming_angle,
+                        tangent.arc_angle,
+                    ) {
+                        continue;
+                    }
+
+                    let distance_cost = tangent.segment.length();
+                    let turn_cost = calc_turn_cost(
+                        current.incoming_angle,
+                        tangent.arc_angle,
+                        current_arc.radius,
+                        current_dir,
+                    );
+
+                    frontier.push(Rc::new(SearchNode {
+                        context: ArcContext(0),
+                        goal: Some((goal, original_goal, goal_idx)),
+                        came_from: Some(current.clone()),
+                        incoming_angle: 0.0,
+                        parent_outgoing_angle: tangent.arc_angle,
+                        cost_so_far: current.cost_so_far + distance_cost + turn_cost,
+                    }));
                 }
-
-                if !can_leave_from(
-                    current_arc,
-                    current_dir,
-                    current.incoming_angle,
-                    tangent.arc_angle,
-                ) {
-                    continue;
-                }
-
-                let distance_cost = tangent.segment.length();
-                let turn_cost = calc_turn_cost(
-                    current.incoming_angle,
-                    tangent.arc_angle,
-                    current_arc.radius,
-                    current_dir,
-                );
-
-                frontier.push(Rc::new(SearchNode {
-                    context: ArcContext(0),
-                    is_goal: true,
-                    came_from: Some(current.clone()),
-                    incoming_angle: 0.0,
-                    parent_outgoing_angle: tangent.arc_angle,
-                    cost_so_far: current.cost_so_far + distance_cost + turn_cost,
-                }));
             }
         }
 

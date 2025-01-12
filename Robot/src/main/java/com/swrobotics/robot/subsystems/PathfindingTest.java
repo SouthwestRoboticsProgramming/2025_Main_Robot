@@ -2,9 +2,10 @@ package com.swrobotics.robot.subsystems;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
+import com.swrobotics.lib.pathfinding.PathResult;
+import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.logging.FieldView;
-import com.swrobotics.lib.pathfinding.*;
 import com.swrobotics.robot.config.PathEnvironments;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class PathfindingTest extends SubsystemBase {
@@ -29,6 +31,7 @@ public final class PathfindingTest extends SubsystemBase {
        PathEnvironments.kFieldWithAutoGamePieces.getDebug().plot(FieldView.pathfindingDebug);
 
         FieldView.pathfindingGoal.setPose(new Pose2d(new Translation2d(2, 2), new Rotation2d()));
+        FieldView.pathfindingGoal2.setPose(new Pose2d(new Translation2d(2, 3), new Rotation2d()));
     }
 
     public Command getFollowCommand() {
@@ -41,33 +44,35 @@ public final class PathfindingTest extends SubsystemBase {
                 Units.rotationsToRadians(Constants.kDriveControlMaxTurnSpeed),
                 Units.rotationsToRadians(Constants.kDriveControlMaxTurnSpeed / 0.3));
 
-        return Commands.sequence(
-            Commands.runOnce(() -> PathPlannerPathfinder.setEnvironment(PathEnvironments.kFieldWithAutoGamePieces)),
-            AutoBuilder.pathfindToPose(goal, constraints)
+        return AutoBuilderExt.pathfindToPose(
+                PathEnvironments.kFieldWithAutoGamePieces,
+                goal,
+                constraints
         );
     }
 
     @Override
     public void periodic() {
         Pose2d goal = FieldView.pathfindingGoal.getPose();
-        Translation2d goalPos = goal.getTranslation();
+        Pose2d goal2 = FieldView.pathfindingGoal2.getPose();
 
         double startTime = Timer.getFPGATimestamp();
-        List<Translation2d> path = PathEnvironments.kFieldWithAutoGamePieces
-               .findPath(drive.getEstimatedPose().getTranslation(), goalPos);
+        PathResult result = PathEnvironments.kFieldWithAutoGamePieces
+               .findPathToClosest(drive.getEstimatedPose().getTranslation(), Arrays.asList(goal.getTranslation(), goal2.getTranslation()));
 
         double endTime = Timer.getFPGATimestamp();
         Logger.recordOutput("Pathfinding/Calc time (ms)", (endTime - startTime) * 1000);
 
-        if (path != null) {
+        if (result != null) {
+            List<Translation2d> bezier = result.bezierPoints();
             List<Pose2d> poses = new ArrayList<>();
 
             // Visualize Bezier curves
-            Translation2d p0 = path.get(0);
-            for (int i = 1; i < path.size(); i += 3) {
-                Translation2d p1 = path.get(i);
-                Translation2d p2 = path.get(i + 1);
-                Translation2d p3 = path.get(i + 2);
+            Translation2d p0 = bezier.get(0);
+            for (int i = 1; i < bezier.size(); i += 3) {
+                Translation2d p1 = bezier.get(i);
+                Translation2d p2 = bezier.get(i + 1);
+                Translation2d p3 = bezier.get(i + 2);
 
                 // Add poses at a few points along the curve to approximate it visually
                 for (int j = i == 1 ? 0 : 1; j <= 10; j++) {
