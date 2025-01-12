@@ -1,5 +1,6 @@
 package com.swrobotics.lib.input;
 
+import com.swrobotics.lib.utils.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 import java.util.function.Supplier;
@@ -8,13 +9,10 @@ import java.util.function.Supplier;
  * Represents a D-pad (POV) input on a controller. A D-pad can act as four independent buttons, two
  * axes, or an angle input.
  */
-public final class InputDpad implements InputElement {
+public final class InputDpad {
     private final Supplier<Integer> getter;
     public final InputButton up, down, left, right;
     public final InputAxis vertical, horizontal;
-
-    private int angleDeg;
-    private Rotation2d angle;
 
     /**
      * Creates a new D-pad input that reads its value from a provided getter function. The getter
@@ -26,17 +24,19 @@ public final class InputDpad implements InputElement {
     public InputDpad(Supplier<Integer> getter) {
         this.getter = getter;
 
-        angleDeg = getter.get();
-        angle = calcAngle();
+        up = new InputButton(() -> isDirectionDown(0, 45, 315));
+        down = new InputButton(() -> isDirectionDown(135, 180, 225));
+        left = new InputButton(() -> isDirectionDown(225, 270, 315));
+        right = new InputButton(() -> isDirectionDown(45, 90, 135));
 
-        up = new InputButton(() -> angleDeg == 0 || angleDeg == 45 || angleDeg == 315);
-        down = new InputButton(() -> angleDeg == 135 || angleDeg == 180 || angleDeg == 225);
-        left = new InputButton(() -> angleDeg == 225 || angleDeg == 270 || angleDeg == 315);
-        right = new InputButton(() -> angleDeg == 45 || angleDeg == 90 || angleDeg == 135);
-
-        vertical = new InputAxis(() -> up.isDown() ? 1.0 : (down.isDown() ? -1.0 : 0.0), 0);
+        vertical = new InputAxis(() -> up.get() ? 1.0 : (down.get() ? -1.0 : 0.0), 0);
         horizontal =
-                new InputAxis(() -> right.isDown() ? 1.0 : (left.isDown() ? -1.0 : 0.0), 0);
+                new InputAxis(() -> right.get() ? 1.0 : (left.get() ? -1.0 : 0.0), 0);
+    }
+
+    private boolean isDirectionDown(int angle1, int angle2, int angle3) {
+        int angleDeg = getter.get();
+        return angleDeg == angle1 || angleDeg == angle2 || angleDeg == angle3;
     }
 
     /**
@@ -45,34 +45,20 @@ public final class InputDpad implements InputElement {
      * @return pressed
      */
     public boolean isPressed() {
-        return angleDeg >= 0;
+        return getter.get() >= 0;
     }
 
     /**
-     * Gets the angle that the D-pad is currently pressed. Zero represents up.
+     * Gets the angle that the D-pad is currently pressed. Zero represents
+     * right.
      *
      * @return angle, ccw positive
      */
     public Rotation2d getAngle() {
-        return angle;
-    }
+        int angle = getter.get();
+        if (angle < 0)
+            angle = 0;
 
-    // Calculates the angle based on the POV measurement
-    private Rotation2d calcAngle() {
-        return isPressed() ? Rotation2d.fromDegrees(-angleDeg) : new Rotation2d(0);
-    }
-
-    @Override
-    public void update() {
-        up.update();
-        down.update();
-        left.update();
-        right.update();
-
-        vertical.update();
-        horizontal.update();
-
-        angleDeg = getter.get();
-        angle = calcAngle();
+        return Rotation2d.fromDegrees(MathUtil.wrap(angle + 90, -180, 180));
     }
 }

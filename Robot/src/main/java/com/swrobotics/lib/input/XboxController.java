@@ -9,9 +9,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /** Represents an Xbox controller attached to the driver station. */
-public final class XboxController extends InputSource {
+public final class XboxController {
     private final edu.wpi.first.wpilibj.XboxController xbox;
-    private final List<InputElement> elements;
     private final double deadband;
 
     // All the inputs on the Xbox controller
@@ -55,26 +54,6 @@ public final class XboxController extends InputSource {
         rightTrigger = new InputAxis(xbox::getRightTriggerAxis, deadband);
 
         dpad = new InputDpad(xbox::getPOV);
-
-        elements =
-                Arrays.asList(
-                        a,
-                        b,
-                        x,
-                        y,
-                        back,
-                        start,
-                        leftStickButton,
-                        rightStickButton,
-                        leftBumper,
-                        rightBumper,
-                        leftStickX,
-                        leftStickY,
-                        rightStickX,
-                        rightStickY,
-                        leftTrigger,
-                        rightTrigger,
-                        dpad);
     }
 
     /**
@@ -109,10 +88,5 @@ public final class XboxController extends InputSource {
      */
     public Translation2d getRightStick() {
         return MathUtil.deadband2d(rightStickX.getRaw(), rightStickY.getRaw(), deadband);
-    }
-
-    @Override
-    protected Iterable<InputElement> getElements() {
-        return elements;
     }
 }

@@ -97,7 +97,7 @@ public final class ControlBoard extends SubsystemBase {
             FieldView.pathfindingDebug.plotLines(points, Color.kOrange);
         });
 
-        new Trigger(driver.b::isDown)
+        driver.b.trigger()
                 .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(
                         robot.drive,
                         this::getDriveTranslation,
@@ -139,9 +139,5 @@ public final class ControlBoard extends SubsystemBase {
     private double getDriveRotation() {
         double input = MathUtil.powerWithSign(-driver.rightStickX.get(), Constants.kDriveControlTurnPower);
         return Units.rotationsToRadians(input * Constants.kDriveControlMaxTurnSpeed);
-    }
-
-    @Override
-    public void periodic() {
     }
 }
