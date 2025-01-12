@@ -1,6 +1,5 @@
 package com.swrobotics.robot.control;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.input.XboxController;
 import com.swrobotics.lib.net.NTBoolean;
@@ -8,6 +7,7 @@ import com.swrobotics.lib.net.NTEntry;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
 import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
+import com.swrobotics.robot.commands.DriveCommands;
 import com.swrobotics.robot.commands.LightCommands;
 import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
@@ -16,6 +16,7 @@ import com.swrobotics.robot.subsystems.pathfinding.PathEnvironments;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -26,7 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class ControlBoard extends SubsystemBase {
-    /**
+    /*
      * Control mapping:
      *
      * Driver:
@@ -52,37 +53,56 @@ public final class ControlBoard extends SubsystemBase {
         driver = new XboxController(Constants.kDriverControllerPort, Constants.kDeadband);
         operator = new XboxController(Constants.kOperatorControllerPort, Constants.kDeadband);
 
+        driveFilter = new DriveAccelFilter(Constants.kDriveControlMaxAccel);
+
+        configureControls();
+    }
+
+    private void configureControls() {
         // Gyro reset buttons
         driver.start.onReleased(() -> robot.drive.resetRotation(new Rotation2d()));
         driver.back.onReleased(() -> robot.drive.resetRotation(new Rotation2d())); // Two buttons to reset gyro so the driver can't get confused
+
+        robot.drive.setDefaultCommand(DriveCommands.driveFieldRelative(
+                robot.drive,
+                this::getDriveTranslation,
+                this::getDriveRotation
+        ));
+
+        new Trigger(CHARACTERISE_WHEEL_RADIUS::get).whileTrue(new CharacterizeWheelsCommand(robot.drive));
+
+        // Endgame Alert
+        new Trigger(
+                () ->
+                        DriverStation.isTeleopEnabled()
+                                && DriverStation.getMatchTime() > 0
+                                && DriverStation.getMatchTime() <= Constants.kEndgameAlertTime)
+                .onTrue(RumblePatternCommands.endgameAlert(driver, 0.75)
+                        .alongWith(RumblePatternCommands.endgameAlert(operator, 0.75)));
+
+        // Everything past here is for testing and should eventually be removed
 
         // Test LEDs
         driver.a.onPressed(LightCommands.blink(robot.lights, Color.kCyan));
         driver.a.onHeld(LightCommands.blink(robot.lights, Color.kYellow));
 
-        // Endgame Alert
-        new Trigger(
-            () ->
-                DriverStation.isTeleopEnabled()
-                    && DriverStation.getMatchTime() > 0
-                    && DriverStation.getMatchTime() <= Constants.kEndgameAlertTime)
-        .onTrue(RumblePatternCommands.endgameAlert(driver, 0.75)
-                .alongWith(RumblePatternCommands.endgameAlert(operator, 0.75)));
-
-        driver.b.onPressed(RumblePatternCommands.endgameAlert(driver, 0.75));
-
-        driveFilter = new DriveAccelFilter(Constants.kDriveControlMaxAccel);
-
-        new Trigger(CHARACTERISE_WHEEL_RADIUS::get).whileTrue(new CharacterizeWheelsCommand(robot.drive));
+//        driver.b.onPressed(RumblePatternCommands.endgameAlert(driver, 0.75));
 
         driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
-    
+
         driver.y.onPressed(() -> {
             Translation2d prev = robot.drive.getEstimatedPose().getTranslation();
             List<Translation2d> points = PathEnvironments.kFieldWithAutoGamePieces.debugFindSafe(prev);
             points.add(0, prev);
             FieldView.pathfindingDebug.plotLines(points, Color.kOrange);
         });
+
+        new Trigger(driver.b::isDown)
+                .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(
+                        robot.drive,
+                        this::getDriveTranslation,
+                        () -> Rotation2d.fromDegrees(90)
+                ));
     }
 
     /**
@@ -114,25 +134,14 @@ public final class ControlBoard extends SubsystemBase {
     }
 
     /**
-     * @return rotation per second input for the drive base
+     * @return radians per second input for the drive base
      */
-    private Rotation2d getDriveRotation() {
+    private double getDriveRotation() {
         double input = MathUtil.powerWithSign(-driver.rightStickX.get(), Constants.kDriveControlTurnPower);
-        return Rotation2d.fromRotations(input * Constants.kDriveControlMaxTurnSpeed);
+        return Units.rotationsToRadians(input * Constants.kDriveControlMaxTurnSpeed);
     }
 
     @Override
     public void periodic() {
-        if (!DriverStation.isTeleop()) {
-            return;
-        }
-
-        Translation2d translation = getDriveTranslation();
-        Rotation2d rotation = getDriveRotation();
-
-        robot.drive.setControl(new SwerveRequest.FieldCentric()
-                .withVelocityX(translation.getX())
-                .withVelocityY(translation.getY())
-                .withRotationalRate(rotation.getRadians()));
     }
 }

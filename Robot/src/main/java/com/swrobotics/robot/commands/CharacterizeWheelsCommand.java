@@ -23,6 +23,7 @@ public final class CharacterizeWheelsCommand extends Command {
 
     public CharacterizeWheelsCommand(SwerveDriveSubsystem drive) {
         this.drive = drive;
+        addRequirements(drive);
     }
 
     @Override

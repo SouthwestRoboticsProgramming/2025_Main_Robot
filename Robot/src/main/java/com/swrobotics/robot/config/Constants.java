@@ -58,6 +58,13 @@ public final class Constants {
     public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Auto/Turn PID/kP", 9).setPersistent();
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Auto/Turn PID/kD", 0.5).setPersistent();
 
+    public static final NTEntry<Double> kSnapMaxSpeed = new NTDouble("Snap/Max Speed (m/s)", 2).setPersistent();
+    public static final NTEntry<Double> kSnapMaxTurnSpeed = new NTDouble("Snap/Max Turn Speed (rot/s)", 1).setPersistent();
+    public static final NTEntry<Double> kSnapDriveKp = new NTDouble("Snap/Drive kP", 8).setPersistent();
+    public static final NTEntry<Double> kSnapDriveKd = new NTDouble("Snap/Drive kD", 0).setPersistent();
+    public static final NTEntry<Double> kSnapTurnKp = new NTDouble("Snap/Turn kP", 9).setPersistent();
+    public static final NTEntry<Double> kSnapTurnKd = new NTDouble("Snap/Turn kD", 0.5).setPersistent();
+
     // Drive
     public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
 
