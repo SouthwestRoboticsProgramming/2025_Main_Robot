@@ -18,7 +18,7 @@ public final class SnapTargets {
     static {
         Translation2d center = new Translation2d(kReefCenterX, kReefCenterY);
 
-        double offsetX = -kReefApothem - Constants.kFrameLengthWithBumpers / 2;
+        double offsetX = -kReefApothem - Constants.kRobotLength / 2;
         Translation2d offset1 = new Translation2d(offsetX, kReefBranchSpacing / 2);
         Translation2d offset2 = new Translation2d(offsetX, -kReefBranchSpacing / 2);
 

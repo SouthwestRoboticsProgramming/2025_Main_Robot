@@ -33,11 +33,11 @@ public final class Constants {
     // Robot dimensions
     public static final double kFrameLength = Units.inchesToMeters(30); // m
     public static final double kFrameWidth = Units.inchesToMeters(27); // m
-    public static final double kBumperThickness = Units.inchesToMeters(3); // FIXME
-    public static final double kFrameLengthWithBumpers = kFrameLength + kBumperThickness * 2;
-    public static final double kFrameWidthWithBumpers = kFrameWidth + kBumperThickness * 2;
 
-    public static final double kRobotRadius = Math.hypot(kFrameLengthWithBumpers/2, kFrameWidthWithBumpers/2);
+    public static final double kBumperThickness = Units.inchesToMeters(3); // FIXME
+    public static final double kRobotLength = kFrameLength + kBumperThickness * 2;
+    public static final double kRobotWidth = kFrameWidth + kBumperThickness * 2;
+    public static final double kRobotRadius = Math.hypot(kRobotLength /2, kRobotWidth /2);
     public static final double kRobotMass = Units.lbsToKilograms(122 + 14 + 14);
     // Approximation of robot as uniform cuboid
     // See https://sleipnirgroup.github.io/Choreo/usage/estimating-moi/
