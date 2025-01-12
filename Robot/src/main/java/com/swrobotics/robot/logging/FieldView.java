@@ -1,5 +1,6 @@
 package com.swrobotics.robot.logging;
 
+import com.swrobotics.lib.utils.DebugGraphics;
 import com.swrobotics.robot.config.Constants;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;

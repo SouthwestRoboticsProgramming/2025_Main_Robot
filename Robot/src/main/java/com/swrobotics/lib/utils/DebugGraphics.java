@@ -1,4 +1,4 @@
-package com.swrobotics.robot.logging;
+package com.swrobotics.lib.utils;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * VERY inefficient way to draw arbitrary lines to a Mechanism2d. Should only
- * be used in simulation.
+ * be used in simulation as it causes issues with most dashboards.
  */
 public final class DebugGraphics {
     private final Mechanism2d mechanism;

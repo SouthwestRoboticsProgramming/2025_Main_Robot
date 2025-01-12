@@ -2,7 +2,7 @@ package com.swrobotics.lib.pathfinding;
 
 import com.swrobotics.lib.utils.DoubleInput;
 import com.swrobotics.lib.utils.MathUtil;
-import com.swrobotics.robot.logging.DebugGraphics;
+import com.swrobotics.lib.utils.DebugGraphics;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.util.Color;
 
