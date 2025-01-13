@@ -16,10 +16,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
-import java.util.function.BiConsumer;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 public final class AutoBuilderExt {
     private static PathfinderExt pathfinder;
@@ -60,12 +57,13 @@ public final class AutoBuilderExt {
         return pathfinder;
     }
 
-    public static Command pathfindToClosestPose(PathEnvironment env, List<Pose2d> poses, PathConstraints constraints, double goalEndVelocity) {
+    public static PathfindingCommandExt pathfindToClosestPose(PathEnvironment env, List<Pose2d> poses, PathConstraints constraints, double goalEndVelocity, IntConsumer goalSelectedConsumer) {
         return new PathfindingCommandExt(
                 env,
                 poses,
                 constraints,
                 goalEndVelocity,
+                goalSelectedConsumer,
                 poseSupplier,
                 robotRelativeSpeedsSupplier,
                 output,
@@ -75,29 +73,29 @@ public final class AutoBuilderExt {
         );
     }
 
-    public static Command pathfindToClosestPoseFlipped(PathEnvironment env, List<Pose2d> poses, PathConstraints constraints, double goalEndVelocity) {
+    public static Command pathfindToClosestPoseFlipped(PathEnvironment env, List<Pose2d> poses, PathConstraints constraints, double goalEndVelocity, IntConsumer goalSelectedConsumer) {
         List<Pose2d> flipped = new ArrayList<>(poses.size());
         for (Pose2d pose : poses) {
             flipped.add(FlippingUtil.flipFieldPose(pose));
         }
 
         return Commands.either(
-                pathfindToClosestPose(env, flipped, constraints, goalEndVelocity),
-                pathfindToClosestPose(env, poses, constraints, goalEndVelocity),
+                pathfindToClosestPose(env, flipped, constraints, goalEndVelocity, goalSelectedConsumer),
+                pathfindToClosestPose(env, poses, constraints, goalEndVelocity, goalSelectedConsumer),
                 AutoBuilder::shouldFlip
         );
     }
 
-    public static Command pathfindToPose(PathEnvironment env, Pose2d pose, PathConstraints constraints) {
+    public static PathfindingCommandExt pathfindToPose(PathEnvironment env, Pose2d pose, PathConstraints constraints) {
         return pathfindToPose(env, pose, constraints, 0);
     }
 
-    public static Command pathfindToPose(PathEnvironment env, Pose2d pose, PathConstraints constraints, double goalEndVelocity) {
-        return pathfindToClosestPose(env, Collections.singletonList(pose), constraints, goalEndVelocity);
+    public static PathfindingCommandExt pathfindToPose(PathEnvironment env, Pose2d pose, PathConstraints constraints, double goalEndVelocity) {
+        return pathfindToClosestPose(env, Collections.singletonList(pose), constraints, goalEndVelocity, null);
     }
 
-    public static Command pathfindToClosestPose(PathEnvironment env, List<Pose2d> poses, PathConstraints constraints) {
-        return pathfindToClosestPose(env, poses, constraints, 0);
+    public static PathfindingCommandExt pathfindToClosestPose(PathEnvironment env, List<Pose2d> poses, PathConstraints constraints, IntConsumer goalSelectedConsumer) {
+        return pathfindToClosestPose(env, poses, constraints, 0, goalSelectedConsumer);
     }
 
     public static Command pathfindToPoseFlipped(PathEnvironment env, Pose2d pose, PathConstraints constraints) {
@@ -105,10 +103,10 @@ public final class AutoBuilderExt {
     }
 
     public static Command pathfindToPoseFlipped(PathEnvironment env, Pose2d pose, PathConstraints constraints, double goalEndVelocity) {
-        return pathfindToClosestPoseFlipped(env, Collections.singletonList(pose), constraints, goalEndVelocity);
+        return pathfindToClosestPoseFlipped(env, Collections.singletonList(pose), constraints, goalEndVelocity, null);
     }
 
-    public static Command pathfindToClosestPoseFlipped(PathEnvironment env, List<Pose2d> poses, PathConstraints constraints) {
-        return pathfindToClosestPoseFlipped(env, poses, constraints, 0);
+    public static Command pathfindToClosestPoseFlipped(PathEnvironment env, List<Pose2d> poses, PathConstraints constraints, IntConsumer goalSelectedConsumer) {
+        return pathfindToClosestPoseFlipped(env, poses, constraints, 0, goalSelectedConsumer);
     }
 }

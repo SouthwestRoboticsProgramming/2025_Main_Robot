@@ -2,6 +2,7 @@ package com.swrobotics.robot;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -125,18 +126,29 @@ public class RobotContainer {
                 Units.rotationsToRadians(Constants.kDriveControlMaxTurnSpeed),
                 Units.rotationsToRadians(Constants.kDriveControlMaxTurnSpeed / 0.3));
 
+        List<Pose2d> remainingScoringPositions = new ArrayList<>();
+
         List<Command> sequence = new ArrayList<>();
+        sequence.add(Commands.runOnce(() -> {
+            for (int i = 0; i < 12; i++) {
+                remainingScoringPositions.add(Constants.kField.flipPoseForAlliance(
+                        FieldPositions.getBlueReefScoringTarget(i)));
+            }
+        }));
         for (int i = 0; i < 12; i++) {
             sequence.add(AutoBuilderExt.pathfindToClosestPoseFlipped(
                     PathEnvironments.kFieldWithAutoGamePieces,
                     List.of(coralStation, coralStation2),
-                    constraints
+                    constraints,
+                    null
             ));
-            sequence.add(AutoBuilderExt.pathfindToPoseFlipped(
-                    PathEnvironments.kFieldWithAutoGamePieces,
-                    FieldPositions.getBlueReefScoringTarget(i),
-                    constraints
-            ));
+            sequence.add(Commands.defer(
+                    () -> AutoBuilderExt.pathfindToClosestPose(
+                        PathEnvironments.kFieldWithAutoGamePieces,
+                        remainingScoringPositions,
+                        constraints,
+                        remainingScoringPositions::remove
+                    ), Collections.singleton(drive)));
         }
 
         return Commands.sequence(sequence.toArray(new Command[0]));

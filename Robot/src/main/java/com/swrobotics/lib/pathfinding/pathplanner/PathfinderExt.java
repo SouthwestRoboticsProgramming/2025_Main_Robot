@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import java.util.List;
 
 public interface PathfinderExt {
+    record Path(PathPlannerPath path, int goalIndex) {}
+
     boolean isNewPathAvailable();
 
     void setEnvironment(PathEnvironment env);
@@ -17,5 +19,5 @@ public interface PathfinderExt {
 
     void setGoalPoses(List<Pose2d> goalPos);
 
-    PathPlannerPath getCurrentPath(PathConstraints pathConstraints, double goalVelocityMPS);
+    Path getCurrentPath(PathConstraints pathConstraints, double goalVelocityMPS);
 }

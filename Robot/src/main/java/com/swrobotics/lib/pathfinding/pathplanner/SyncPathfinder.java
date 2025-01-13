@@ -51,7 +51,7 @@ public final class SyncPathfinder implements PathfinderExt {
     }
 
     @Override
-    public PathPlannerPath getCurrentPath(PathConstraints pathConstraints, double goalVelocityMPS) {
+    public Path getCurrentPath(PathConstraints pathConstraints, double goalVelocityMPS) {
         paramsChanged = false;
 
         List<Translation2d> goalPositions = new ArrayList<>(goalPoses.size());
@@ -95,7 +95,10 @@ public final class SyncPathfinder implements PathfinderExt {
         List<Waypoint> waypoints = bezierPointsToWaypoints(bezierPoints);
         Rotation2d goalRotation = goalPoses.get(goalIndex).getRotation();
 
-        return new PathPlannerPath(waypoints, pathConstraints, null, new GoalEndState(goalVelocityMPS, goalRotation));
+        return new Path(
+                new PathPlannerPath(waypoints, pathConstraints, null, new GoalEndState(goalVelocityMPS, goalRotation)),
+                goalIndex
+        );
     }
 
     public static List<Waypoint> bezierPointsToWaypoints(List<Translation2d> bezier) {
