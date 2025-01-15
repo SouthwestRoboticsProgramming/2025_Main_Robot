@@ -164,7 +164,7 @@ public final class Constants {
     // Coral outtake pivot
     // 60:24 CANcoder
     public static final double kOuttakePivotMotorToArmRatio = 100; // FIXME
-    public static final double kOuttakeCANcoderToArmRatio = 60.0 / 24.0;
+    public static final double kOuttakePivotCANcoderToArmRatio = 60.0 / 24.0;
     public static final NTEntry<Double> kOuttakePivotEncoderOffset = new NTDouble("Coral Outtake/Pivot/Encoder/Offset (rot)", 0).setPersistent();
     public static final NTEntry<Double> kOuttakePivotKg = new NTDouble("Coral Outtake/Pivot/PID/kG", 0).setPersistent();
     public static final NTEntry<Double> kOuttakePivotKs = new NTDouble("Coral Outtake/Pivot/PID/kS", 0).setPersistent();

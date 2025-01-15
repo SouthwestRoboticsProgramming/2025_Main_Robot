@@ -55,11 +55,12 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         positionControl = new MotionMagicVoltage(0)
                 .withEnableFOC(true);
 
+        canCoderPositionStatus.waitForUpdate(1);
         double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
         double armPos = MathUtil.wrap(
                 canCoderPos + Constants.kOuttakePivotEncoderOffset.get(),
                 -0.5, 0.5
-        ) / Constants.kOuttakeCANcoderToArmRatio;
+        ) / Constants.kOuttakePivotCANcoderToArmRatio;
         motor.setPosition(armPos);
 
         Consumer<Double> updateSlot0Configs = (v) -> motor.getConfigurator().apply(getSlot0Configs());

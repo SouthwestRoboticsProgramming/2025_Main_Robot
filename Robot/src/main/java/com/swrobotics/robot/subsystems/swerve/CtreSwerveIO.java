@@ -120,9 +120,9 @@ public class CtreSwerveIO implements SwerveIO {
             CANcoder canCoder = modules[i].getEncoder();
             NTEntry<Double> offset = Constants.kSwerveModuleInfos[i].offset();
 
-            double position = canCoder
-                    .getAbsolutePosition(true)
-                    .getValueAsDouble();
+            StatusSignal<Angle> canCoderPos = canCoder.getAbsolutePosition();
+            canCoderPos.waitForUpdate(1);
+            double position = canCoderPos.getValueAsDouble();
 
             offset.set(offset.get() - position);
             canCoder.getConfigurator().apply(new MagnetSensorConfigs().withMagnetOffset(offset.get()));
