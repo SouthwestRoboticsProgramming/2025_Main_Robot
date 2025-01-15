@@ -132,6 +132,7 @@ public class RobotContainer {
 
         List<Command> sequence = new ArrayList<>();
         sequence.add(Commands.runOnce(() -> {
+            remainingScoringPositions.clear();
             for (int i = 0; i < 12; i++) {
                 remainingScoringPositions.add(Constants.kField.flipPoseForAlliance(
                         FieldPositions.getBlueReefScoringTarget(i)));
