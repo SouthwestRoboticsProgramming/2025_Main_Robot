@@ -22,7 +22,7 @@ public final class LightsSubsystem extends SubsystemBase {
 
     public LightsSubsystem(RobotContainer robot) {
         this.robot = robot;
-        leds = new AddressableLED(IOAllocation.RIO.PWM_LEDS);
+        leds = new AddressableLED(IOAllocation.RIO.kPWM_LEDs);
         leds.setLength(Constants.kLedStripLength);
 
         data = new AddressableLEDBuffer(Constants.kLedStripLength);

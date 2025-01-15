@@ -35,12 +35,12 @@ public final class ElevatorIOReal implements ElevatorIO {
         config.Slot0 = getSlot0Configs();
         config.MotionMagic = getMotionMagicConfigs();
 
-        motor1 = IOAllocation.CAN.ELEVATOR_MOTOR_1.createTalonFX();
-        motor2 = IOAllocation.CAN.ELEVATOR_MOTOR_2.createTalonFX();
+        motor1 = IOAllocation.CAN.kElevatorMotor1.createTalonFX();
+        motor2 = IOAllocation.CAN.kElevatorMotor2.createTalonFX();
         motor1.getConfigurator().apply(config);
         motor2.getConfigurator().apply(config);
 
-        motor2.setControl(new Follower(IOAllocation.CAN.ELEVATOR_MOTOR_1.id(), true));
+        motor2.setControl(new Follower(IOAllocation.CAN.kElevatorMotor1.id(), true));
 
         MotorTrackerSubsystem.getInstance().addMotor("Elevator Motor 1", motor1);
         MotorTrackerSubsystem.getInstance().addMotor("Elevator Motor 2", motor2);

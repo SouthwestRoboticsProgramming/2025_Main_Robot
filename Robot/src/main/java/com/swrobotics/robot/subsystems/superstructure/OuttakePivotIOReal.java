@@ -39,8 +39,8 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; // FIXME
 
-        motor = IOAllocation.CAN.OUTTAKE_PIVOT_MOTOR.createTalonFX();
-        canCoder = IOAllocation.CAN.OUTTAKE_PIVOT_ENCODER.createCANcoder();
+        motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
+        canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
         motor.getConfigurator().apply(motorConfig);
         canCoder.getConfigurator().apply(canCoderConfig);
 

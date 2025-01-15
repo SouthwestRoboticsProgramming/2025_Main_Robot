@@ -90,15 +90,15 @@ public final class Constants {
     public static final NTEntry<Double> kBackLeftOffset = new NTDouble("Drive/Modules/Back Left Offset (rot)", 0).setPersistent();
     public static final NTEntry<Double> kBackRightOffset = new NTDouble("Drive/Modules/Back Right Offset (rot)", 0).setPersistent();
     public static final SwerveModuleInfo[] kSwerveModuleInfos = {
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_FL, kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2, Constants.kFrontLeftOffset, "Front Left"),
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_FR, kDriveWheelSpacingX / 2, -kDriveWheelSpacingY / 2, Constants.kFrontRightOffset, "Front Right"),
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BL, -kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2, Constants.kBackLeftOffset, "Back Left"),
-            new SwerveModuleInfo(IOAllocation.CAN.SWERVE_BR, -kDriveWheelSpacingX / 2, -kDriveWheelSpacingY / 2, Constants.kBackRightOffset, "Back Right")
+            new SwerveModuleInfo(IOAllocation.CAN.kSwerveFL, kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2, Constants.kFrontLeftOffset, "Front Left"),
+            new SwerveModuleInfo(IOAllocation.CAN.kSwerveFR, kDriveWheelSpacingX / 2, -kDriveWheelSpacingY / 2, Constants.kFrontRightOffset, "Front Right"),
+            new SwerveModuleInfo(IOAllocation.CAN.kSwerveBL, -kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2, Constants.kBackLeftOffset, "Back Left"),
+            new SwerveModuleInfo(IOAllocation.CAN.kSwerveBR, -kDriveWheelSpacingX / 2, -kDriveWheelSpacingY / 2, Constants.kBackRightOffset, "Back Right")
     };
 
     public static final SwerveDrivetrainConstants kDrivetrainConstants = new SwerveDrivetrainConstants()
-            .withCANBusName(IOAllocation.CAN.SWERVE_BUS)
-            .withPigeon2Id(IOAllocation.CAN.PIGEON2.id())
+            .withCANBusName(IOAllocation.CAN.kSwerveBus)
+            .withPigeon2Id(IOAllocation.CAN.kPigeon2.id())
             .withPigeon2Configs(new Pigeon2Configuration());
     public static final SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> kModuleConstantsFactory =
             new SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>()
