@@ -254,5 +254,8 @@ public class PathfindingCommandExt extends Command {
         }
 
         PathPlannerLogging.logActivePath(null);
+
+        // Discard trajectory so we run the pathfinder again next command execution
+        currentTrajectory = null;
     }
 }
