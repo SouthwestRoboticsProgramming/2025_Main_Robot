@@ -7,6 +7,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.swrobotics.lib.field.FieldInfo;
+import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
 import com.swrobotics.lib.pathfinding.pathplanner.SyncPathfinder;
 import com.swrobotics.robot.config.Constants;
@@ -27,6 +28,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
 public final class SwerveDriveSubsystem extends SubsystemBase {
+    private static final NTBoolean CALIBRATE = new NTBoolean("Drive/Modules/Calibrate", false);
+
     private final SwerveIO io;
     private final SwerveIO.Inputs inputs;
 
@@ -128,5 +131,10 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
         Logger.processInputs("Drive", inputs);
 
         FieldView.robotPose.setPose(inputs.estPose);
+
+        if (CALIBRATE.get()) {
+            CALIBRATE.set(false);
+            io.calibrateModuleOffsets();
+        }
     }
 }

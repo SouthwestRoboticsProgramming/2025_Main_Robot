@@ -13,6 +13,7 @@ import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
 import com.swrobotics.robot.logging.FieldView;
+import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -77,17 +78,6 @@ public final class ControlBoard extends SubsystemBase {
                 .onTrue(RumblePatternCommands.endgameAlert(driver, 0.75)
                         .alongWith(RumblePatternCommands.endgameAlert(operator, 0.75)));
 
-        // Everything past here is for testing and should eventually be removed
-
-        // Test LEDs
-//        driver.a.onPressed(LightCommands.blink(robot.lights, Color.kCyan));
-//        driver.a.onHeld(LightCommands.blink(robot.lights, Color.kYellow));
-
-//        driver.b.onPressed(RumblePatternCommands.endgameAlert(driver, 0.75));
-
-//        driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
-//        driver.y.onPressed(() -> FieldView.pathfindingGoal.setPose(robot.drive.getEstimatedPose()));
-
         driver.b.trigger()
                 .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(
                         robot.drive,
@@ -100,6 +90,28 @@ public final class ControlBoard extends SubsystemBase {
                         robot.drive,
                         () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
+
+        robot.superstructure.setDefaultCommand(
+                robot.superstructure.commandSetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER));
+        operator.x.trigger()
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L1));
+        operator.a.trigger()
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L2));
+        operator.b.trigger()
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L3));
+        operator.y.trigger()
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
+
+        // Everything past here is for testing and should eventually be removed
+
+        // Test LEDs
+//        driver.a.onPressed(LightCommands.blink(robot.lights, Color.kCyan));
+//        driver.a.onHeld(LightCommands.blink(robot.lights, Color.kYellow));
+
+//        driver.b.onPressed(RumblePatternCommands.endgameAlert(driver, 0.75));
+
+//        driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
+//        driver.y.onPressed(() -> FieldView.pathfindingGoal.setPose(robot.drive.getEstimatedPose()));
     }
 
     /**

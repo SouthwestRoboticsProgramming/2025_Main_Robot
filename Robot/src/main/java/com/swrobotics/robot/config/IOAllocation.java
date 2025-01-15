@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 /**
  * Describes the IDs of the various devices within the robot.
  */
-// For now, IDs are set such that this code can run on the 2024 robot
+// TODO: Variable names should be updated to start with k
 public final class IOAllocation {
     public static final class CAN {
         private static final String RIO = "";
@@ -20,6 +20,18 @@ public final class IOAllocation {
         public static final SwerveIDs SWERVE_BL = new SwerveIDs(11, 7, 3);
         public static final SwerveIDs SWERVE_BR = new SwerveIDs(12, 8, 4);
         public static final CanId PIGEON2 = new CanId(13, GERALD);
+
+        public static final CanId ELEVATOR_MOTOR_1 = new CanId(1, RIO);
+        public static final CanId ELEVATOR_MOTOR_2 = new CanId(2, RIO);
+
+        public static final CanId OUTTAKE_PIVOT_MOTOR = new CanId(3, RIO);
+        public static final CanId OUTTAKE_PIVOT_ENCODER = new CanId(4, RIO);
+        public static final CanId OUTTAKE_MOTOR = new CanId(5, RIO);
+
+        public static final CanId INDEXER_MOTOR = new CanId(6, RIO);
+
+        public static final CanId ALGAE_INTAKE_PIVOT_MOTOR = new CanId(7, RIO);
+        public static final CanId ALGAE_INTAKE_SPIN_MOTOR = new CanId(8, RIO);
 
         public static final CanId PDP = new CanId(62, RIO);
     }

@@ -137,6 +137,7 @@ public abstract class NTEntry<T> implements Supplier<T> {
      */
     public void set(T value) {
         this.value = value;
+        setValue(entry, value);
     }
 
     /**

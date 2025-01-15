@@ -11,6 +11,8 @@ import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 import com.swrobotics.robot.config.PathEnvironments;
+import com.swrobotics.robot.logging.RobotView;
+import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.PathfindingTest;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
@@ -54,8 +56,7 @@ public class RobotContainer {
     public final MotorTrackerSubsystem motorTracker;
     public final SwerveDriveSubsystem drive;
     public final VisionSubsystem vision;
-
-//    public final PathfindingTest pathfindingTest;
+    public final SuperstructureSubsystem superstructure;
 
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
@@ -74,9 +75,9 @@ public class RobotContainer {
 
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
-        lights = new LightsSubsystem(this);
+        superstructure = new SuperstructureSubsystem();
 
-//        pathfindingTest = new PathfindingTest(drive);
+        lights = new LightsSubsystem(this);
 
         // ControlBoard must be initialized last
         controlboard = new ControlBoard(this);
@@ -102,13 +103,14 @@ public class RobotContainer {
         }
 
         FieldView.publish();
+        RobotView.publish();
 
         // Play startup song
         CommandScheduler.getInstance().schedule(musicCommand = Commands.waitSeconds(5)
                 .andThen(new PlaySongCommand(music, "music" + File.separator + "xp.chrp")));
     }
 
-    private static final record AutoEntry(String name, Command cmd) {}
+    private record AutoEntry(String name, Command cmd) {}
 
     private Command testAutoCommand() {
         Pose2d coralStation = new Pose2d(
