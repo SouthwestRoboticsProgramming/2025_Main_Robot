@@ -15,6 +15,8 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.IOAllocation;
+import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
+import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 
@@ -43,6 +45,9 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
         motor.getConfigurator().apply(motorConfig);
         canCoder.getConfigurator().apply(canCoderConfig);
+
+        MotorTrackerSubsystem.getInstance().addMotor("Outtake Pivot", motor);
+        MusicSubsystem.getInstance().addInstrument(motor);
 
         motorPositionStatus = motor.getPosition();
         canCoderPositionStatus = canCoder.getAbsolutePosition(true);
