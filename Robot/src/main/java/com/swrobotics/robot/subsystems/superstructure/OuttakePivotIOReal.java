@@ -63,8 +63,8 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         ) / Constants.kOuttakePivotCANcoderToArmRatio;
         motor.setPosition(armPos);
 
-        Consumer<Double> updateSlot0Configs = (v) -> motor.getConfigurator().apply(getSlot0Configs());
-        Consumer<Double> updateMotionMagicConfigs = (v) -> motor.getConfigurator().apply(getMotionMagicConfigs());
+        Runnable updateSlot0Configs = () -> motor.getConfigurator().apply(getSlot0Configs());
+        Runnable updateMotionMagicConfigs = () -> motor.getConfigurator().apply(getMotionMagicConfigs());
         Constants.kOuttakePivotKg.onChange(updateSlot0Configs);
         Constants.kOuttakePivotKs.onChange(updateSlot0Configs);
         Constants.kOuttakePivotKv.onChange(updateSlot0Configs);

@@ -54,12 +54,12 @@ public final class ElevatorIOReal implements ElevatorIO {
                 .withEnableFOC(true);
         neutralControl = new NeutralOut();
 
-        Consumer<Double> updateSlot0Configs = (v) -> {
+        Runnable updateSlot0Configs = () -> {
             Slot0Configs configs = getSlot0Configs();
             motor1.getConfigurator().apply(configs);
             motor2.getConfigurator().apply(configs);
         };
-        Consumer<Double> updateMotionMagicConfigs = (v) -> {
+        Runnable updateMotionMagicConfigs = () -> {
             MotionMagicConfigs configs = getMotionMagicConfigs();
             motor1.getConfigurator().apply(configs);
             motor2.getConfigurator().apply(configs);

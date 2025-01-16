@@ -7,7 +7,6 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -72,7 +71,7 @@ public abstract class NTEntry<T> implements Supplier<T> {
     }
 
     private final NetworkTableEntry entry;
-    private final List<Consumer<T>> changeListeners;
+    private final List<Runnable> changeListeners;
     private final LoggableInputs inputs;
 
     private final T defaultValue;
@@ -172,19 +171,8 @@ public abstract class NTEntry<T> implements Supplier<T> {
      *
      * @param listener listener to register
      */
-    public void onChange(Consumer<T> listener) {
+    public void onChange(Runnable listener) {
         changeListeners.add(listener);
-    }
-
-    /**
-     * Registers a change listener and also calls it immediately. The function
-     * provided will be called whenever the value within the entry changes.
-     *
-     * @param listener listener to register
-     */
-    public void nowAndOnChange(Consumer<T> listener) {
-        listener.accept(value);
-        onChange(listener);
     }
 
     private void update() {
@@ -194,8 +182,8 @@ public abstract class NTEntry<T> implements Supplier<T> {
         Logger.processInputs(PREFIX, inputs);
 
         if (!Objects.equals(value, prevValue)) {
-            for (Consumer<T> listener : changeListeners) {
-                listener.accept(value);
+            for (Runnable listener : changeListeners) {
+                listener.run();
             }
         }
         prevValue = value;
