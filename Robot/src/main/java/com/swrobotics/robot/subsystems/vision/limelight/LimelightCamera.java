@@ -67,6 +67,9 @@ public final class LimelightCamera {
 
         prevUpdateTimestamp = est.timestamp;
 
+        if (inputs.stdDevsData.length < 12)
+            return; // Incomplete data
+
         int stdDevIdx = useMegaTag2 ? 6 : 0;
         double xStdDev = inputs.stdDevsData[stdDevIdx];
         double yStdDev = inputs.stdDevsData[stdDevIdx + 1];
