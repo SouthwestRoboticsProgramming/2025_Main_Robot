@@ -56,6 +56,13 @@ public final class Constants {
     public static final double kDriveControlDrivePower = 2; // Exponent input is raised to
     public static final double kDriveControlTurnPower = 2;
 
+    //indexer
+    public static final NTEntry<Double> kIndexSpeed = new NTDouble("Indexer/Indexer Speed", 0).setPersistent();
+    public static final NTEntry<Double> kIndexeEjectSpeedTop = new NTDouble("Indexer/Eject Speed (Top)", 0).setPersistent();
+    public static final NTEntry<Double> kIndexIdleSpeed = new NTDouble("Indexer/Idle Speed", 0).setPersistent();
+
+
+
     // Auto (TODO: Tune)
     public static final double kAutoDriveKp = 8;
     public static final double kAutoDriveKd = 0;
@@ -150,6 +157,7 @@ public final class Constants {
     // Motor tracking
     public static final double kMotorTrackInterval = 2; // Seconds
     public static final double kOverheatingThreshold = 75; // Celsius
+public static Object kIndexerIdleSpeed;
 
     // This must be at the bottom of the file so it happens last
     static {

@@ -13,6 +13,7 @@ import com.swrobotics.robot.config.FieldPositions;
 import com.swrobotics.robot.config.PathEnvironments;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.PathfindingTest;
+import com.swrobotics.robot.subsystems.Indexer.IndexerSubsystem;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -55,8 +56,10 @@ public class RobotContainer {
     public final SwerveDriveSubsystem drive;
     public final VisionSubsystem vision;
 
-//    public final PathfindingTest pathfindingTest;
 
+
+//    public final PathfindingTest pathfindingTest;
+    public final IndexerSubsystem index;
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
 
@@ -64,6 +67,9 @@ public class RobotContainer {
 
     private Command musicCommand;
 
+    /**
+     * 
+     */
     public RobotContainer() {
         // Turn off joystick warnings in sim
         DriverStation.silenceJoystickConnectionWarning(RobotBase.isSimulation());
@@ -75,6 +81,10 @@ public class RobotContainer {
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
         lights = new LightsSubsystem(this);
+        index = new IndexerSubsystem();
+
+
+        
 
 //        pathfindingTest = new PathfindingTest(drive);
 
