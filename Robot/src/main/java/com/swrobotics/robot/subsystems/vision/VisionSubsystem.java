@@ -21,7 +21,7 @@ public final class VisionSubsystem extends SubsystemBase {
                 new LimelightCamera(
                         "limelight",
                         Constants.kLimelightLocation,
-                        Constants.kLimelightConfig)
+                        Constants.kLimelightMT1MaxDistance)
                 // Add more cameras here...
         );
     }
@@ -40,6 +40,7 @@ public final class VisionSubsystem extends SubsystemBase {
         // MegaTag 1 is unreliable while moving, so use MegaTag 2 then.
         // However, still use MegaTag 1 when slow/stopped so the gyro can be
         // corrected by vision measurements.
+        // TODO: See how this behaves on 2025 field
         boolean useMegaTag2 = Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
                 > Constants.kVisionMT2SpeedThreshold;
 

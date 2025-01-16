@@ -5,11 +5,13 @@ import edu.wpi.first.networktables.*;
 public final class NTLimelightIO implements LimelightIO {
     private static final String MEGATAG_1_NAME = "botpose_wpiblue";
     private static final String MEGATAG_2_NAME = "botpose_orb_wpiblue";
+    private static final String STD_DEVS_NAME = "stddevs";
     private static final String ORIENTATION_NAME = "robot_orientation_set";
     private static final String LOCATION_NAME = "camerapose_robotspace_set";
 
     private final DoubleArraySubscriber mt1EstimateSub;
     private final DoubleArraySubscriber mt2EstimateSub;
+    private final DoubleArraySubscriber stdDevsSub;
 
     private final DoubleArrayPublisher robotOrientationPub;
 
@@ -18,6 +20,7 @@ public final class NTLimelightIO implements LimelightIO {
 
         mt1EstimateSub = table.getDoubleArrayTopic(MEGATAG_1_NAME).subscribe(new double[0]);
         mt2EstimateSub = table.getDoubleArrayTopic(MEGATAG_2_NAME).subscribe(new double[0]);
+        stdDevsSub = table.getDoubleArrayTopic(STD_DEVS_NAME).subscribe(new double[0]);
 
         robotOrientationPub = table.getDoubleArrayTopic(ORIENTATION_NAME).publish();
 
@@ -40,6 +43,7 @@ public final class NTLimelightIO implements LimelightIO {
     public void updateInputs(Inputs inputs) {
         updateEstimateInput(inputs.megaTag1, mt1EstimateSub);
         updateEstimateInput(inputs.megaTag2, mt2EstimateSub);
+        inputs.stdDevsData = stdDevsSub.get();
     }
 
     @Override

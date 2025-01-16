@@ -131,16 +131,7 @@ public final class Constants {
             0, 0, 0,
             0, 0, 0
     );
-
-    // This will be different for each lens type, cameras with same lens should
-    // have the same config
-    public static final LimelightCamera.Config kLimelightConfig = new LimelightCamera.Config(
-            // These were tuned at MURA using red alliance speaker AprilTags
-            4,
-            0.00197,
-            0.002,
-            0.00117
-    );
+    public static final double kLimelightMT1MaxDistance = 4;
 
     // Elevator
     public static final double kElevatorRotationsForFullHeight = 500; // FIXME

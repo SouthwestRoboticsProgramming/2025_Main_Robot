@@ -24,17 +24,20 @@ public interface LimelightIO {
     final class Inputs implements LoggableInputs {
         public final EstimateInputs megaTag1 = new EstimateInputs();
         public final EstimateInputs megaTag2 = new EstimateInputs();
+        public double[] stdDevsData = new double[0];
 
         @Override
         public void toLog(LogTable table) {
             megaTag1.toLog(table.getSubtable("megaTag1"));
             megaTag2.toLog(table.getSubtable("megaTag2"));
+            table.put("stdDevs", stdDevsData);
         }
 
         @Override
         public void fromLog(LogTable table) {
             megaTag1.fromLog(table.getSubtable("megaTag1"));
             megaTag2.fromLog(table.getSubtable("megaTag2"));
+            stdDevsData = table.get("stdDevs", stdDevsData);
         }
     }
 

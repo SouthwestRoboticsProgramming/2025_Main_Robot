@@ -14,31 +14,25 @@ import java.util.List;
 
 public final class LimelightCamera {
     // forward, right, up in meters; pitch, yaw, roll in degrees CCW
-    public static record MountingLocation(
+    public record MountingLocation(
             double forward, double right, double up,
             double roll, double pitch, double yaw) {}
 
-    public static record Config(
-            double mt1MaxDistance,
-            double xyStdDevCoeffMT1,
-            double thetaStdDevCoeffMT1,
-            double xyStdDevCoeffMT2) {}
+    public record Update(Pose2d pose, double timestamp, Matrix<N3, N1> stdDevs) {}
 
-    public static record Update(Pose2d pose, double timestamp, Matrix<N3, N1> stdDevs) {}
-
-    private static record PoseEstimate(Pose2d pose, double timestamp, int tagCount, double avgTagDist) {}
+    private record PoseEstimate(Pose2d pose, double timestamp, double avgTagDist) {}
 
     private final String name;
-    private final Config config;
+    private final double mt1MaxDistance;
 
     private final LimelightIO io;
     private final LimelightIO.Inputs inputs;
 
     private double prevUpdateTimestamp;
 
-    public LimelightCamera(String name, MountingLocation location, Config config) {
+    public LimelightCamera(String name, MountingLocation location, double mt1MaxDistance) {
         this.name = name;
-        this.config = config;
+        this.mt1MaxDistance = mt1MaxDistance;
 
         io = new NTLimelightIO(name, location);
         inputs = new LimelightIO.Inputs();
@@ -66,34 +60,27 @@ public final class LimelightCamera {
 
         // If too far away, use MegaTag 2 estimate instead. MegaTag 1 estimate
         // is too unstable at far distances
-        if (!useMegaTag2 && est.avgTagDist > config.mt1MaxDistance) {
+        if (!useMegaTag2 && est.avgTagDist > mt1MaxDistance) {
             processEstimate(updatesOut, true);
             return;
         }
 
         prevUpdateTimestamp = est.timestamp;
 
-        // Standard deviation of vision estimates appears to be proportional to
-        // the square of the distance to the tag. Also, estimates are more
-        // stable with more tags.
-        // TODO: How accurate is the divide by tag count? Do we even want it?
-        double baseStdDev = MathUtil.square(est.avgTagDist) / est.tagCount;
+        int stdDevIdx = useMegaTag2 ? 6 : 0;
+        double xStdDev = inputs.stdDevsData[stdDevIdx];
+        double yStdDev = inputs.stdDevsData[stdDevIdx + 1];
+        double thetaStdDev = inputs.stdDevsData[stdDevIdx + 5];
 
-        // Calculate standard deviations by linear regressions on distance^2
-        double xyStdDev, thetaStdDev;
         if (useMegaTag2) {
-            xyStdDev = baseStdDev * config.xyStdDevCoeffMT2;
             // Don't trust MT2 theta at all, it's just gyro theta but with latency
-            thetaStdDev = 99999999999999.0;
-        } else {
-            xyStdDev = baseStdDev * config.xyStdDevCoeffMT1;
-            thetaStdDev = baseStdDev * config.thetaStdDevCoeffMT1;
+            thetaStdDev = 999999999.0;
         }
 
         updatesOut.add(new Update(
                 est.pose,
                 est.timestamp,
-                VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev)
+                VecBuilder.fill(xStdDev, yStdDev, thetaStdDev)
         ));
     }
 
@@ -118,6 +105,6 @@ public final class LimelightCamera {
 
         double correctedTimestamp = (timestamp / 1000000.0) - (latency / 1000.0);
 
-        return new PoseEstimate(pose, correctedTimestamp, tagCount, avgTagDist);
+        return new PoseEstimate(pose, correctedTimestamp, avgTagDist);
     }
 }
