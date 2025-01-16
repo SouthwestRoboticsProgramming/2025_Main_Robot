@@ -61,6 +61,11 @@ public final class Constants {
     public static final NTEntry<Double> kIndexeEjectSpeedTop = new NTDouble("Indexer/Eject Speed (Top)", 0).setPersistent();
     public static final NTEntry<Double> kIndexIdleSpeed = new NTDouble("Indexer/Idle Speed", 0).setPersistent();
 
+    //CoralOuttake
+    public static final NTEntry<Double> kCoralOutSpeed = new NTDouble("CoralOut/CoralOut Speed", 0).setPersistent();
+    public static final NTEntry<Double> kCoralOuteEjectSpeedTop = new NTDouble("CoralOut/Eject Speed (Top)", 0).setPersistent();
+    public static final NTEntry<Double> kCoralOutIdleSpeed = new NTDouble("CoralOut/Idle Speed", 0).setPersistent();
+
 
 
     // Auto (TODO: Tune)

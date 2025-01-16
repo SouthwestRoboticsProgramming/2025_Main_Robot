@@ -13,6 +13,7 @@ import com.swrobotics.robot.config.FieldPositions;
 import com.swrobotics.robot.config.PathEnvironments;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.PathfindingTest;
+import com.swrobotics.robot.subsystems.CoralOuttake.CoralOutSubsystem;
 import com.swrobotics.robot.subsystems.Indexer.IndexerSubsystem;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -59,6 +60,7 @@ public class RobotContainer {
 
 
 //    public final PathfindingTest pathfindingTest;
+    public final CoralOutSubsystem coralout;
     public final IndexerSubsystem index;
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
@@ -82,6 +84,7 @@ public class RobotContainer {
         vision = new VisionSubsystem(drive);
         lights = new LightsSubsystem(this);
         index = new IndexerSubsystem();
+        coralout = new CoralOutSubsystem();
 
 
         
