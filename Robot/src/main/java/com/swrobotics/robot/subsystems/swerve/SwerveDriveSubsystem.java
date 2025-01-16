@@ -116,6 +116,11 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
         return inputs.estPose;
     }
 
+    public boolean isCloseTo(Translation2d position, double tolerance) {
+        double distance = getEstimatedPose().getTranslation().getDistance(position);
+        return distance <= tolerance;
+    }
+
     public void resetRotation(Rotation2d robotRotation) {
         io.resetRotation(robotRotation);
     }

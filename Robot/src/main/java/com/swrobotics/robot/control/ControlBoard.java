@@ -31,9 +31,11 @@ public final class ControlBoard extends SubsystemBase {
      * Driver:
      * Left stick: drive translation
      * Right stick X: drive rotation
-     *
+     *      *
      * Operator:
      * nothing!
+     *
+     * TODO: put algae intake control on drive controller
      */
 
     private static final NTEntry<Boolean> CHARACTERISE_WHEEL_RADIUS = new NTBoolean("Drive/Characterize Wheel Radius", false);

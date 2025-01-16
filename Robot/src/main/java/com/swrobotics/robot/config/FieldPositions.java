@@ -53,6 +53,10 @@ public final class FieldPositions {
         return kReefPositions.get(branch);
     }
 
+    public static Pose2d getAllianceReefScoringTarget(int branch) {
+        return Constants.kField.flipPoseForAlliance(getBlueReefScoringTarget(branch));
+    }
+
     // Faces are numbered counterclockwise starting with the one facing the
     // driver station
     public static Pose2d getBlueReefDealgifyingTarget(int face) {

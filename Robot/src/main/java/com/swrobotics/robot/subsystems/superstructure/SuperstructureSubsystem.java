@@ -13,6 +13,16 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         SCORE_L3(Elevator.Position.SCORE_L3, OuttakePivot.Position.SCORE_L2L3),
         SCORE_L4(Elevator.Position.SCORE_L4, OuttakePivot.Position.SCORE_L4);
 
+        public static State forScoring(int level) {
+            return switch (level) {
+                case 1 -> SCORE_L1;
+                case 2 -> SCORE_L2;
+                case 3 -> SCORE_L3;
+                case 4 -> SCORE_L4;
+                default -> throw new IndexOutOfBoundsException(level);
+            };
+        }
+
         public final Elevator.Position elevatorPosition;
         public final OuttakePivot.Position pivotPosition;
 
@@ -41,7 +51,14 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     }
 
     public Command commandSetState(State targetState) {
-        return Commands.run(() -> setTargetState(targetState), this);
+        return Commands.run(() -> {
+            setTargetState(targetState);
+            System.out.println("aidhfsuifhascuilraoeyrcauirhlafkjsdfk");
+        }, this);
+    }
+
+    public Command commandSetStateOnce(State targetState) {
+        return Commands.runOnce(() -> setTargetState(targetState), this);
     }
 
     @Override
