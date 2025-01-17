@@ -11,14 +11,13 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.swrobotics.lib.utils.CTREUtil;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.IOAllocation;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-
-import java.util.function.Consumer;
 
 public final class ElevatorIOReal implements ElevatorIO {
     private final TalonFX motor1, motor2;
@@ -37,10 +36,9 @@ public final class ElevatorIOReal implements ElevatorIO {
 
         motor1 = IOAllocation.CAN.kElevatorMotor1.createTalonFX();
         motor2 = IOAllocation.CAN.kElevatorMotor2.createTalonFX();
-        motor1.getConfigurator().apply(config);
-        motor2.getConfigurator().apply(config);
-
-        motor2.setControl(new Follower(IOAllocation.CAN.kElevatorMotor1.id(), true));
+        CTREUtil.retryUntilOk(motor1, () -> motor1.getConfigurator().apply(config));
+        CTREUtil.retryUntilOk(motor2, () -> motor2.getConfigurator().apply(config));
+        CTREUtil.retryUntilOk(motor2, () -> motor2.setControl(new Follower(IOAllocation.CAN.kElevatorMotor1.id(), true)));
 
         MotorTrackerSubsystem.getInstance().addMotor("Elevator Motor 1", motor1);
         MotorTrackerSubsystem.getInstance().addMotor("Elevator Motor 2", motor2);
@@ -49,6 +47,8 @@ public final class ElevatorIOReal implements ElevatorIO {
 
         motor1.setPosition(0); // Start fully down
         positionStatus = motor1.getPosition();
+        CTREUtil.setUpdateFrequency(motor1, Constants.kStatusSignalFreq, positionStatus);
+        CTREUtil.optimizeBusUtilization(motor1, motor2);
 
         positionControl = new MotionMagicVoltage(0)
                 .withEnableFOC(true);
@@ -56,13 +56,13 @@ public final class ElevatorIOReal implements ElevatorIO {
 
         Runnable updateSlot0Configs = () -> {
             Slot0Configs configs = getSlot0Configs();
-            motor1.getConfigurator().apply(configs);
-            motor2.getConfigurator().apply(configs);
+            CTREUtil.retryUntilOk(motor1, () -> motor1.getConfigurator().apply(configs));
+            CTREUtil.retryUntilOk(motor2, () -> motor2.getConfigurator().apply(configs));
         };
         Runnable updateMotionMagicConfigs = () -> {
             MotionMagicConfigs configs = getMotionMagicConfigs();
-            motor1.getConfigurator().apply(configs);
-            motor2.getConfigurator().apply(configs);
+            CTREUtil.retryUntilOk(motor1, () -> motor1.getConfigurator().apply(configs));
+            CTREUtil.retryUntilOk(motor2, () -> motor2.getConfigurator().apply(configs));
         };
         Constants.kElevatorKg.onChange(updateSlot0Configs);
         Constants.kElevatorKs.onChange(updateSlot0Configs);

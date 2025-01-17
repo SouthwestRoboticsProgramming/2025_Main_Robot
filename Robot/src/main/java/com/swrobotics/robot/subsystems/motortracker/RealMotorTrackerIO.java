@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import com.swrobotics.lib.utils.CTREUtil;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 
@@ -81,7 +82,8 @@ public final class RealMotorTrackerIO implements MotorTrackerIO {
         StatusSignal<Integer> faultsStatus = motor.getFaultField();
         StatusSignal<Integer> stickyFaultsStatus = motor.getStickyFaultField();
 
-        StatusSignal.setUpdateFrequencyForAll(
+        CTREUtil.setUpdateFrequency(
+                motor,
                 4, // 4 Hz is minimum update frequency supported
                 tempStatus,
                 supplyCurrentStatus,

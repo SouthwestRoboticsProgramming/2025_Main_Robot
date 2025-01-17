@@ -26,6 +26,7 @@ import static edu.wpi.first.units.Units.*;
 public final class Constants {
     public static final int kPeriodicFreq = 50; // Hz
     public static final double kPeriodicTime = 1.0 / kPeriodicFreq;
+    public static final double kStatusSignalFreq = kPeriodicFreq * 2;
 
     public static final FieldInfo kField = FieldInfo.REEFSCAPE_2025;
     public static final int kEndgameAlertTime = 20;

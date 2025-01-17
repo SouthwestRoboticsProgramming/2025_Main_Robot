@@ -12,6 +12,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.swrobotics.lib.utils.CTREUtil;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.IOAllocation;
@@ -19,8 +20,6 @@ import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-
-import java.util.function.Consumer;
 
 public final class OuttakePivotIOReal implements OuttakePivotIO {
     private final TalonFX motor;
@@ -43,28 +42,36 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
         motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
         canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
-        motor.getConfigurator().apply(motorConfig);
-        canCoder.getConfigurator().apply(canCoderConfig);
+        CTREUtil.retryUntilOk(motor, () -> motor.getConfigurator().apply(motorConfig));
+        CTREUtil.retryUntilOk(canCoder, () -> canCoder.getConfigurator().apply(canCoderConfig));
 
         MotorTrackerSubsystem.getInstance().addMotor("Outtake Pivot", motor);
         MusicSubsystem.getInstance().addInstrument(motor);
 
         motorPositionStatus = motor.getPosition();
         canCoderPositionStatus = canCoder.getAbsolutePosition(true);
+        CTREUtil.setUpdateFrequency(motor, Constants.kStatusSignalFreq, motorPositionStatus);
+        CTREUtil.setUpdateFrequency(canCoder, Constants.kStatusSignalFreq, canCoderPositionStatus);
+        CTREUtil.optimizeBusUtilization(motor, canCoder);
 
         positionControl = new MotionMagicVoltage(0)
                 .withEnableFOC(true);
 
+        CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
         canCoderPositionStatus.waitForUpdate(1);
+
         double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
         double armPos = MathUtil.wrap(
                 canCoderPos + Constants.kOuttakePivotEncoderOffset.get(),
                 -0.5, 0.5
         ) / Constants.kOuttakePivotCANcoderToArmRatio;
-        motor.setPosition(armPos);
 
-        Runnable updateSlot0Configs = () -> motor.getConfigurator().apply(getSlot0Configs());
-        Runnable updateMotionMagicConfigs = () -> motor.getConfigurator().apply(getMotionMagicConfigs());
+        CTREUtil.retryUntilOk(motor, () -> motor.setPosition(armPos));
+
+        Runnable updateSlot0Configs = () -> CTREUtil.retryUntilOk(
+                motor, () -> motor.getConfigurator().apply(getSlot0Configs()));
+        Runnable updateMotionMagicConfigs = () -> CTREUtil.retryUntilOk(
+                motor, () -> motor.getConfigurator().apply(getMotionMagicConfigs()));
         Constants.kOuttakePivotKg.onChange(updateSlot0Configs);
         Constants.kOuttakePivotKs.onChange(updateSlot0Configs);
         Constants.kOuttakePivotKv.onChange(updateSlot0Configs);
@@ -111,6 +118,6 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
         Constants.kOuttakePivotEncoderOffset.set(-canCoderPos);
 
-        motor.setPosition(0);
+        CTREUtil.retryUntilOk(motor, () -> motor.setPosition(0));
     }
 }
