@@ -127,9 +127,19 @@ public final class Constants {
     // Vision
     public static final double kVisionMT2SpeedThreshold = 0.2; // m/s
 
-    public static final LimelightCamera.MountingLocation kLimelightLocation = new LimelightCamera.MountingLocation(
-            0, 0, 0,
-            0, 0, 0
+    public static final LimelightCamera.MountingLocation kLimelightFrontLeftLocation = new LimelightCamera.MountingLocation(
+            kFrameLength / 2 - Units.inchesToMeters(4.5),
+            -kFrameWidth / 2 + Units.inchesToMeters(3.25),
+            Units.inchesToMeters(9.059),
+            // Degrees CCW
+            0, 20.6, -33
+    );
+    public static final LimelightCamera.MountingLocation kLimelightFrontRightLocation = new LimelightCamera.MountingLocation(
+            kFrameLength / 2 - Units.inchesToMeters(4.5),
+            kFrameWidth / 2 - Units.inchesToMeters(3.25),
+            Units.inchesToMeters(9.059),
+            // Degrees CCW
+            0, 20.6, 33
     );
 
     // This will be different for each lens type, cameras with same lens should
