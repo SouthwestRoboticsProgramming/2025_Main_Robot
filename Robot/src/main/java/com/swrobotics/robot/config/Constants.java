@@ -8,6 +8,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
+import com.swrobotics.lib.ctre.NTSlot0MotionMagicConfigs;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.net.NTDouble;
 import com.swrobotics.lib.net.NTEntry;
@@ -155,15 +156,8 @@ public final class Constants {
 
     // Elevator
     public static final double kElevatorRotationsForFullHeight = 500; // FIXME
-    public static final NTEntry<Double> kElevatorKg = new NTDouble("Elevator/PID/kG", 0).setPersistent();
-    public static final NTEntry<Double> kElevatorKs = new NTDouble("Elevator/PID/kS", 0).setPersistent();
-    public static final NTEntry<Double> kElevatorKv = new NTDouble("Elevator/PID/kV", 0).setPersistent();
-    public static final NTEntry<Double> kElevatorKa = new NTDouble("Elevator/PID/kA", 0).setPersistent();
-    public static final NTEntry<Double> kElevatorKp = new NTDouble("Elevator/PID/kP", 0).setPersistent();
-    public static final NTEntry<Double> kElevatorKd = new NTDouble("Elevator/PID/kD", 0).setPersistent();
-    public static final NTEntry<Double> kElevatorMMCruiseVelocity = new NTDouble("Elevator/PID/MM Cruise Velocity", 0).setPersistent();
-    public static final NTEntry<Double> kElevatorMMAcceleration = new NTDouble("Elevator/PID/MM Acceleration", 0).setPersistent();
-    public static final NTEntry<Double> kElevatorMMJerk = new NTDouble("Elevator/PID/MM Jerk", 0).setPersistent();
+    public static final NTSlot0MotionMagicConfigs kElevatorPID =
+            new NTSlot0MotionMagicConfigs("Elevator/PID", 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Elevator/Tolerance", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorMaxHeightWithArmIn = new NTDouble("Elevator/Max Height With Arm In", 0.1).setPersistent();
@@ -177,15 +171,8 @@ public final class Constants {
     public static final double kOuttakePivotMotorToArmRatio = 100; // FIXME
     public static final double kOuttakePivotCANcoderToArmRatio = 60.0 / 24.0;
     public static final NTEntry<Double> kOuttakePivotEncoderOffset = new NTDouble("Coral Outtake/Pivot/Encoder/Offset (rot)", 0).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotKg = new NTDouble("Coral Outtake/Pivot/PID/kG", 0).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotKs = new NTDouble("Coral Outtake/Pivot/PID/kS", 0).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotKv = new NTDouble("Coral Outtake/Pivot/PID/kV", 0).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotKa = new NTDouble("Coral Outtake/Pivot/PID/kA", 0).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotKp = new NTDouble("Coral Outtake/Pivot/PID/kP", 0).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotKd = new NTDouble("Coral Outtake/Pivot/PID/kD", 0).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotMMCruiseVelocity = new NTDouble("Coral Outtake/Pivot/PID/MM Cruise Velocity", 0).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotMMAcceleration = new NTDouble("Coral Outtake/Pivot/PID/MM Acceleration", 0).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotMMJerk = new NTDouble("Coral Outtake/Pivot/PID/MM Jerk", 0).setPersistent();
+    public static final NTSlot0MotionMagicConfigs kOuttakePivotPID =
+            new NTSlot0MotionMagicConfigs("Coral Outtake/Pivot/PID", 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     public static final NTEntry<Double> kOuttakePivotTolerance = new NTDouble("Coral Outtake/Pivot/Tolerance (deg)", 3).setPersistent();
     public static final NTEntry<Double> kOuttakePivotMaxAngleWithElevatorUp = new NTDouble("Coral Outtake/Pivot/Max Angle With Elevator Up", 85).setPersistent();

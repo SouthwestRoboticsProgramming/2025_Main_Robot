@@ -2,9 +2,6 @@ package com.swrobotics.robot.subsystems.superstructure;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -12,7 +9,8 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.swrobotics.lib.utils.CTREUtil;
+import com.swrobotics.lib.ctre.CTREUtil;
+import com.swrobotics.lib.ctre.TalonFXConfigHelper;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.IOAllocation;
@@ -31,18 +29,19 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
     private final MotionMagicVoltage positionControl;
 
     public OuttakePivotIOReal() {
-        TalonFXConfiguration motorConfig = new TalonFXConfiguration();
+        motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
+        canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
+
+        TalonFXConfigHelper motorConfig = new TalonFXConfigHelper();
         motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // FIXME
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.Feedback.SensorToMechanismRatio = Constants.kOuttakePivotMotorToArmRatio;
-        motorConfig.Slot0 = getSlot0Configs();
+        motorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+        motorConfig.withTunable(Constants.kOuttakePivotPID);
+        motorConfig.apply(motor);
 
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; // FIXME
-
-        motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
-        canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
-        CTREUtil.retryUntilOk(motor, () -> motor.getConfigurator().apply(motorConfig));
         CTREUtil.retryUntilOk(canCoder, () -> canCoder.getConfigurator().apply(canCoderConfig));
 
         MotorTrackerSubsystem.getInstance().addMotor("Outtake Pivot", motor);
@@ -64,38 +63,6 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         ) / Constants.kOuttakePivotCANcoderToArmRatio;
 
         CTREUtil.retryUntilOk(motor, () -> motor.setPosition(armPos));
-
-        Runnable updateSlot0Configs = () -> CTREUtil.retryUntilOk(
-                motor, () -> motor.getConfigurator().apply(getSlot0Configs()));
-        Runnable updateMotionMagicConfigs = () -> CTREUtil.retryUntilOk(
-                motor, () -> motor.getConfigurator().apply(getMotionMagicConfigs()));
-        Constants.kOuttakePivotKg.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotKs.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotKv.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotKa.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotKp.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotKd.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotMMCruiseVelocity.onChange(updateMotionMagicConfigs);
-        Constants.kOuttakePivotMMAcceleration.onChange(updateMotionMagicConfigs);
-        Constants.kOuttakePivotMMJerk.onChange(updateMotionMagicConfigs);
-    }
-
-    private Slot0Configs getSlot0Configs() {
-        return new Slot0Configs()
-                .withGravityType(GravityTypeValue.Arm_Cosine)
-                .withKG(Constants.kOuttakePivotKg.get())
-                .withKS(Constants.kOuttakePivotKs.get())
-                .withKV(Constants.kOuttakePivotKv.get())
-                .withKA(Constants.kOuttakePivotKa.get())
-                .withKP(Constants.kOuttakePivotKp.get())
-                .withKD(Constants.kOuttakePivotKd.get());
-    }
-
-    private MotionMagicConfigs getMotionMagicConfigs() {
-        return new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(Constants.kOuttakePivotMMCruiseVelocity.get())
-                .withMotionMagicAcceleration(Constants.kOuttakePivotMMAcceleration.get())
-                .withMotionMagicJerk(Constants.kOuttakePivotMMJerk.get());
     }
 
     @Override

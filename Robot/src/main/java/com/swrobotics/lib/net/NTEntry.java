@@ -175,6 +175,11 @@ public abstract class NTEntry<T> implements Supplier<T> {
         changeListeners.add(listener);
     }
 
+    public void nowAndOnChange(Runnable listener) {
+        listener.run();
+        changeListeners.add(listener);
+    }
+
     private void update() {
         if (!Logger.hasReplaySource()) {
             value = getValue(entry, defaultValue);

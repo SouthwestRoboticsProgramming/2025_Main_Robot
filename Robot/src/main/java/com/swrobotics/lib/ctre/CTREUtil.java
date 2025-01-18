@@ -1,8 +1,6 @@
-package com.swrobotics.lib.utils;
+package com.swrobotics.lib.ctre;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
-import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import edu.wpi.first.wpilibj.DriverStation;
 
