@@ -83,11 +83,11 @@ public final class IOAllocation {
         }
 
         public TalonFX createTalonFX() {
-            return new TalonFX(id, bus);
+            return new TalonFX(id(), bus());
         }
 
         public CANcoder createCANcoder() {
-            return new CANcoder(id, bus);
+            return new CANcoder(id(), bus());
         }
     }
 }
