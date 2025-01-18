@@ -27,12 +27,4 @@ public final class CTREUtil {
             DriverStation.reportWarning("Warning on " + deviceDesc + ": " + status.getDescription(), true);
         }
     }
-
-    public static void setUpdateFrequency(ParentDevice device, double frequencyHz, StatusSignal<?>... statuses) {
-        retryUntilOk(device, () -> BaseStatusSignal.setUpdateFrequencyForAll(frequencyHz, statuses));
-    }
-
-    public static void optimizeBusUtilization(ParentDevice... devices) {
-        retryUntilOk(devices[0], () -> ParentDevice.optimizeBusUtilizationForAll(devices));
-    }
 }

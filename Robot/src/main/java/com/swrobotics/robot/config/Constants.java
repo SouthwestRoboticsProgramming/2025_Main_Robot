@@ -197,10 +197,8 @@ public final class Constants {
     // Lights
     public static final int kLedStripLength = 22;
     public static final int kLowBatteryThreshold = 10; // Volts
-    public static final int kLedCurrentShutoffThreshold = 250; // Amps
 
     // Motor tracking
-    public static final double kMotorTrackInterval = 2; // Seconds
     public static final double kOverheatingThreshold = 75; // Celsius
 
     // This must be at the bottom of the file so it happens last

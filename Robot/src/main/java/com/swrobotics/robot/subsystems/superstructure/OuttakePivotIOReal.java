@@ -50,9 +50,6 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
         motorPositionStatus = motor.getPosition();
         canCoderPositionStatus = canCoder.getAbsolutePosition(true);
-        CTREUtil.setUpdateFrequency(motor, Constants.kStatusSignalFreq, motorPositionStatus);
-        CTREUtil.setUpdateFrequency(canCoder, Constants.kStatusSignalFreq, canCoderPositionStatus);
-        CTREUtil.optimizeBusUtilization(motor, canCoder);
 
         positionControl = new MotionMagicVoltage(0)
                 .withEnableFOC(true);

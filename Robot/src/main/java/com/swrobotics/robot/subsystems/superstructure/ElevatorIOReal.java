@@ -47,8 +47,6 @@ public final class ElevatorIOReal implements ElevatorIO {
 
         motor1.setPosition(0); // Start fully down
         positionStatus = motor1.getPosition();
-        CTREUtil.setUpdateFrequency(motor1, Constants.kStatusSignalFreq, positionStatus);
-        CTREUtil.optimizeBusUtilization(motor1, motor2);
 
         positionControl = new MotionMagicVoltage(0)
                 .withEnableFOC(true);
