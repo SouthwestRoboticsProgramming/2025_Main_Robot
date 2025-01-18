@@ -51,10 +51,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     }
 
     public Command commandSetState(State targetState) {
-        return Commands.run(() -> {
-            setTargetState(targetState);
-            System.out.println("aidhfsuifhascuilraoeyrcauirhlafkjsdfk");
-        }, this);
+        return Commands.run(() -> setTargetState(targetState), this);
     }
 
     public Command commandSetStateOnce(State targetState) {
