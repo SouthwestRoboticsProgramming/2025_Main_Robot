@@ -5,7 +5,7 @@ import com.swrobotics.robot.logging.AutoLoggedInputs;
 public interface OuttakePivotIO {
     class Inputs extends AutoLoggedInputs {
         // Rotations, from horizontal
-        public double currentAngle;
+        public double currentAngleRot;
     }
 
     void updateInputs(Inputs inputs);

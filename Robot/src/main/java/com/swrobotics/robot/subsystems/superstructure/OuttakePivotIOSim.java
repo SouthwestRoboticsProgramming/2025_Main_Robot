@@ -16,7 +16,7 @@ public final class OuttakePivotIOSim implements OuttakePivotIO {
     @Override
     public void updateInputs(Inputs inputs) {
         currentAngle = MathUtil.lerp(currentAngle, targetAngle, 0.1);
-        inputs.currentAngle = currentAngle;
+        inputs.currentAngleRot = currentAngle;
     }
 
     @Override

@@ -67,7 +67,7 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
     @Override
     public void updateInputs(Inputs inputs) {
-        inputs.currentAngle = motorPositionStatus.getValueAsDouble();
+        inputs.currentAngleRot = motorPositionStatus.getValueAsDouble();
     }
 
     @Override
