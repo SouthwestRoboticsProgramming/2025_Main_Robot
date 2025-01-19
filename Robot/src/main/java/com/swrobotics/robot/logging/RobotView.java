@@ -19,8 +19,8 @@ public final class RobotView {
     private static final MechanismLigament2d outtake = outtakePivot.append(
             new MechanismLigament2d("Outtake", 0.7, 0, 3, new Color8Bit(Color.kYellow)));
 
-    public static void setSuperstructureState(double elevatorHeightPct, double pivotAngleRot) {
-        outtakePivot.setPosition(1, 0.5 + 2 * elevatorHeightPct);
+    public static void setSuperstructureState(double elevatorHeightMeters, double pivotAngleRot) {
+        outtakePivot.setPosition(1, 0.5 + elevatorHeightMeters);
         outtake.setAngle(Units.rotationsToDegrees(pivotAngleRot));
     }
 

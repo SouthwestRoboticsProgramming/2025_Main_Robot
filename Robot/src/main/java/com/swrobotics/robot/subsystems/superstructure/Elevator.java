@@ -59,15 +59,15 @@ public final class Elevator {
         }
     }
 
-    public double getCurrentHeight() {
-        return inputs.currentHeight;
+    public double getCurrentHeightMeters() {
+        return inputs.currentHeightMeters;
     }
 
     public boolean isSafeToMovePivotIn() {
-        return inputs.currentHeight < Constants.kElevatorMaxHeightWithArmIn.get();
+        return inputs.currentHeightMeters < Constants.kElevatorMaxHeightWithArmIn.get();
     }
 
     public boolean isInTolerance() {
-        return Math.abs(inputs.currentHeight - targetPosition.getHeight()) < Constants.kElevatorTolerance.get();
+        return Math.abs(inputs.currentHeightMeters - targetPosition.getHeight()) < Constants.kElevatorTolerance.get();
     }
 }

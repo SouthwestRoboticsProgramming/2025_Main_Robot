@@ -155,16 +155,16 @@ public final class Constants {
     );
 
     // Elevator
-    public static final double kElevatorRotationsForFullHeight = 500; // FIXME
+    public static final double kElevatorRotationsPerMeter = 250; // FIXME
     public static final NTSlot0MotionMagicConfigs kElevatorPID =
             new NTSlot0MotionMagicConfigs("Elevator/PID", 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Elevator/Tolerance", 0.01).setPersistent();
-    public static final NTEntry<Double> kElevatorMaxHeightWithArmIn = new NTDouble("Elevator/Max Height With Arm In", 0.1).setPersistent();
-    public static final NTEntry<Double> kElevatorHeightL1 = new NTDouble("Elevator/L1 Height", 0.25).setPersistent();
-    public static final NTEntry<Double> kElevatorHeightL2 = new NTDouble("Elevator/L2 Height", 0.5).setPersistent();
-    public static final NTEntry<Double> kElevatorHeightL3 = new NTDouble("Elevator/L3 Height", 0.75).setPersistent();
-    public static final NTEntry<Double> kElevatorHeightL4 = new NTDouble("Elevator/L4 Height", 1.0).setPersistent();
+    public static final NTEntry<Double> kElevatorMaxHeightWithArmIn = new NTDouble("Elevator/Max Height With Arm In", 0.2).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightL1 = new NTDouble("Elevator/L1 Height", 0.5).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightL2 = new NTDouble("Elevator/L2 Height", 1).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightL3 = new NTDouble("Elevator/L3 Height", 1.5).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightL4 = new NTDouble("Elevator/L4 Height", 2).setPersistent();
 
     // Coral outtake pivot
     // 60:24 CANcoder

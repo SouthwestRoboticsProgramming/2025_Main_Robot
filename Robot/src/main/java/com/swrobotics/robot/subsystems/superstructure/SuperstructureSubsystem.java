@@ -62,7 +62,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     public void periodic() {
         elevator.updateInputs();
         pivot.updateInputs();
-        RobotView.setSuperstructureState(elevator.getCurrentHeight(), pivot.getCurrentAngle());
+        RobotView.setSuperstructureState(elevator.getCurrentHeightMeters(), pivot.getCurrentAngle());
 
         Elevator.Position elevatorTarget = targetState.elevatorPosition;
         OuttakePivot.Position pivotTarget = targetState.pivotPosition;
