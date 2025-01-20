@@ -13,7 +13,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.Supplier;
 
 public final class SuperstructureSubsystem extends SubsystemBase {
-    private static final NTBoolean CALIBRATE_PIVOT = new NTBoolean("Coral Outtake/Pivot/Encoder/Calibrate", false);
+    private static final NTBoolean CALIBRATE_PIVOT = new NTBoolean("Superstructure/Pivot/Encoder/Calibrate", false);
 
     public enum State {
         RECEIVE_CORAL_FROM_INDEXER(() -> 0.0, Constants.kOuttakePivotInAngle),
