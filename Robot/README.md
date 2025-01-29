@@ -11,7 +11,7 @@ by following the directions below.
 2. Download and install Docker Desktop from [here](https://www.docker.com/products/docker-desktop/).
    Make sure the option to use WSL instead of Hyper-V is enabled.
 3. Go to "Turn Windows features on or off" and ensure that `Virtual Machine Platform` and `Windows Subsystem for Linux`
-4. Reboot your computer.
+4. Reboot your computer. (optional?)
 5. Docker Desktop should open on next boot. If not, open it. Then accept the licence agreement.
 6. Download the `rustup` installer from [here](https://rustup.rs) and run it. This should open a
    terminal window.

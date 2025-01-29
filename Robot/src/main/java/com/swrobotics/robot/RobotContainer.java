@@ -16,6 +16,7 @@ import com.swrobotics.robot.logging.RobotView;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.PathfindingTest;
+import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -58,6 +59,7 @@ public class RobotContainer {
     public final SwerveDriveSubsystem drive;
     public final VisionSubsystem vision;
     public final SuperstructureSubsystem superstructure;
+    public final AlgaeIntakeSubsystem algaeIntake;
 
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
@@ -77,6 +79,7 @@ public class RobotContainer {
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
         superstructure = new SuperstructureSubsystem();
+        algaeIntake = new AlgaeIntakeSubsystem();
 
         lights = new LightsSubsystem(this);
 

@@ -13,6 +13,7 @@ import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
 import com.swrobotics.robot.logging.FieldView;
+import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -103,6 +104,12 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L3));
         operator.y.trigger()
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
+
+
+        robot.algaeIntake.setDefaultCommand(
+                robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
+        driver.leftTrigger.triggerOutside(0.25)
+                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
 
         // Everything past here is for testing and should eventually be removed
 
