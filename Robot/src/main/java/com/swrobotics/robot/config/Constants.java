@@ -109,7 +109,7 @@ public final class Constants {
                     .withCouplingGearRatio(50.0 / 16)
                     .withWheelRadius(Inches.of(1.9))
                     // Gains taken from 254 2024 robot code
-                    .withSteerMotorGains(new Slot0Configs().withKP(100).withKD(0.2).withKV(1.5))
+                    .withSteerMotorGains(new Slot0Configs().withKP(50).withKD(0.01).withKV(0.1))
                     .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(12.0 / 88.2142857143))
                     // TODO: Torque current FOC
                     .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
