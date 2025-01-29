@@ -100,7 +100,7 @@ public final class Constants {
 
     public static final SwerveDrivetrainConstants kDrivetrainConstants = new SwerveDrivetrainConstants()
             .withCANBusName(IOAllocation.CAN.kSwerveBus)
-            .withPigeon2Id(IOAllocation.CAN.kPigeon2.id())
+            .withPigeon2Id(IOAllocation.CAN.kJosh.id())
             .withPigeon2Configs(new Pigeon2Configuration());
     public static final SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> kModuleConstantsFactory =
             new SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>()
