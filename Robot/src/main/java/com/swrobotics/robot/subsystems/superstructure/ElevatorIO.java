@@ -12,4 +12,6 @@ public interface ElevatorIO {
     void setTargetHeight(double heightMeters);
 
     void setNeutral();
+
+    void setClimbMode(boolean activelyClimbing);
 }

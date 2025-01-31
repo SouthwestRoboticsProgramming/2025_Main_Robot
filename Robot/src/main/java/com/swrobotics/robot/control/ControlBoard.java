@@ -47,6 +47,9 @@ public final class ControlBoard extends SubsystemBase {
      * Y: L4
      * X: L1
      * 
+     * Up: Prep climb
+     * Down: Climb
+     * 
      * Right trigger: Score coral
      */
 
@@ -115,6 +118,11 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L3));
         operator.y.trigger()
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
+
+        operator.dpad.up.trigger()
+                .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
+        operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
+                .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
 
         // Everything past here is for testing and should eventually be removed
 

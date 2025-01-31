@@ -25,6 +25,8 @@ public final class ElevatorIOReal implements ElevatorIO {
     private final MotionMagicVoltage positionControl;
     private final NeutralOut neutralControl;
 
+    private boolean climbMode;
+
     public ElevatorIOReal() {
         motor1 = IOAllocation.CAN.kElevatorMotor1.createTalonFX();
         motor2 = IOAllocation.CAN.kElevatorMotor2.createTalonFX();
@@ -61,11 +63,20 @@ public final class ElevatorIOReal implements ElevatorIO {
     @Override
     public void setTargetHeight(double heightMeters) {
         double positionRot = heightMeters * Constants.kElevatorRotationsPerMeter;
-        motor1.setControl(positionControl.withPosition(positionRot));
+        if (climbMode) {
+            motor1.setControl(positionControl.withPosition(positionRot).withFeedForward(Constants.kElevatorClimbkG.get()));
+        } else {
+            motor1.setControl(positionControl.withPosition(positionRot));
+        }
     }
 
     @Override
     public void setNeutral() {
         motor1.setControl(neutralControl);
+    }
+
+    @Override
+    public void setClimbMode(boolean activelyClimbing) {
+        climbMode = activelyClimbing;
     }
 }

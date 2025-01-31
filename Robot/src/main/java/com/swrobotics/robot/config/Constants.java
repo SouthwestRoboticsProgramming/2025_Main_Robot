@@ -8,6 +8,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
+import com.swrobotics.lib.ctre.NTSlot0Configs;
 import com.swrobotics.lib.ctre.NTSlot0MotionMagicConfigs;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.net.NTDouble;
@@ -158,6 +159,7 @@ public final class Constants {
     public static final double kElevatorRotationsPerMeter = 250; // FIXME
     public static final NTSlot0MotionMagicConfigs kElevatorPID =
             new NTSlot0MotionMagicConfigs("Superstructure/Elevator/PID", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public static final NTEntry<Double> kElevatorClimbkG = new NTDouble("Superstructure/Elevator/PID/Climb kG", 0).setPersistent();
 
     public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Superstructure/Elevator/Tolerance", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.05).setPersistent();
@@ -167,6 +169,8 @@ public final class Constants {
     public static final NTEntry<Double> kElevatorHeightL2 = new NTDouble("Superstructure/Elevator/L2 Height", 1).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL3 = new NTDouble("Superstructure/Elevator/L3 Height", 1.5).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL4 = new NTDouble("Superstructure/Elevator/L4 Height", 2).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightClimbPrep = new NTDouble("Superstructure/Elevator/Climb Prep Height", 0.75).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightClimbEnd = new NTDouble("Superstructure/Elevator/Climb End Height", 0.5).setPersistent();
 
     // Coral outtake pivot
     // 60:24 CANcoder
@@ -184,6 +188,7 @@ public final class Constants {
     public static final NTEntry<Double> kOuttakePivotScoreL2Angle = new NTDouble("Superstructure/Pivot/Score L2 Angle (deg)", 70).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL3Angle = new NTDouble("Superstructure/Pivot/Score L3 Angle (deg)", 70).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL4Angle = new NTDouble("Superstructure/Pivot/Score L4 Angle (deg)", 60).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotClimbAngle = new NTDouble("Superstructure/Pivot/Climb Angle (deg)", 90).setPersistent();
 
     // Lights
     public static final int kLedStripLength = 22;

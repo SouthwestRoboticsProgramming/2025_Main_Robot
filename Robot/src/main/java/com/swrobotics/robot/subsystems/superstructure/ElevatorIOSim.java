@@ -28,4 +28,7 @@ public final class ElevatorIOSim implements ElevatorIO {
         currentHeight = 0;
         targetHeight = 0;
     }
+
+    @Override
+    public void setClimbMode(boolean activelyClimbing) {}
 }

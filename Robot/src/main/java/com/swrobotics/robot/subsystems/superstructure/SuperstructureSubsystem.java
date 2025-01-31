@@ -20,7 +20,9 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         SCORE_L1(Constants.kElevatorHeightL1, Constants.kOuttakePivotScoreL1Angle),
         SCORE_L2(Constants.kElevatorHeightL2, Constants.kOuttakePivotScoreL2Angle),
         SCORE_L3(Constants.kElevatorHeightL3, Constants.kOuttakePivotScoreL3Angle),
-        SCORE_L4(Constants.kElevatorHeightL4, Constants.kOuttakePivotScoreL4Angle);
+        SCORE_L4(Constants.kElevatorHeightL4, Constants.kOuttakePivotScoreL4Angle),
+        PREP_CLIMB(Constants.kElevatorHeightClimbPrep, Constants.kOuttakePivotClimbAngle),
+        CLIMB(Constants.kElevatorHeightClimbEnd, Constants.kOuttakePivotClimbAngle);
 
         public static State forScoring(int level) {
             return switch (level) {
@@ -74,6 +76,10 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         this.targetState = targetState;
     }
 
+    public State getTargetState() {
+        return targetState;
+    }
+
     public Command commandSetState(State targetState) {
         return Commands.run(() -> setTargetState(targetState), this);
     }
@@ -88,6 +94,9 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         pivotIO.updateInputs(pivotInputs);
         Logger.processInputs("Elevator", elevatorInputs);
         Logger.processInputs("Outtake Pivot", pivotInputs);
+
+        // Set elevator climb mode
+        elevatorIO.setClimbMode(targetState == State.CLIMB);
 
         if (CALIBRATE_PIVOT.get()) {
             CALIBRATE_PIVOT.set(false);
