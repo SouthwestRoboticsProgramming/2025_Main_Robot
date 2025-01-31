@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -16,6 +17,8 @@ import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.IOAllocation;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
+
+import edu.wpi.first.units.AngleUnit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 
@@ -32,17 +35,21 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
         canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
 
+        CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
+        canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; // FIXME
+        canCoderConfig.MagnetSensor.MagnetOffset = Constants.kOuttakePivotEncoderOffset.get();
+        CTREUtil.retryUntilOk(canCoder, () -> canCoder.getConfigurator().apply(canCoderConfig));
+
         TalonFXConfigHelper motorConfig = new TalonFXConfigHelper();
         motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // FIXME
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        motorConfig.Feedback.SensorToMechanismRatio = Constants.kOuttakePivotMotorToArmRatio;
+        motorConfig.Feedback.FeedbackRemoteSensorID = IOAllocation.CAN.kOuttakePivotEncoder.id();
+        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        motorConfig.Feedback.SensorToMechanismRatio = Constants.kOuttakePivotCANcoderToArmRatio;
+        motorConfig.Feedback.RotorToSensorRatio = Constants.kOuttakePivotMotorToArmRatio / Constants.kOuttakePivotCANcoderToArmRatio;
         motorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         motorConfig.withTunable(Constants.kOuttakePivotPID);
         motorConfig.apply(motor);
-
-        CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
-        canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; // FIXME
-        CTREUtil.retryUntilOk(canCoder, () -> canCoder.getConfigurator().apply(canCoderConfig));
 
         MotorTrackerSubsystem.getInstance().addMotor("Outtake Pivot", motor);
         MusicSubsystem.getInstance().addInstrument(motor);
@@ -54,15 +61,6 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
                 .withEnableFOC(true);
 
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
-        canCoderPositionStatus.waitForUpdate(1);
-
-        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
-        double armPos = MathUtil.wrap(
-                canCoderPos + Constants.kOuttakePivotEncoderOffset.get(),
-                -0.5, 0.5
-        ) / Constants.kOuttakePivotCANcoderToArmRatio;
-
-        CTREUtil.retryUntilOk(motor, () -> motor.setPosition(armPos));
     }
 
     @Override
@@ -77,11 +75,8 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
     @Override
     public void calibrateEncoder() {
-        // Assumes that the arm is currently in horizontal position (angle 0)
-        canCoderPositionStatus.refresh();
-        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
-        Constants.kOuttakePivotEncoderOffset.set(-canCoderPos);
-
-        CTREUtil.retryUntilOk(motor, () -> motor.setPosition(0));
+        // Assumes that the arm is currently in vertical position (angle 90)
+        CTREUtil.retryUntilOk(canCoder, () -> canCoder.setPosition(0.25));
+        // TODO: Check that the motor resets when the CANCoder does
     }
 }
