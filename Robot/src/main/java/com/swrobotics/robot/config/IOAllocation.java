@@ -31,6 +31,7 @@ public final class IOAllocation {
 
         public static final CanId kAlgaeIntakeSpinMotor = new CanId(16, kGerald);
         public static final CanId kAlgaeIntakePivotMotor = new CanId(17, kGerald);
+        public static final CanId kAlgaeIntakePivotEncoder = new CanId(18, kGerald);
 
         public static final CanId kPDP = new CanId(62, kRIO);
     }

@@ -186,11 +186,16 @@ public final class Constants {
     public static final NTEntry<Double> kOuttakePivotScoreL4Angle = new NTDouble("Superstructure/Pivot/Score L4 Angle (deg)", 60).setPersistent();
 
     // Algae floor intake
-    public static final NTEntry<Double> kAlgaeStowAngle = new NTDouble("Algae/Stow Angle (deg)", 0.0).setPersistent();
-    public static final NTEntry<Double> kAlgaeIntakeAngle = new NTDouble("Algae/Intake Angle (deg)", 45.0).setPersistent();
-    public static final NTEntry<Double> kAlgaeHoldAngle = new NTDouble("Algae/Hold Angle (deg)", 30.0).setPersistent();
-    public static final NTEntry<Double> kAlgaeIntakeVoltage = new NTDouble("Algae/Intake Voltage", 6.0).setPersistent();
-    public static final NTEntry<Double> kAlgaeHoldVoltage = new NTDouble("Algae/Hold Voltage", 1.0).setPersistent();
+    public static final double kAlgaePivotMotorToArmRatio = (36.0 / 16.0) * (58.0 / 24.0) * 25;
+    public static final double kAlgaePivotCANcoderToArmRatio = (36.0 / 16.0);
+    public static final NTEntry<Double> kAlgaeStowAngle = new NTDouble("Algae/Pivot/Stow Angle (deg)", 0.0).setPersistent();
+    public static final NTEntry<Double> kAlgaeIntakeAngle = new NTDouble("Algae/Pivot/Intake Angle (deg)", 45.0).setPersistent();
+    public static final NTEntry<Double> kAlgaeHoldAngle = new NTDouble("Algae//Pivot/Hold Angle (deg)", 30.0).setPersistent();
+    public static final NTEntry<Double> kAlgaeIntakeVoltage = new NTDouble("Algae/Roller/Intake Voltage", 6.0).setPersistent();
+    public static final NTEntry<Double> kAlgaeHoldVoltage = new NTDouble("Algae/Roller/Hold Voltage", 1.0).setPersistent();
+    public static final NTEntry<Double> kAlgaePivotEncoderOffset = new NTDouble("Algae/Pivot/Offset (rot)", 0).setPersistent();
+    public static final NTSlot0MotionMagicConfigs kAlgaePivotPID =
+            new NTSlot0MotionMagicConfigs("Algae/Pivot/PID", 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     // Lights
     public static final int kLedStripLength = 22;

@@ -1,5 +1,7 @@
 package com.swrobotics.robot.subsystems.algae;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
@@ -70,9 +72,9 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
         algaeIO.updateInputs(algaeInputs);
         Logger.processInputs("Algae", algaeInputs);
 
-        RobotView.setAlgaeIntakeState(algaeInputs.currentAngleDeg, algaeInputs.voltageOut);
+        RobotView.setAlgaeIntakeState(algaeInputs.currentAngleRot / 360.0, algaeInputs.voltageOut);
 
-        algaeIO.setTargetAngle(targetState.getAngle());
+        algaeIO.setTargetAngle(Degrees.of(targetState.getAngle()));
         algaeIO.setVoltage(targetState.getVoltage());
     }
 }
