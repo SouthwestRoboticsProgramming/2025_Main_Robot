@@ -76,6 +76,7 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
     @Override
     public void calibrateEncoder() {
         // Assumes that the arm is currently in vertical position (angle 90)
+        Constants.kOuttakePivotEncoderOffset.set(canCoder.getPosition().getValueAsDouble() - 0.25);
         CTREUtil.retryUntilOk(canCoder, () -> canCoder.setPosition(0.25));
         // TODO: Check that the motor resets when the CANCoder does
     }
