@@ -14,6 +14,8 @@ import com.swrobotics.lib.ctre.CTREUtil;
 import com.swrobotics.lib.ctre.TalonFXConfigHelper;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.IOAllocation;
+import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
+import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 
 import edu.wpi.first.units.measure.Angle;
 
@@ -50,6 +52,11 @@ public class AlgaeIOReal implements AlgaeIO {
         rollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         rollerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         CTREUtil.retryUntilOk(rollerMotor, () -> rollerMotor.getConfigurator().apply(rollerConfig));
+
+        MotorTrackerSubsystem.getInstance().addMotor("Algae Pivot", pivotMotor);
+        MotorTrackerSubsystem.getInstance().addChild("Algae Roller", rollerMotor);
+        MusicSubsystem.getInstance().addInstrument(pivotMotor);
+        MusicSubsystem.getInstance().addInstrument(rollerMotor);
 
         pivotMotorPositionStatus = pivotMotor.getPosition();
 
