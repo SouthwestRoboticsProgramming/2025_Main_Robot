@@ -13,6 +13,7 @@ import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
 import com.swrobotics.robot.logging.FieldView;
+import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -48,6 +49,9 @@ public final class ControlBoard extends SubsystemBase {
      * X: L1
      * 
      * Right trigger: Score coral
+     * 
+     * Inverted: 2
+     * Not inverted: 1
      */
 
     private static final NTEntry<Boolean> CHARACTERISE_WHEEL_RADIUS = new NTBoolean("Drive/Characterize Wheel Radius", false);
@@ -115,6 +119,13 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L3));
         operator.y.trigger()
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
+
+        robot.coralHandler.setDefaultCommand(
+                robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.HOLD));
+        new Trigger(() -> operator.leftTrigger.isOutside(Constants.kTriggerThreshold))
+                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
+        new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
+                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.SCORE));
 
         // Everything past here is for testing and should eventually be removed
 
