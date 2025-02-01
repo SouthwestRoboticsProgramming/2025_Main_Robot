@@ -14,12 +14,12 @@ public final class ElevatorIOSim implements ElevatorIO {
     @Override
     public void updateInputs(Inputs inputs) {
         currentHeight = MathUtil.lerp(currentHeight, targetHeight, 0.2);
-        inputs.currentHeightMeters = currentHeight;
+        inputs.currentHeightPct = currentHeight;
     }
 
     @Override
-    public void setTargetHeight(double heightMeters) {
-        targetHeight = heightMeters;
+    public void setTargetHeight(double heightPct) {
+        targetHeight = heightPct;
     }
 
     @Override

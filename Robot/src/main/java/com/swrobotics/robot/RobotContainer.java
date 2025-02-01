@@ -32,6 +32,7 @@ import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.logging.Logging;
 import com.swrobotics.robot.subsystems.lights.LightsSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
+import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -60,6 +61,7 @@ public class RobotContainer {
     public final VisionSubsystem vision;
     public final SuperstructureSubsystem superstructure;
     public final AlgaeIntakeSubsystem algaeIntake;
+    public final CoralHandlingSubsystem coralHandler;
 
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
@@ -80,6 +82,7 @@ public class RobotContainer {
         vision = new VisionSubsystem(drive);
         superstructure = new SuperstructureSubsystem();
         algaeIntake = new AlgaeIntakeSubsystem();
+        coralHandler = new CoralHandlingSubsystem();
 
         lights = new LightsSubsystem(this);
 

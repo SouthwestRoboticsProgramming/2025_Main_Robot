@@ -28,8 +28,9 @@ public final class RobotView {
         outtake.setAngle(Units.rotationsToDegrees(pivotAngleRot));
     }
 
-    public static void setAlgaeIntakeState(double intakeAngleDeg, double voltageOut) {
-        algaeIntake.setAngle(90 + intakeAngleDeg);
+    public static void setAlgaeIntakeState(double intakeAngleRot, double voltageOut) {
+        double intakeAngleDeg = Units.rotationsToDegrees(intakeAngleRot);
+        algaeIntake.setAngle(180 - intakeAngleDeg);
         double red = 256.0 / 12.0 * voltageOut;
         algaeIntake.setColor(new Color8Bit((int) red, 20, 100));
     }

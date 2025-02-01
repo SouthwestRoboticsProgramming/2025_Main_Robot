@@ -72,7 +72,7 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
         algaeIO.updateInputs(algaeInputs);
         Logger.processInputs("Algae", algaeInputs);
 
-        RobotView.setAlgaeIntakeState(algaeInputs.currentAngleRot / 360.0, algaeInputs.voltageOut);
+        RobotView.setAlgaeIntakeState(algaeInputs.currentAngleRot, algaeInputs.voltageOut);
 
         algaeIO.setTargetAngle(Degrees.of(targetState.getAngle()));
         algaeIO.setVoltage(targetState.getVoltage());

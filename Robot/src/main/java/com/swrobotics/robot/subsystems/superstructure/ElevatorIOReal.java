@@ -55,12 +55,14 @@ public final class ElevatorIOReal implements ElevatorIO {
     public void updateInputs(Inputs inputs) {
         positionStatus.refresh();
         double position = positionStatus.getValue().in(Units.Rotations);
-        inputs.currentHeightMeters = position / Constants.kElevatorRotationsPerMeter;
+        inputs.currentHeightPct = position / Constants.kElevatorMaxHeightRotations;
     }
 
     @Override
-    public void setTargetHeight(double heightMeters) {
-        double positionRot = heightMeters * Constants.kElevatorRotationsPerMeter;
+    public void setTargetHeight(double heightPct) {
+        heightPct = Math.min(heightPct, 1.0);
+
+        double positionRot = heightPct * Constants.kElevatorMaxHeightRotations;
         motor1.setControl(positionControl.withPosition(positionRot));
     }
 

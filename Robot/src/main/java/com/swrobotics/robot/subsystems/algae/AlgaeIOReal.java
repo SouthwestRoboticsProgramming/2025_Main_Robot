@@ -54,7 +54,7 @@ public class AlgaeIOReal implements AlgaeIO {
         CTREUtil.retryUntilOk(rollerMotor, () -> rollerMotor.getConfigurator().apply(rollerConfig));
 
         MotorTrackerSubsystem.getInstance().addMotor("Algae Pivot", pivotMotor);
-        MotorTrackerSubsystem.getInstance().addChild("Algae Roller", rollerMotor);
+        MotorTrackerSubsystem.getInstance().addMotor("Algae Roller", rollerMotor);
         MusicSubsystem.getInstance().addInstrument(pivotMotor);
         MusicSubsystem.getInstance().addInstrument(rollerMotor);
 

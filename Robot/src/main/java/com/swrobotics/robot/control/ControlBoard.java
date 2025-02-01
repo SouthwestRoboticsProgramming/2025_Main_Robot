@@ -14,10 +14,12 @@ import com.swrobotics.robot.config.FieldPositions;
 
 import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
+import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -32,11 +34,25 @@ public final class ControlBoard extends SubsystemBase {
      * Driver:
      * Left stick: drive translation
      * Right stick X: drive rotation
-     *      *
+     * 
+     * Start: Reset gyro
+     * Back: Reset gyro
+     * 
+     * B: Snap to coral station
+     * A: Snap to reef point
+     * 
+     * Left trigger: Intake algae
+     * 
      * Operator:
-     * nothing!
-     *
-     * TODO: put algae intake control on drive controller
+     * A: L2
+     * B: L3
+     * Y: L4
+     * X: L1
+     * 
+     * Right trigger: Score coral
+     * 
+     * Inverted: 2
+     * Not inverted: 1
      */
 
     private static final NTEntry<Boolean> CHARACTERISE_WHEEL_RADIUS = new NTBoolean("Drive/Characterize Wheel Radius", false);
@@ -72,7 +88,7 @@ public final class ControlBoard extends SubsystemBase {
 
         new Trigger(CHARACTERISE_WHEEL_RADIUS::get).whileTrue(new CharacterizeWheelsCommand(robot.drive));
 
-        // Endgame Alert
+        // Endgame Notice (controller rumble)
         new Trigger(
                 () ->
                         DriverStation.isTeleopEnabled()
@@ -110,6 +126,13 @@ public final class ControlBoard extends SubsystemBase {
                 robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
         driver.leftTrigger.triggerOutside(0.25)
                 .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
+                
+        robot.coralHandler.setDefaultCommand(
+                robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.HOLD));
+        new Trigger(() -> operator.leftTrigger.isOutside(Constants.kTriggerThreshold))
+                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
+        new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
+                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.SCORE));
 
         // Everything past here is for testing and should eventually be removed
 

@@ -33,7 +33,7 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
 
         TalonFXConfigHelper motorConfig = new TalonFXConfigHelper();
-        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // FIXME
+        motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.Feedback.SensorToMechanismRatio = Constants.kOuttakePivotMotorToArmRatio;
         motorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
@@ -56,11 +56,13 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
         canCoderPositionStatus.waitForUpdate(1);
 
-        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
-        double armPos = MathUtil.wrap(
-                canCoderPos + Constants.kOuttakePivotEncoderOffset.get(),
-                -0.5, 0.5
-        ) / Constants.kOuttakePivotCANcoderToArmRatio;
+        // double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
+        // double armPos = MathUtil.wrap(
+        //         canCoderPos + Constants.kOuttakePivotEncoderOffset.get(),
+        //         -0.5, 0.5
+        // ) / Constants.kOuttakePivotCANcoderToArmRatio;
+
+        double armPos = Math.PI / 2;
 
         CTREUtil.retryUntilOk(motor, () -> motor.setPosition(armPos));
     }
@@ -72,7 +74,7 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
     @Override
     public void setTargetAngle(double targetAngleRot) {
-        motor.setControl(positionControl.withPosition(targetAngleRot));
+        // motor.setControl(positionControl.withPosition(targetAngleRot));
     }
 
     @Override

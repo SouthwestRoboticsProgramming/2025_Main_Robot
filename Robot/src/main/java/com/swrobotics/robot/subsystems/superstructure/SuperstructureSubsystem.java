@@ -16,7 +16,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private static final NTBoolean CALIBRATE_PIVOT = new NTBoolean("Superstructure/Pivot/Encoder/Calibrate", false);
 
     public enum State {
-        RECEIVE_CORAL_FROM_INDEXER(() -> 0.0, Constants.kOuttakePivotInAngle),
+        RECEIVE_CORAL_FROM_INDEXER(Constants.kElevatorHeightBottom, Constants.kOuttakePivotInAngle),
         SCORE_L1(Constants.kElevatorHeightL1, Constants.kOuttakePivotScoreL1Angle),
         SCORE_L2(Constants.kElevatorHeightL2, Constants.kOuttakePivotScoreL2Angle),
         SCORE_L3(Constants.kElevatorHeightL3, Constants.kOuttakePivotScoreL3Angle),
@@ -94,9 +94,9 @@ public final class SuperstructureSubsystem extends SubsystemBase {
             pivotIO.calibrateEncoder();
         }
 
-        RobotView.setSuperstructureState(elevatorInputs.currentHeightMeters, pivotInputs.currentAngleRot);
+        RobotView.setSuperstructureState(elevatorInputs.currentHeightPct, pivotInputs.currentAngleRot);
 
-        double elevatorCurrent = elevatorInputs.currentHeightMeters;
+        double elevatorCurrent = elevatorInputs.currentHeightPct;
         double pivotCurrent = pivotInputs.currentAngleRot;
         double elevatorTarget = targetState.getElevatorHeight();
         double pivotTarget = targetState.getPivotAngle();
@@ -107,27 +107,28 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         double elevatorTolerance = Constants.kElevatorCollisionTolerance.get();
         double pivotTolerance = Constants.kOuttakePivotCollisionTolerance.get();
 
-        // Prevent collision with elevator crossbar
-        boolean sameSideOfBar = (elevatorCurrent < collisionBottom && elevatorTarget < collisionBottom)
-                || (elevatorCurrent > collisionTop && elevatorTarget > collisionTop);
-        if (!sameSideOfBar) {
-            // Pivot must get out of the way of the bar
-            // Subtract tolerance so it goes a little farther out than necessary
-            pivotTarget = Math.min(pivotTarget, collisionPivot - Units.degreesToRotations(pivotTolerance));
+        // TODO: Re-enable collision logic once pivot works
+        // // Prevent collision with elevator crossbar
+        // boolean sameSideOfBar = (elevatorCurrent < collisionBottom && elevatorTarget < collisionBottom)
+        //         || (elevatorCurrent > collisionTop && elevatorTarget > collisionTop);
+        // if (!sameSideOfBar) {
+        //     // Pivot must get out of the way of the bar
+        //     // Subtract tolerance so it goes a little farther out than necessary
+        //     pivotTarget = Math.min(pivotTarget, collisionPivot - Units.degreesToRotations(pivotTolerance));
 
-            boolean pivotIsOutOfWay = pivotCurrent <= collisionPivot;
-            if (!pivotIsOutOfWay) {
-                // Wait for pivot to move
-                if (elevatorCurrent < collisionBottom)
-                    elevatorTarget = collisionBottom - elevatorTolerance;
-                else if (elevatorCurrent > collisionTop)
-                    elevatorTarget = collisionTop + elevatorTolerance;
-                else
-                    elevatorTarget = elevatorCurrent;
-            }
-        }
+        //     boolean pivotIsOutOfWay = pivotCurrent <= collisionPivot;
+        //     if (!pivotIsOutOfWay) {
+        //         // Wait for pivot to move
+        //         if (elevatorCurrent < collisionBottom)
+        //             elevatorTarget = collisionBottom - elevatorTolerance;
+        //         else if (elevatorCurrent > collisionTop)
+        //             elevatorTarget = collisionTop + elevatorTolerance;
+        //         else
+        //             elevatorTarget = elevatorCurrent;
+        //     }
+        // }
 
-        if (elevatorTarget == 0.0 && Math.abs(elevatorInputs.currentHeightMeters) < Constants.kElevatorTolerance.get()) {
+        if (elevatorTarget == 0.0 && Math.abs(elevatorInputs.currentHeightPct) < Constants.kElevatorTolerance.get()) {
             // Conserve battery power when we can
             elevatorIO.setNeutral();
         } else {
@@ -137,7 +138,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     }
 
     public boolean isInTolerance() {
-        boolean elevator = Math.abs(elevatorInputs.currentHeightMeters - targetState.getElevatorHeight())
+        boolean elevator = Math.abs(elevatorInputs.currentHeightPct - targetState.getElevatorHeight())
                 < Constants.kElevatorTolerance.get();
 
         boolean pivot = Math.abs(pivotInputs.currentAngleRot - targetState.getPivotAngle())

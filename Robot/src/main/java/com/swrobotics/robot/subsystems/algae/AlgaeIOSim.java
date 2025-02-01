@@ -1,6 +1,7 @@
 package com.swrobotics.robot.subsystems.algae;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Rotations;
 
 import com.swrobotics.lib.utils.MathUtil;
 
@@ -20,7 +21,7 @@ public class AlgaeIOSim implements AlgaeIO {
 
     @Override
     public void setTargetAngle(Angle angle) {
-        targetAngle = angle.in(Degrees);
+        targetAngle = angle.in(Rotations);
     }
 
     @Override
