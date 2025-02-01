@@ -8,6 +8,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
+import com.swrobotics.lib.ctre.NTSlot0Configs;
 import com.swrobotics.lib.ctre.NTSlot0MotionMagicConfigs;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.net.NTDouble;
@@ -87,10 +88,10 @@ public final class Constants {
     public static final double kDriveWheelSpacingY = 63.0 / 100; // m
     public static final double kDriveRadius = Math.hypot(kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2);
 
-    public static final NTEntry<Double> kFrontLeftOffset = new NTDouble("Drive/Modules/Front Left Offset (rot)", 0).setPersistent();
-    public static final NTEntry<Double> kFrontRightOffset = new NTDouble("Drive/Modules/Front Right Offset (rot)", 0).setPersistent();
-    public static final NTEntry<Double> kBackLeftOffset = new NTDouble("Drive/Modules/Back Left Offset (rot)", 0).setPersistent();
-    public static final NTEntry<Double> kBackRightOffset = new NTDouble("Drive/Modules/Back Right Offset (rot)", 0).setPersistent();
+    public static final NTEntry<Double> kFrontLeftOffset = new NTDouble("Drive/Modules/Front Left Offset (rot)", -0.335693).setPersistent();
+    public static final NTEntry<Double> kFrontRightOffset = new NTDouble("Drive/Modules/Front Right Offset (rot)", 0.314453).setPersistent();
+    public static final NTEntry<Double> kBackLeftOffset = new NTDouble("Drive/Modules/Back Left Offset (rot)", -0.318115).setPersistent();
+    public static final NTEntry<Double> kBackRightOffset = new NTDouble("Drive/Modules/Back Right Offset (rot)", -0.360107).setPersistent();
     public static final SwerveModuleInfo[] kSwerveModuleInfos = {
             new SwerveModuleInfo(IOAllocation.CAN.kSwerveFL, kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2, Constants.kFrontLeftOffset, "Front Left"),
             new SwerveModuleInfo(IOAllocation.CAN.kSwerveFR, kDriveWheelSpacingX / 2, -kDriveWheelSpacingY / 2, Constants.kFrontRightOffset, "Front Right"),
@@ -157,7 +158,7 @@ public final class Constants {
     // Elevator
     public static final double kElevatorMaxHeightRotations = 100;
     public static final NTSlot0MotionMagicConfigs kElevatorPID =
-            new NTSlot0MotionMagicConfigs("Superstructure/Elevator/PID", 0.4, 0, 0.286, 0, 0.132, 0, 80, 190, 0);
+            new NTSlot0MotionMagicConfigs("Superstructure/Elevator/PID", 0.4, 0, 0.286, 0, 0.12, 0, 80, 500, 0);
 
     public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Superstructure/Elevator/Tolerance", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.05).setPersistent();
@@ -195,8 +196,10 @@ public final class Constants {
     public static final NTEntry<Double> kAlgaeIntakeVoltage = new NTDouble("Algae/Roller/Intake Voltage", 6.0).setPersistent();
     public static final NTEntry<Double> kAlgaeHoldVoltage = new NTDouble("Algae/Roller/Hold Voltage", 1.0).setPersistent();
     public static final NTEntry<Double> kAlgaePivotEncoderOffset = new NTDouble("Algae/Pivot/Offset (rot)", 0).setPersistent();
-    public static final NTSlot0MotionMagicConfigs kAlgaePivotPID =
-            new NTSlot0MotionMagicConfigs("Algae/Pivot/PID", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    public static final NTSlot0Configs kAlgaePivotPID =
+            new NTSlot0Configs("Algae/Pivot/PID", 0, 0, 0, 0, 0, 0);
+    
+    // Coral outtake
     public static final NTEntry<Double> kOuttakeRollerIntakeVoltage = new NTDouble("Outtake/Intake Voltage", 2).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreVoltage = new NTDouble("Outtake/Score Voltage", 3).setPersistent();
 

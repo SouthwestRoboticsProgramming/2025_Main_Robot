@@ -14,7 +14,7 @@ public interface AlgaeIO {
 
     void updateInputs(Inputs inputs);
 
-    void setTargetAngle(Angle targetAngle);
+    void setTargetAngle(double targetAngleRot);
 
     void setVoltage(double targetVoltage);
 

@@ -6,15 +6,18 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.logging.RobotView;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class AlgaeIntakeSubsystem extends SubsystemBase {
+    private static final NTBoolean CALIBRATE_PIVOT = new NTBoolean("Algae/Pivot/Calibrate", false);
 
     public enum State {
         STOW(Constants.kAlgaeStowAngle, () -> 0.0),
@@ -30,7 +33,7 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
         }
 
         public double getAngle() {
-            return angleGetter.get();
+            return Units.degreesToRadians(angleGetter.get());
         }
 
         public double getVoltage() {
@@ -72,9 +75,14 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
         algaeIO.updateInputs(algaeInputs);
         Logger.processInputs("Algae", algaeInputs);
 
+        if (CALIBRATE_PIVOT.get()) {
+            CALIBRATE_PIVOT.set(false);
+            algaeIO.calibrateEncoder();
+        }
+
         RobotView.setAlgaeIntakeState(algaeInputs.currentAngleRot, algaeInputs.voltageOut);
 
-        algaeIO.setTargetAngle(Degrees.of(targetState.getAngle()));
+        algaeIO.setTargetAngle(targetState.getAngle());
         algaeIO.setVoltage(targetState.getVoltage());
     }
 }

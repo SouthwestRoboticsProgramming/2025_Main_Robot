@@ -51,8 +51,8 @@ public final class ControlBoard extends SubsystemBase {
      * 
      * Right trigger: Score coral
      * 
-     * Inverted: 2
-     * Not inverted: 1
+     * Inverted: 3
+     * Not inverted: 2
      */
 
     private static final NTEntry<Boolean> CHARACTERISE_WHEEL_RADIUS = new NTBoolean("Drive/Characterize Wheel Radius", false);
@@ -122,10 +122,10 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
 
 
-        robot.algaeIntake.setDefaultCommand(
-                robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
-        driver.leftTrigger.triggerOutside(0.25)
-                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
+        // robot.algaeIntake.setDefaultCommand(
+        //         robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
+        // driver.leftTrigger.triggerOutside(0.25)
+        //         .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
                 
         robot.coralHandler.setDefaultCommand(
                 robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.HOLD));

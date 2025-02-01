@@ -20,8 +20,8 @@ public class AlgaeIOSim implements AlgaeIO {
     }
 
     @Override
-    public void setTargetAngle(Angle angle) {
-        targetAngle = angle.in(Rotations);
+    public void setTargetAngle(double angleRot) {
+        targetAngle = angleRot;
     }
 
     @Override

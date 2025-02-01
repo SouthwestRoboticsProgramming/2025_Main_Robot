@@ -54,7 +54,6 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
                 .withEnableFOC(true);
 
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
-        canCoderPositionStatus.waitForUpdate(1);
 
         // double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
         // double armPos = MathUtil.wrap(
