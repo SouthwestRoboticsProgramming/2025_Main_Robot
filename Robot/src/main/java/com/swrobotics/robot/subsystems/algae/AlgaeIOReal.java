@@ -1,5 +1,6 @@
 package com.swrobotics.robot.subsystems.algae;
 
+import com.ctre.phoenix6.signals.*;
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.StatusSignal;
@@ -9,10 +10,6 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.swrobotics.lib.ctre.CTREUtil;
 import com.swrobotics.lib.ctre.TalonFXConfigHelper;
 import com.swrobotics.lib.utils.MathUtil;
@@ -32,7 +29,7 @@ public class AlgaeIOReal implements AlgaeIO {
     private final StatusSignal<Angle> pivotMotorPositionStatus;
     private final StatusSignal<Angle> canCoderPositionStatus;
 
-    private final PositionVoltage positionControl;
+    private final MotionMagicVoltage positionControl;
     private final VoltageOut rollerControl;
 
     public AlgaeIOReal() {
@@ -46,8 +43,9 @@ public class AlgaeIOReal implements AlgaeIO {
 
         TalonFXConfigHelper pivotConfig = new TalonFXConfigHelper();
         pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         pivotConfig.Feedback.SensorToMechanismRatio = Constants.kAlgaePivotMotorToArmRatio;
+        pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         pivotConfig.withTunable(Constants.kAlgaePivotPID);
         pivotConfig.apply(pivotMotor);
 
@@ -66,14 +64,18 @@ public class AlgaeIOReal implements AlgaeIO {
 
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
 
+        double centerOfRange = 45 / 360.0;
+
         double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
         double armPos = MathUtil.wrap(
-                canCoderPos + Constants.kAlgaePivotEncoderOffset.get(),
-                -0.5, 0.5
-        ) / Constants.kAlgaePivotCANcoderToArmRatio;
+                (canCoderPos + Constants.kAlgaePivotEncoderOffset.get())
+                        / Constants.kAlgaePivotCANcoderToArmRatio,
+                centerOfRange - 0.5/Constants.kAlgaePivotCANcoderToArmRatio,
+                centerOfRange + 0.5/Constants.kAlgaePivotCANcoderToArmRatio
+        );
         CTREUtil.retryUntilOk(pivotMotor, () -> pivotMotor.setPosition(armPos));
 
-        positionControl = new PositionVoltage(0)
+        positionControl = new MotionMagicVoltage(0)
                 .withEnableFOC(true);
 
         rollerControl = new VoltageOut(0);
@@ -104,9 +106,8 @@ public class AlgaeIOReal implements AlgaeIO {
     @Override
     public void calibrateEncoder() {
         // Assumes that the arm is currently in horizontal position (angle 0)
-        Constants.kAlgaePivotEncoderOffset.set(canCoder.getAbsolutePosition().getValueAsDouble());
+        Constants.kAlgaePivotEncoderOffset.set(-canCoder.getAbsolutePosition().getValueAsDouble());
 
-        CTREUtil.retryUntilOk(canCoder, () -> canCoder.setPosition(0));
+        CTREUtil.retryUntilOk(pivotMotor, () -> pivotMotor.setPosition(0));
     }
-    
 }
