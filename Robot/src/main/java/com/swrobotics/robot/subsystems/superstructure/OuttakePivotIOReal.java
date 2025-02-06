@@ -2,6 +2,7 @@ package com.swrobotics.robot.subsystems.superstructure;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -73,6 +74,7 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
     @Override
     public void setTargetAngle(double targetAngleRot) {
+        motor.setControl(new CoastOut());
         // motor.setControl(positionControl.withPosition(targetAngleRot));
     }
 

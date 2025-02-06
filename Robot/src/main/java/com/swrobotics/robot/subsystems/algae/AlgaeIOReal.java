@@ -1,5 +1,6 @@
 package com.swrobotics.robot.subsystems.algae;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.*;
 import org.littletonrobotics.junction.Logger;
 
@@ -24,6 +25,7 @@ import edu.wpi.first.units.measure.Angle;
 public class AlgaeIOReal implements AlgaeIO {
     private final TalonFX pivotMotor;
     private final TalonFX rollerMotor;
+    private final TalonFXConfiguration rollerConfig;
     private final CANcoder canCoder;
 
     private final StatusSignal<Angle> pivotMotorPositionStatus;
@@ -31,6 +33,8 @@ public class AlgaeIOReal implements AlgaeIO {
 
     private final MotionMagicVoltage positionControl;
     private final VoltageOut rollerControl;
+
+    private boolean currentLimitEnabled;
 
     public AlgaeIOReal() {
         pivotMotor = IOAllocation.CAN.kAlgaeIntakePivotMotor.createTalonFX();
@@ -50,9 +54,12 @@ public class AlgaeIOReal implements AlgaeIO {
         pivotConfig.apply(pivotMotor);
 
         TalonFXConfigHelper rollerConfig = new TalonFXConfigHelper();
-        rollerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        rollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         rollerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        rollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        rollerConfig.CurrentLimits.StatorCurrentLimit = 24; // TODO: Constnat
         rollerConfig.apply(rollerMotor);
+        this.rollerConfig = rollerConfig;
 
         MotorTrackerSubsystem.getInstance().addMotor("Algae Pivot", pivotMotor);
         MotorTrackerSubsystem.getInstance().addMotor("Algae Roller", rollerMotor);
@@ -63,6 +70,8 @@ public class AlgaeIOReal implements AlgaeIO {
         canCoderPositionStatus = canCoder.getAbsolutePosition();
 
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
+
+        currentLimitEnabled = true;
 
         double centerOfRange = 45 / 360.0;
 
@@ -95,7 +104,7 @@ public class AlgaeIOReal implements AlgaeIO {
 
     @Override
     public void setTargetAngle(double targetAngleRot) {
-        // pivotMotor.setControl(positionControl.withPosition(targetAngleRot));
+         pivotMotor.setControl(positionControl.withPosition(targetAngleRot));
     }
 
     @Override

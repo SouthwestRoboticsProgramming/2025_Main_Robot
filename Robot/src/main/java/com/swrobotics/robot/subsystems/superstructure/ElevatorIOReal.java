@@ -63,8 +63,8 @@ public final class ElevatorIOReal implements ElevatorIO {
         heightPct = Math.min(heightPct, 1.0);
 
         double positionRot = heightPct * Constants.kElevatorMaxHeightRotations;
-        motor1.setControl(positionControl.withPosition(positionRot));
-//        setNeutral();
+//        motor1.setControl(positionControl.withPosition(positionRot));
+        setNeutral();
     }
 
     @Override

@@ -122,10 +122,12 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
 
 
-        // robot.algaeIntake.setDefaultCommand(
-        //         robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
-        // driver.leftTrigger.triggerOutside(0.25)
-        //         .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
+        robot.algaeIntake.setDefaultCommand(
+                robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
+        driver.leftTrigger.triggerOutside(0.25)
+                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
+        driver.rightTrigger.triggerOutside(0.25)
+                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
                 
         robot.coralHandler.setDefaultCommand(
                 robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.HOLD));

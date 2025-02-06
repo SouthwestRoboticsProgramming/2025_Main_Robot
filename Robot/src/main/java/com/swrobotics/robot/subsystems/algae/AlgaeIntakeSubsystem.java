@@ -22,7 +22,7 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
     public enum State {
         STOW(Constants.kAlgaeStowAngle, () -> 0.0),
         INTAKE(Constants.kAlgaeIntakeAngle, Constants.kAlgaeIntakeVoltage),
-        HOLD(Constants.kAlgaeHoldAngle, Constants.kAlgaeHoldVoltage);
+        OUTTAKE(Constants.kAlgaeIntakeAngle, () -> -Constants.kAlgaeOuttakeVoltage.get());
 
         private final Supplier<Double> angleGetter;
         private final Supplier<Double> voltageGetter;
@@ -33,7 +33,7 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
         }
 
         public double getAngle() {
-            return Units.degreesToRadians(angleGetter.get());
+            return Units.degreesToRotations(angleGetter.get());
         }
 
         public double getVoltage() {
