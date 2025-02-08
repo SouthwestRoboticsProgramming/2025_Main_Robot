@@ -27,18 +27,20 @@ public final class FieldPositions {
     private static final Rotation2d kRedLeftCoralStationFacing = Rotation2d.fromDegrees(90 + kCoralStationAngle);
     private static final Rotation2d kRedRightCoralStationFacing = kRedLeftCoralStationFacing.unaryMinus();
 
-    private static final List<Pose2d> kReefPositions; // Aligned with branch
-    private static final List<Pose2d> kReefAlgaePositions; // Centered on face
-    static {
+    private static final List<Pose2d> kReefPositions = new ArrayList<>(); // Aligned with branch
+    private static final List<Pose2d> kReefAlgaePositions = new ArrayList<>(); // Centered on face
+    private static void initPositions() {
         Translation2d center = new Translation2d(kReefCenterX, kReefCenterY);
 
-        double offsetX = -kReefApothem - Constants.kRobotLength / 2;
+        double offset = Constants.kSnapOffset.get();
+        kReefPositions.clear();
+        kReefAlgaePositions.clear();
+
+        double offsetX = -kReefApothem - Constants.kRobotLength / 2 - offset;
         Translation2d branchOffset1 = new Translation2d(offsetX, kReefBranchSpacing / 2);
         Translation2d branchOffset2 = new Translation2d(offsetX, -kReefBranchSpacing / 2);
         Translation2d algaeOffset = new Translation2d(offsetX, 0);
 
-        kReefPositions = new ArrayList<>();
-        kReefAlgaePositions = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             Rotation2d rotation = Rotation2d.fromDegrees(i * 60);
 
@@ -46,6 +48,11 @@ public final class FieldPositions {
             kReefPositions.add(new Pose2d(center.plus(branchOffset2.rotateBy(rotation)), rotation));
             kReefAlgaePositions.add(new Pose2d(center.plus(algaeOffset.rotateBy(rotation)), rotation));
         }
+    }
+
+    static {
+        initPositions();
+        Constants.kSnapOffset.onChange(FieldPositions::initPositions);
     }
 
     // Branches are numbered in the same order as Figure 5-8 in the game manual
