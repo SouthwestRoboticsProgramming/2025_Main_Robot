@@ -11,5 +11,11 @@ public class CoralOuttakeIOSim implements CoralOuttakeIO {
     public void setVoltage(double voltage) {
 
     }
+
+    @Override
+    public boolean hasPiece() {
+        // TODO Auto-generated method stub
+        return false;
+    }
     
 }
