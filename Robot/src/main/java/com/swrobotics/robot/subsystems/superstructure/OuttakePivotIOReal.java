@@ -2,6 +2,7 @@ package com.swrobotics.robot.subsystems.superstructure;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -33,7 +34,7 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
 
         TalonFXConfigHelper motorConfig = new TalonFXConfigHelper();
-        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // FIXME
+        motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.Feedback.SensorToMechanismRatio = Constants.kOuttakePivotMotorToArmRatio;
         motorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
@@ -54,13 +55,14 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
                 .withEnableFOC(true);
 
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
-        canCoderPositionStatus.waitForUpdate(1);
 
-        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
-        double armPos = MathUtil.wrap(
-                canCoderPos + Constants.kOuttakePivotEncoderOffset.get(),
-                -0.5, 0.5
-        ) / Constants.kOuttakePivotCANcoderToArmRatio;
+        // double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
+        // double armPos = MathUtil.wrap(
+        //         canCoderPos + Constants.kOuttakePivotEncoderOffset.get(),
+        //         -0.5, 0.5
+        // ) / Constants.kOuttakePivotCANcoderToArmRatio;
+
+        double armPos = Math.PI / 2;
 
         CTREUtil.retryUntilOk(motor, () -> motor.setPosition(armPos));
     }
@@ -72,7 +74,8 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
     @Override
     public void setTargetAngle(double targetAngleRot) {
-        motor.setControl(positionControl.withPosition(targetAngleRot));
+        motor.setControl(new CoastOut());
+        // motor.setControl(positionControl.withPosition(targetAngleRot));
     }
 
     @Override
