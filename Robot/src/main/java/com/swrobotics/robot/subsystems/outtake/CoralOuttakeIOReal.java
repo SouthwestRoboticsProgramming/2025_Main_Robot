@@ -10,12 +10,17 @@ import com.swrobotics.robot.config.IOAllocation;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 
+import edu.wpi.first.wpilibj.DigitalInput;
+
 public class CoralOuttakeIOReal implements CoralOuttakeIO {
     private final TalonFX motor;
+    private final DigitalInput beamBreak;
 
     private final VoltageOut voltageControl;
 
     public CoralOuttakeIOReal() {
+        beamBreak = new DigitalInput(IOAllocation.RIO.kDIO_OuttakeBeamBreak);
+
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -33,12 +38,17 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
     @Override
     public void updateInputs(Inputs inputs) {
         inputs.voltage = 0;
-        inputs.hasPiece = false;
+        inputs.hasPiece = beamBreak.get();
     }
 
     @Override
     public void setVoltage(double voltage) {
         motor.setControl(voltageControl.withOutput(voltage));
+    }
+
+    @Override
+    public boolean hasPiece() {
+        return beamBreak.get();
     }
     
 }
