@@ -11,4 +11,6 @@ public interface CoralOuttakeIO {
     void updateInputs(Inputs inputs);
 
     void setVoltage(double voltage);
+
+    boolean hasPiece();
 }

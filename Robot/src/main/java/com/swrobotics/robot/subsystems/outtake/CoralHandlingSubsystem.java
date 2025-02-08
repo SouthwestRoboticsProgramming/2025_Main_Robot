@@ -75,6 +75,10 @@ public class CoralHandlingSubsystem extends SubsystemBase {
         Logger.processInputs("Outtake", outtakeInputs);
         Logger.processInputs("Indexer", indexerInputs);
 
+        if (outtakeIO.hasPiece() && targetState != State.SCORE) {
+            setTargetState(State.HOLD);
+        }
+
         outtakeIO.setVoltage(targetState.getOuttakeVoltage());
         indexerIO.setVoltage(targetState.getIndexerVoltage());
     }
