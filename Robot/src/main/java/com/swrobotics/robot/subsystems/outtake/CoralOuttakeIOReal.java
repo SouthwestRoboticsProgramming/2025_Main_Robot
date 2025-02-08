@@ -38,17 +38,11 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
     @Override
     public void updateInputs(Inputs inputs) {
         inputs.voltage = 0;
-        inputs.hasPiece = beamBreak.get();
+        inputs.hasPiece = !beamBreak.get();
     }
 
     @Override
     public void setVoltage(double voltage) {
         motor.setControl(voltageControl.withOutput(voltage));
     }
-
-    @Override
-    public boolean hasPiece() {
-        return beamBreak.get();
-    }
-    
 }

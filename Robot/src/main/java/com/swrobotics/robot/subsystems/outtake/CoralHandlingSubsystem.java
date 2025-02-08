@@ -2,6 +2,7 @@ package com.swrobotics.robot.subsystems.outtake;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.Logger;
 
 import com.swrobotics.robot.config.Constants;
@@ -35,23 +36,19 @@ public class CoralHandlingSubsystem extends SubsystemBase {
     }
 
     private final CoralOuttakeIO outtakeIO;
-    private final IndexerIO indexerIO;
     private final CoralOuttakeIO.Inputs outtakeInputs;
-    private final IndexerIO.Inputs indexerInputs;
 
     private State targetState;
+    private double beamBreakDetectTime;
 
     public CoralHandlingSubsystem() {
         if (RobotBase.isReal()) {
             outtakeIO = new CoralOuttakeIOReal();
-            indexerIO = new IndexerIOReal();
         } else {
             outtakeIO = new CoralOuttakeIOSim();
-            indexerIO = new IndexerIOSim();
         }
 
         outtakeInputs = new CoralOuttakeIO.Inputs();
-        indexerInputs = new IndexerIO.Inputs();
 
         targetState = State.HOLD;
     }
@@ -70,16 +67,19 @@ public class CoralHandlingSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        boolean hadPiece = outtakeInputs.hasPiece;
         outtakeIO.updateInputs(outtakeInputs);
-        indexerIO.updateInputs(indexerInputs);
         Logger.processInputs("Outtake", outtakeInputs);
-        Logger.processInputs("Indexer", indexerInputs);
+        boolean hasPiece = outtakeInputs.hasPiece;
 
-        if (outtakeIO.hasPiece() && targetState != State.SCORE) {
+        if (!hadPiece && hasPiece) {
+            beamBreakDetectTime = Timer.getTimestamp();
+        }
+
+        if (outtakeInputs.hasPiece && targetState != State.SCORE && Timer.getTimestamp() >= beamBreakDetectTime + 0.05) {
             setTargetState(State.HOLD);
         }
 
         outtakeIO.setVoltage(targetState.getOuttakeVoltage());
-        indexerIO.setVoltage(targetState.getIndexerVoltage());
     }
 }
