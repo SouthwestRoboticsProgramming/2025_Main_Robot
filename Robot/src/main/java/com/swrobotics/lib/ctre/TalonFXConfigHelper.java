@@ -32,4 +32,10 @@ public final class TalonFXConfigHelper extends TalonFXConfiguration {
             CTREUtil.retryUntilOk(fx, () -> fx.getConfigurator().apply(this));
         }
     }
+
+    public void reapply() {
+        for (TalonFX fx : motors) {
+            CTREUtil.retryUntilOk(fx, () -> fx.getConfigurator().apply(this));
+        }
+    }
 }

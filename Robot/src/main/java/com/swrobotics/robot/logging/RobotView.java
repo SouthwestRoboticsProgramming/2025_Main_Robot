@@ -23,9 +23,18 @@ public final class RobotView {
     private static final MechanismLigament2d algaeIntake = algaePivot.append(
             new MechanismLigament2d("Algae Intake", 0.5, 90, 3, new Color8Bit(Color.kWhite)));
 
-    public static void setSuperstructureState(double elevatorHeightMeters, double pivotAngleRot) {
-        outtakePivot.setPosition(1, 0.5 + elevatorHeightMeters);
+    private static final MechanismRoot2d outtakeTargetPivot = mechanism.getRoot("Outtake Target Pivot", 1, 0.5);
+    private static final MechanismLigament2d outtakeTarget = outtakeTargetPivot.append(
+            new MechanismLigament2d("Outtake", 0.7, 0, 3, new Color8Bit(Color.kLightBlue)));
+
+    public static void setSuperstructureState(double elevatorHeightPct, double pivotAngleRot) {
+        outtakePivot.setPosition(1, 2 * elevatorHeightPct);
         outtake.setAngle(Units.rotationsToDegrees(pivotAngleRot));
+    }
+
+    public static void setTargetSuperstructureState(double elevatorHeightPct, double pivotAngleRot) {
+        outtakeTargetPivot.setPosition(1, 2 * elevatorHeightPct);
+        outtakeTarget.setAngle(Units.rotationsToDegrees(pivotAngleRot));
     }
 
     public static void setAlgaeIntakeState(double intakeAngleRot, double voltageOut) {

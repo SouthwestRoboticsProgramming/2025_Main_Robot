@@ -74,7 +74,6 @@ public class AlgaeIOReal implements AlgaeIO {
         currentLimitEnabled = true;
 
         double centerOfRange = 45 / 360.0;
-
         double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
         double armPos = MathUtil.wrap(
                 (canCoderPos + Constants.kAlgaePivotEncoderOffset.get())
@@ -115,7 +114,8 @@ public class AlgaeIOReal implements AlgaeIO {
     @Override
     public void calibrateEncoder() {
         // Assumes that the arm is currently in horizontal position (angle 0)
-        Constants.kAlgaePivotEncoderOffset.set(-canCoder.getAbsolutePosition().getValueAsDouble());
+        CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
+        Constants.kAlgaePivotEncoderOffset.set(-canCoderPositionStatus.getValueAsDouble());
 
         CTREUtil.retryUntilOk(pivotMotor, () -> pivotMotor.setPosition(0));
     }

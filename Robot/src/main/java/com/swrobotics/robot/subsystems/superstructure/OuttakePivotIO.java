@@ -10,7 +10,7 @@ public interface OuttakePivotIO {
 
     void updateInputs(Inputs inputs);
 
-    void setTargetAngle(double targetAngleRot);
+    void setTargetAngle(double targetAngleRot, boolean hasCoral);
 
     void calibrateEncoder();
 }

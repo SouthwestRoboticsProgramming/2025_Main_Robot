@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.swrobotics.lib.ctre.CTREUtil;
 import com.swrobotics.lib.ctre.TalonFXConfigHelper;
+import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.IOAllocation;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
@@ -18,6 +19,8 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 
 public final class ElevatorIOReal implements ElevatorIO {
+    private static final NTBoolean BRAKE_MODE = new NTBoolean("Superstructure/Elevator/Brake Mode", true);
+
     private final TalonFX motor1, motor2;
 
     private final StatusSignal<Angle> positionStatus;
@@ -49,6 +52,13 @@ public final class ElevatorIOReal implements ElevatorIO {
         positionControl = new MotionMagicVoltage(0)
                 .withEnableFOC(true);
         neutralControl = new NeutralOut();
+
+        BRAKE_MODE.onChange(() -> {
+            config.MotorOutput.NeutralMode = BRAKE_MODE.get()
+                    ? NeutralModeValue.Brake
+                    : NeutralModeValue.Coast;
+            config.reapply();
+        });
     }
 
     @Override
@@ -63,8 +73,8 @@ public final class ElevatorIOReal implements ElevatorIO {
         heightPct = Math.min(heightPct, 1.0);
 
         double positionRot = heightPct * Constants.kElevatorMaxHeightRotations;
-//        motor1.setControl(positionControl.withPosition(positionRot));
-        setNeutral();
+        motor1.setControl(positionControl.withPosition(positionRot));
+//        setNeutral();
     }
 
     @Override

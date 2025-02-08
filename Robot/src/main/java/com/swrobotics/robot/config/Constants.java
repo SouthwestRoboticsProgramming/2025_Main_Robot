@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.swrobotics.lib.ctre.NTSlot0Configs;
 import com.swrobotics.lib.ctre.NTSlot0MotionMagicConfigs;
+import com.swrobotics.lib.ctre.NTSlot1MotionMagicConfigs;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.net.NTDouble;
 import com.swrobotics.lib.net.NTEntry;
@@ -65,6 +66,7 @@ public final class Constants {
     public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Drive/Auto/Turn PID/kP", 9).setPersistent();
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Drive/Auto/Turn PID/kD", 0.5).setPersistent();
 
+    public static final double kSnap
     public static final NTEntry<Double> kSnapMaxSpeed = new NTDouble("Drive/Snap/Max Speed (m/s)", 1.5).setPersistent();
     public static final NTEntry<Double> kSnapMaxTurnSpeed = new NTDouble("Drive/Snap/Max Turn Speed (rot/s)", 1.2).setPersistent();
     public static final NTEntry<Double> kSnapDriveKp = new NTDouble("Drive/Snap/Drive kP", 8).setPersistent();
@@ -163,7 +165,6 @@ public final class Constants {
     public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Superstructure/Elevator/Tolerance", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.05).setPersistent();
     public static final NTEntry<Double> kElevatorMaxHeightWithArmInBelowBar = new NTDouble("Superstructure/Elevator/Max Height With Arm In Below Bar", 0.2).setPersistent();
-    public static final NTEntry<Double> kElevatorMinHeightWithArmInAboveBar = new NTDouble("Superstructure/Elevator/Min Height With Arm In Above Bar", 0.6).setPersistent();
     public static final NTEntry<Double> kElevatorHeightBottom = new NTDouble("Superstructure/Elevator/Bottom Height", 0.05).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL1 = new NTDouble("Superstructure/Elevator/L1 Height", 0.25).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL2 = new NTDouble("Superstructure/Elevator/L2 Height", 0.5).setPersistent();
@@ -172,11 +173,13 @@ public final class Constants {
 
     // Coral outtake pivot
     // 60:24 CANcoder
-    public static final double kOuttakePivotMotorToArmRatio = 100; // FIXME
+    public static final double kOuttakePivotMotorToArmRatio = (60.0 / 24.0) * (58.0 / 18.0) * (60.0 / 8.0);
     public static final double kOuttakePivotCANcoderToArmRatio = 60.0 / 24.0;
     public static final NTEntry<Double> kOuttakePivotEncoderOffset = new NTDouble("Superstructure/Pivot/Encoder/Offset (rot)", 0).setPersistent();
     public static final NTSlot0MotionMagicConfigs kOuttakePivotPID =
-            new NTSlot0MotionMagicConfigs("Superstructure/Pivot/PID", 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            new NTSlot0MotionMagicConfigs("Superstructure/Pivot/PID", 200, 0, 0.316, 0, 7.02, 0, 1.2, 0.3, 0);
+    public static final NTSlot1MotionMagicConfigs kOuttakePivotPIDWithCoral =
+            new NTSlot1MotionMagicConfigs("Superstructure/Pivot/PID With Coral", 200, 0, 0.424, 0.1, 7.356069, 0, 1.2, 0.1, 0);
 
     public static final NTEntry<Double> kOuttakePivotTolerance = new NTDouble("Superstructure/Pivot/Tolerance (deg)", 3).setPersistent();
     public static final NTEntry<Double> kOuttakePivotCollisionTolerance = new NTDouble("Superstructure/Pivot/Collision Tolerance (deg)", 5).setPersistent();

@@ -80,9 +80,9 @@ public class RobotContainer {
 
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
-        superstructure = new SuperstructureSubsystem();
         algaeIntake = new AlgaeIntakeSubsystem();
         coralHandler = new CoralHandlingSubsystem();
+        superstructure = new SuperstructureSubsystem(coralHandler);
 
         lights = new LightsSubsystem(this);
 

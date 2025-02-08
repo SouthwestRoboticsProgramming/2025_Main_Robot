@@ -72,14 +72,18 @@ public class CoralHandlingSubsystem extends SubsystemBase {
         Logger.processInputs("Outtake", outtakeInputs);
         boolean hasPiece = outtakeInputs.hasPiece;
 
-        if (!hadPiece && hasPiece) {
-            beamBreakDetectTime = Timer.getTimestamp();
-        }
+//        if (!hadPiece && hasPiece) {
+//            beamBreakDetectTime = Timer.getTimestamp();
+//        }
 
-        if (outtakeInputs.hasPiece && targetState != State.SCORE && Timer.getTimestamp() >= beamBreakDetectTime + 0.05) {
+        if (outtakeInputs.hasPiece && targetState != State.SCORE) {
             setTargetState(State.HOLD);
         }
 
         outtakeIO.setVoltage(targetState.getOuttakeVoltage());
+    }
+
+    public boolean hasPiece() {
+        return outtakeInputs.hasPiece;
     }
 }
