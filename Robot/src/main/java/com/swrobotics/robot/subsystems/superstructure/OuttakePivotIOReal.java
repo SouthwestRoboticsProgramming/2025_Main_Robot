@@ -2,9 +2,6 @@ package com.swrobotics.robot.subsystems.superstructure;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -12,6 +9,8 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.swrobotics.lib.ctre.CTREUtil;
+import com.swrobotics.lib.ctre.TalonFXConfigHelper;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.IOAllocation;
@@ -19,8 +18,6 @@ import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-
-import java.util.function.Consumer;
 
 public final class OuttakePivotIOReal implements OuttakePivotIO {
     private final TalonFX motor;
@@ -30,21 +27,25 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
     private final StatusSignal<Angle> canCoderPositionStatus;
 
     private final MotionMagicVoltage positionControl;
+    private final MotionMagicVoltage positionControlWithCoral;
 
     public OuttakePivotIOReal() {
-        TalonFXConfiguration motorConfig = new TalonFXConfiguration();
-        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // FIXME
+        motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
+        canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
+
+        TalonFXConfigHelper motorConfig = new TalonFXConfigHelper();
+        motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.Feedback.SensorToMechanismRatio = Constants.kOuttakePivotMotorToArmRatio;
-        motorConfig.Slot0 = getSlot0Configs();
+        motorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+        motorConfig.addTunable(Constants.kOuttakePivotPID);
+        motorConfig.addTunable(Constants.kOuttakePivotPIDWithCoral);
+        motorConfig.addTunable(Constants.kOuttakePivotMotionMagic);
+        motorConfig.apply(motor);
 
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; // FIXME
-
-        motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
-        canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
-        motor.getConfigurator().apply(motorConfig);
-        canCoder.getConfigurator().apply(canCoderConfig);
+        CTREUtil.retryUntilOk(canCoder, () -> canCoder.getConfigurator().apply(canCoderConfig));
 
         MotorTrackerSubsystem.getInstance().addMotor("Outtake Pivot", motor);
         MusicSubsystem.getInstance().addInstrument(motor);
@@ -54,63 +55,48 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
         positionControl = new MotionMagicVoltage(0)
                 .withEnableFOC(true);
+        positionControlWithCoral = new MotionMagicVoltage(0)
+                .withSlot(1)
+                .withEnableFOC(true);
 
-        canCoderPositionStatus.waitForUpdate(1);
+        CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
+
+        double centerOfRange = 45 / 360.0;
         double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
         double armPos = MathUtil.wrap(
-                canCoderPos + Constants.kOuttakePivotEncoderOffset.get(),
-                -0.5, 0.5
-        ) / Constants.kOuttakePivotCANcoderToArmRatio;
-        motor.setPosition(armPos);
-
-        Runnable updateSlot0Configs = () -> motor.getConfigurator().apply(getSlot0Configs());
-        Runnable updateMotionMagicConfigs = () -> motor.getConfigurator().apply(getMotionMagicConfigs());
-        Constants.kOuttakePivotKg.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotKs.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotKv.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotKa.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotKp.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotKd.onChange(updateSlot0Configs);
-        Constants.kOuttakePivotMMCruiseVelocity.onChange(updateMotionMagicConfigs);
-        Constants.kOuttakePivotMMAcceleration.onChange(updateMotionMagicConfigs);
-        Constants.kOuttakePivotMMJerk.onChange(updateMotionMagicConfigs);
-    }
-
-    private Slot0Configs getSlot0Configs() {
-        return new Slot0Configs()
-                .withGravityType(GravityTypeValue.Arm_Cosine)
-                .withKG(Constants.kOuttakePivotKg.get())
-                .withKS(Constants.kOuttakePivotKs.get())
-                .withKV(Constants.kOuttakePivotKv.get())
-                .withKA(Constants.kOuttakePivotKa.get())
-                .withKP(Constants.kOuttakePivotKp.get())
-                .withKD(Constants.kOuttakePivotKd.get());
-    }
-
-    private MotionMagicConfigs getMotionMagicConfigs() {
-        return new MotionMagicConfigs()
-                .withMotionMagicCruiseVelocity(Constants.kOuttakePivotMMCruiseVelocity.get())
-                .withMotionMagicAcceleration(Constants.kOuttakePivotMMAcceleration.get())
-                .withMotionMagicJerk(Constants.kOuttakePivotMMJerk.get());
+                (canCoderPos + Constants.kOuttakePivotEncoderOffset.get())
+                        / Constants.kOuttakePivotCANcoderToArmRatio,
+                centerOfRange - 0.5/Constants.kOuttakePivotCANcoderToArmRatio,
+                centerOfRange + 0.5/Constants.kOuttakePivotCANcoderToArmRatio
+        );
+        CTREUtil.retryUntilOk(motor, () -> motor.setPosition(armPos));
     }
 
     @Override
     public void updateInputs(Inputs inputs) {
-        inputs.currentAngle = motorPositionStatus.getValueAsDouble();
+        motorPositionStatus.refresh();
+        inputs.currentAngleRot = motorPositionStatus.getValueAsDouble();
     }
 
     @Override
-    public void setTargetAngle(double targetAngleRot) {
-        motor.setControl(positionControl.withPosition(targetAngleRot));
+    public void setTargetAngle(double targetAngleRot, boolean hasCoral) {
+        MotionMagicVoltage control = hasCoral
+                ? positionControl
+                : positionControlWithCoral;
+
+        motor.setControl(control.withPosition(targetAngleRot));
     }
 
     @Override
     public void calibrateEncoder() {
-        // Assumes that the arm is currently in horizontal position (angle 0)
-        canCoderPositionStatus.refresh();
-        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
-        Constants.kOuttakePivotEncoderOffset.set(-canCoderPos);
+        // Assumes that the arm is currently in vertical position
+        double calibrationAngle = 0.25; // Rotations from horizontal
 
-        motor.setPosition(0);
+        CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
+        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
+        double offset = calibrationAngle * Constants.kOuttakePivotCANcoderToArmRatio - canCoderPos;
+        Constants.kOuttakePivotEncoderOffset.set(offset);
+
+        CTREUtil.retryUntilOk(motor, () -> motor.setPosition(calibrationAngle));
     }
 }

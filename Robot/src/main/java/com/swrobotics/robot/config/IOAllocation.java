@@ -18,25 +18,28 @@ public final class IOAllocation {
         public static final SwerveIDs kSwerveFR = new SwerveIDs(10, 6, 2);
         public static final SwerveIDs kSwerveBL = new SwerveIDs(11, 7, 3);
         public static final SwerveIDs kSwerveBR = new SwerveIDs(12, 8, 4);
-        public static final CanId kPigeon2 = new CanId(13, kGerald);
+        public static final CanId kJosh = new CanId(13, kGerald);
 
-        public static final CanId kElevatorMotor1 = new CanId(1, kRIO);
-        public static final CanId kElevatorMotor2 = new CanId(2, kRIO);
+        public static final CanId kElevatorMotor1 = new CanId(14, kGerald);
+        public static final CanId kElevatorMotor2 = new CanId(15, kGerald);
 
-        public static final CanId kOuttakePivotMotor = new CanId(3, kRIO);
-        public static final CanId kOuttakePivotEncoder = new CanId(4, kRIO);
-        public static final CanId kOuttakeMotor = new CanId(5, kRIO);
+        public static final CanId kAlgaeIntakeSpinMotor = new CanId(16, kGerald);
+        public static final CanId kAlgaeIntakePivotMotor = new CanId(17, kGerald);
+        public static final CanId kAlgaeIntakePivotEncoder = new CanId(18, kGerald);
 
-        public static final CanId kIndexerMotor = new CanId(6, kRIO);
+        public static final CanId kOuttakePivotMotor = new CanId(1, kRIO);
+        public static final CanId kOuttakePivotEncoder = new CanId(2, kRIO);
+        public static final CanId kOuttakeMotor = new CanId(3, kRIO);
 
-        public static final CanId kAlgaeIntakeSpinMotor = new CanId(7, kRIO);
-        public static final CanId kAlgaeIntakePivotMotor = new CanId(8, kRIO);
+        public static final CanId kIndexerMotor = new CanId(4, kRIO);
 
         public static final CanId kPDP = new CanId(62, kRIO);
     }
 
     public static final class RIO {
         public static final int kPWM_LEDs = 4;
+
+        public static final int kDIO_OuttakeBeamBreak = 0;
     }
 
     /** IDs of the devices within one swerve module */
@@ -83,11 +86,11 @@ public final class IOAllocation {
         }
 
         public TalonFX createTalonFX() {
-            return new TalonFX(id, bus);
+            return new TalonFX(id(), bus());
         }
 
         public CANcoder createCANcoder() {
-            return new CANcoder(id, bus);
+            return new CANcoder(id(), bus());
         }
     }
 }

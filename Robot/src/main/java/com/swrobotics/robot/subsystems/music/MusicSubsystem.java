@@ -3,6 +3,7 @@ package com.swrobotics.robot.subsystems.music;
 import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.configs.AudioConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.swrobotics.lib.ctre.CTREUtil;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -67,7 +68,7 @@ public final class MusicSubsystem extends SubsystemBase {
         conf.BeepOnBoot = true;
         conf.BeepOnConfig = true;
         conf.AllowMusicDurDisable = true;
-        fx.getConfigurator().apply(conf);
+        CTREUtil.retryUntilOk(fx, () -> fx.getConfigurator().apply(conf));
         
         orchestra.addInstrument(fx);
     }

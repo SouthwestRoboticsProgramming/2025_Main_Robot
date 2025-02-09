@@ -32,8 +32,8 @@ public class CtreSwerveIO implements SwerveIO {
         for (int i = 0; i < kModuleCount; i++) {
             SwerveModuleInfo info = Constants.kSwerveModuleInfos[i];
             moduleConstants[i] = Constants.kModuleConstantsFactory.createModuleConstants(
-                    info.driveId(),
                     info.turnId(),
+                    info.driveId(),
                     info.encoderId(),
                     info.offset().get(),
                     info.position().getX(),

@@ -81,15 +81,6 @@ public final class RealMotorTrackerIO implements MotorTrackerIO {
         StatusSignal<Integer> faultsStatus = motor.getFaultField();
         StatusSignal<Integer> stickyFaultsStatus = motor.getStickyFaultField();
 
-        StatusSignal.setUpdateFrequencyForAll(
-                4, // 4 Hz is minimum update frequency supported
-                tempStatus,
-                supplyCurrentStatus,
-                statorCurrentStatus,
-                faultsStatus,
-                stickyFaultsStatus
-        );
-
         motors.add(new TrackedMotor(
                 name,
                 motor.getNetwork(),

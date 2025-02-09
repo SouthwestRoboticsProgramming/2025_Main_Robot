@@ -104,4 +104,15 @@ public final class DriveCommands {
                     .withRotationalRate(rotOutput));
         }, drive);
     }
+
+    public static Command snapToPoseUntilInTolerance(
+            SwerveDriveSubsystem drive,
+            Supplier<Pose2d> poseSupplier,
+            Supplier<Double> toleranceSupplier) {
+        return snapToPose(drive, poseSupplier)
+                .until(() -> drive.isCloseTo(
+                        poseSupplier.get().getTranslation(),
+                        toleranceSupplier.get()
+                ));
+    }
 }

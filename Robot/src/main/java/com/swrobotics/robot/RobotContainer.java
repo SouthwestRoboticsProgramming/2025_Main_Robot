@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.pathplanner.lib.path.PathConstraints;
 import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
+import com.swrobotics.robot.commands.RobotCommands;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 import com.swrobotics.robot.config.PathEnvironments;
@@ -15,6 +16,7 @@ import com.swrobotics.robot.logging.RobotView;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.PathfindingTest;
+import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -30,6 +32,7 @@ import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.logging.Logging;
 import com.swrobotics.robot.subsystems.lights.LightsSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
+import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -57,6 +60,8 @@ public class RobotContainer {
     public final SwerveDriveSubsystem drive;
     public final VisionSubsystem vision;
     public final SuperstructureSubsystem superstructure;
+    public final AlgaeIntakeSubsystem algaeIntake;
+    public final CoralHandlingSubsystem coralHandler;
 
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
@@ -75,7 +80,9 @@ public class RobotContainer {
 
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
-        superstructure = new SuperstructureSubsystem();
+        algaeIntake = new AlgaeIntakeSubsystem();
+        coralHandler = new CoralHandlingSubsystem();
+        superstructure = new SuperstructureSubsystem(coralHandler);
 
         lights = new LightsSubsystem(this);
 
@@ -128,33 +135,26 @@ public class RobotContainer {
                 Units.rotationsToRadians(Constants.kDriveControlMaxTurnSpeed),
                 Units.rotationsToRadians(Constants.kDriveControlMaxTurnSpeed / 0.3));
 
-        List<Pose2d> remainingScoringPositions = new ArrayList<>();
-
         List<Command> sequence = new ArrayList<>();
-        sequence.add(Commands.runOnce(() -> {
-            remainingScoringPositions.clear();
-            for (int i = 0; i < 12; i++) {
-                remainingScoringPositions.add(Constants.kField.flipPoseForAlliance(
-                        FieldPositions.getBlueReefScoringTarget(i)));
-            }
-        }));
         for (int i = 0; i < 12; i++) {
             sequence.add(AutoBuilderExt.pathfindToClosestPoseFlipped(
                     PathEnvironments.kFieldWithAutoGamePieces,
                     List.of(coralStation, coralStation2),
                     constraints,
                     null
+            ).alongWith(Commands.sequence(
+                    Commands.waitSeconds(0.5),
+                    superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER)
+            )));
+            sequence.add(RobotCommands.autoPathfindAndScore(
+                    this,
+                    i, 4
             ));
-            sequence.add(Commands.defer(
-                    () -> AutoBuilderExt.pathfindToClosestPose(
-                        PathEnvironments.kFieldWithAutoGamePieces,
-                        remainingScoringPositions,
-                        constraints,
-                        remainingScoringPositions::remove
-                    ), Collections.singleton(drive)));
         }
 
-        return Commands.sequence(sequence.toArray(new Command[0]));
+        Command cmd = Commands.sequence(sequence.toArray(new Command[0]));
+        cmd.addRequirements(superstructure);
+        return cmd;
     }
 
     private static List<AutoEntry> buildPathPlannerAutos() {

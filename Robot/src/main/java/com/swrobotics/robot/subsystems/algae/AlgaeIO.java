@@ -1,16 +1,22 @@
-package com.swrobotics.robot.subsystems.superstructure;
+package com.swrobotics.robot.subsystems.algae;
 
 import com.swrobotics.robot.logging.AutoLoggedInputs;
 
-public interface OuttakePivotIO {
+import edu.wpi.first.units.measure.Angle;
+
+public interface AlgaeIO {
     class Inputs extends AutoLoggedInputs {
         // Rotations, from horizontal
         public double currentAngleRot;
+
+        public double voltageOut;
     }
 
     void updateInputs(Inputs inputs);
 
-    void setTargetAngle(double targetAngleRot, boolean hasCoral);
+    void setTargetAngle(double targetAngleRot);
+
+    void setVoltage(double targetVoltage);
 
     void calibrateEncoder();
 }

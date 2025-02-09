@@ -3,7 +3,6 @@ package com.swrobotics.robot.subsystems.motortracker;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.swrobotics.robot.config.Constants;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -21,7 +20,6 @@ public final class MotorTrackerSubsystem extends SubsystemBase {
 
     private final MotorTrackerIO io;
     private final MotorTrackerIO.Inputs inputs;
-    private final Timer periodicTimer;
     private boolean overheating;
 
     public MotorTrackerSubsystem() {
@@ -34,9 +32,6 @@ public final class MotorTrackerSubsystem extends SubsystemBase {
         else
             io = new SimMotorTrackerIO();
         inputs = new MotorTrackerIO.Inputs();
-
-        periodicTimer = new Timer();
-        periodicTimer.start();
 
         overheating = false;
     }
@@ -53,10 +48,6 @@ public final class MotorTrackerSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Only sample temperature every so often
-        if (!periodicTimer.advanceIfElapsed(Constants.kMotorTrackInterval))
-            return;
-
         io.updateInputs(inputs);
         Logger.processInputs("Motor Status", inputs);
 
