@@ -57,7 +57,7 @@ public class AlgaeIOReal implements AlgaeIO {
         rollerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         rollerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         rollerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        rollerConfig.CurrentLimits.StatorCurrentLimit = 24; // TODO: Constnat
+        rollerConfig.CurrentLimits.StatorCurrentLimit = Constants.kAlgaeIntakeCurrentLimit.get();
         rollerConfig.apply(rollerMotor);
         this.rollerConfig = rollerConfig;
 
@@ -87,6 +87,11 @@ public class AlgaeIOReal implements AlgaeIO {
                 .withEnableFOC(true);
 
         rollerControl = new VoltageOut(0);
+
+        Constants.kAlgaeIntakeCurrentLimit.onChange(() -> {
+            rollerConfig.CurrentLimits.StatorCurrentLimit = Constants.kAlgaeIntakeCurrentLimit.get();
+            rollerConfig.reapply();
+        });
     }
 
     @Override
