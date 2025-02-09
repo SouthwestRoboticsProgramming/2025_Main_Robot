@@ -2,7 +2,6 @@ package com.swrobotics.robot.subsystems.superstructure;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -39,8 +38,9 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.Feedback.SensorToMechanismRatio = Constants.kOuttakePivotMotorToArmRatio;
         motorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-        motorConfig.withTunable(Constants.kOuttakePivotPID);
-        motorConfig.withTunable(Constants.kOuttakePivotPIDWithCoral);
+        motorConfig.addTunable(Constants.kOuttakePivotPID);
+        motorConfig.addTunable(Constants.kOuttakePivotPIDWithCoral);
+        motorConfig.addTunable(Constants.kOuttakePivotMotionMagic);
         motorConfig.apply(motor);
 
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();

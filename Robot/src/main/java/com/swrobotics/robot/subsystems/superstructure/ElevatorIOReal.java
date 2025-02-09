@@ -36,7 +36,8 @@ public final class ElevatorIOReal implements ElevatorIO {
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
-        config.withTunable(Constants.kElevatorPID);
+        config.addTunable(Constants.kElevatorPID);
+        config.addTunable(Constants.kElevatorMotionMagic);
         config.apply(motor1, motor2);
 
         CTREUtil.retryUntilOk(motor2, () -> motor2.setControl(new Follower(IOAllocation.CAN.kElevatorMotor1.id(), true)));

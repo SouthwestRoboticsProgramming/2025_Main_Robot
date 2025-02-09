@@ -8,9 +8,9 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
+import com.swrobotics.lib.ctre.NTMotionMagicConfigs;
 import com.swrobotics.lib.ctre.NTSlot0Configs;
-import com.swrobotics.lib.ctre.NTSlot0MotionMagicConfigs;
-import com.swrobotics.lib.ctre.NTSlot1MotionMagicConfigs;
+import com.swrobotics.lib.ctre.NTSlot1Configs;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.net.NTDouble;
 import com.swrobotics.lib.net.NTEntry;
@@ -158,8 +158,10 @@ public final class Constants {
 
     // Elevator
     public static final double kElevatorMaxHeightRotations = 100;
-    public static final NTSlot0MotionMagicConfigs kElevatorPID =
-            new NTSlot0MotionMagicConfigs("Superstructure/Elevator/PID", 0.3, 0, 0.286, 0, 0.12, 0, 80, 500, 0);
+    public static final NTSlot0Configs kElevatorPID =
+            new NTSlot0Configs("Superstructure/Elevator/PID", 0.3, 0, 0.286, 0, 0.12, 0);
+    public static final NTMotionMagicConfigs kElevatorMotionMagic =
+            new NTMotionMagicConfigs("Superstructure/Elevator/Motion Magic", 80, 500, 0);
 
     public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Superstructure/Elevator/Tolerance", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.01).setPersistent();
@@ -175,10 +177,12 @@ public final class Constants {
     public static final double kOuttakePivotMotorToArmRatio = (60.0 / 24.0) * (58.0 / 18.0) * (60.0 / 8.0);
     public static final double kOuttakePivotCANcoderToArmRatio = 60.0 / 24.0;
     public static final NTEntry<Double> kOuttakePivotEncoderOffset = new NTDouble("Superstructure/Pivot/Encoder/Offset (rot)", 0).setPersistent();
-    public static final NTSlot0MotionMagicConfigs kOuttakePivotPID =
-            new NTSlot0MotionMagicConfigs("Superstructure/Pivot/PID", 200, 0, 0.316, 0, 7.021702, 0, 1.2, 0.5, 0);
-    public static final NTSlot1MotionMagicConfigs kOuttakePivotPIDWithCoral =
-            new NTSlot1MotionMagicConfigs("Superstructure/Pivot/PID With Coral", 200, 0, 0.424, 0.1, 7.356069, 0, 1.2, 0.1, 0);
+    public static final NTSlot0Configs kOuttakePivotPID =
+            new NTSlot0Configs("Superstructure/Pivot/PID", 200, 0, 0.316, 0, 7.021702, 0);
+    public static final NTSlot1Configs kOuttakePivotPIDWithCoral =
+            new NTSlot1Configs("Superstructure/Pivot/PID With Coral", 200, 0, 0.424, 0.1, 7.356069, 0);
+    public static final NTMotionMagicConfigs kOuttakePivotMotionMagic =
+            new NTMotionMagicConfigs("Superstructure/Pivot/Motion Magic", 1.2, 0.5, 0);
 
     public static final NTEntry<Double> kOuttakePivotTolerance = new NTDouble("Superstructure/Pivot/Tolerance (deg)", 3).setPersistent();
     public static final NTEntry<Double> kOuttakePivotCollisionTolerance = new NTDouble("Superstructure/Pivot/Collision Tolerance (deg)", 5).setPersistent();
@@ -197,8 +201,10 @@ public final class Constants {
     public static final NTEntry<Double> kAlgaeIntakeVoltage = new NTDouble("Algae/Roller/Intake Voltage", 8).setPersistent();
     public static final NTEntry<Double> kAlgaeOuttakeVoltage = new NTDouble("Algae/Roller/Outtake Voltage", 8).setPersistent();
     public static final NTEntry<Double> kAlgaePivotEncoderOffset = new NTDouble("Algae/Pivot/Offset (rot)", -0.244141).setPersistent();
-    public static final NTSlot0MotionMagicConfigs kAlgaePivotPID =
-            new NTSlot0MotionMagicConfigs("Algae/Pivot/PID", 50, 5, 0.122, 0.1, 17, 0.2, 20, 4, 0);
+    public static final NTSlot0Configs kAlgaePivotPID =
+            new NTSlot0Configs("Algae/Pivot/PID", 50, 5, 0.122, 0.1, 17, 0.2);
+    public static final NTMotionMagicConfigs kAlgaePivotMotionMagic =
+            new NTMotionMagicConfigs("Algae/Pivot/Motion Magic", 20, 4, 0);
     
     // Coral outtake
     public static final NTEntry<Double> kOuttakeRollerIntakeVoltage = new NTDouble("Outtake/Intake Voltage", 2).setPersistent();

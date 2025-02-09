@@ -7,7 +7,6 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -50,7 +49,8 @@ public class AlgaeIOReal implements AlgaeIO {
         pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         pivotConfig.Feedback.SensorToMechanismRatio = Constants.kAlgaePivotMotorToArmRatio;
         pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-        pivotConfig.withTunable(Constants.kAlgaePivotPID);
+        pivotConfig.addTunable(Constants.kAlgaePivotPID);
+        pivotConfig.addTunable(Constants.kAlgaePivotMotionMagic);
         pivotConfig.apply(pivotMotor);
 
         TalonFXConfigHelper rollerConfig = new TalonFXConfigHelper();
