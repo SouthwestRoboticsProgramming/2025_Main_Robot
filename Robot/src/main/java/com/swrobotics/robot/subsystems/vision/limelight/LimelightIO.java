@@ -29,7 +29,7 @@ public interface LimelightIO {
 
         // Not used by robot code, but likely will be useful for log viewing
         // with AdvantageScope's Points tab. Ideally we would log the camera's
-        // video stream, but that requires too much bandwidth.
+        // video stream, but that requires too much bandwidth and storage space
         public Translation2d[] corners;
 
         @Override

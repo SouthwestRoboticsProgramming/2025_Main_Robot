@@ -130,6 +130,7 @@ public final class Constants {
 
     // Vision
     public static final double kVisionMT2SpeedThreshold = 0.2; // m/s
+    public static final double kLimelightMT1MaxDistance = 4; // m
 
     public static final LimelightCamera.MountingLocation kLimelightFrontLeftLocation = new LimelightCamera.MountingLocation(
             kFrameLength / 2 - Units.inchesToMeters(4.5),
@@ -145,7 +146,6 @@ public final class Constants {
             // Degrees CCW
             0, 20.6, 33
     );
-    public static final double kLimelightMT1MaxDistance = 4;
 
     // Elevator
     public static final double kElevatorMaxHeightRotations = 100;
