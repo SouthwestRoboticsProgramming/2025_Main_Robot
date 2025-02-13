@@ -65,6 +65,12 @@ public class CoralHandlingSubsystem extends SubsystemBase {
         return Commands.runOnce(() -> setTargetState(targetState), this);
     }
 
+    public Command score(double seconds) {
+        return commandSetState(State.SCORE)
+                .withTimeout(seconds)
+                .finallyDo(() -> setTargetState(State.HOLD));
+    }
+
     @Override
     public void periodic() {
         boolean hadPiece = outtakeInputs.hasPiece;

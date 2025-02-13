@@ -65,9 +65,21 @@ public final class Constants {
     public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Drive/Auto/Turn PID/kP", 9).setPersistent();
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Drive/Auto/Turn PID/kD", 0.5).setPersistent();
 
+    public static final double kAutoMaxDriveSpeed = Units.feetToMeters(18);
+    public static final double kAutoMaxDriveAccel = 5.5;
+    public static final double kAutoMaxTurnSpeed = 1;
+    public static final double kAutoMaxTurnAccel = 3;
+
+    public static final double kAutoSwitchToSnapDist = 0.2;
+    public static final NTEntry<Double> kAutoScoreXYTolerance = new NTDouble("Drive/Auto/Score XY Tolerance (m)", 0.05).setPersistent();
+    public static final NTEntry<Double> kAutoScoreAngleTolerance = new NTDouble("Drive/Auto/Score Angle Tolerance (deg)", 2).setPersistent();
+    public static final double kAutoToleranceTimeout = 1.5;
+    public static final double kAutoCoralEjectTime = 0.5;
+    public static final double kAutoElevatorDownDelay = 0.5;
+
     public static final NTEntry<Double> kSnapOffset = new NTDouble("Drive/Snap/Offset (m)", 0.025).setPersistent();
-    public static final NTEntry<Double> kSnapMaxSpeed = new NTDouble("Drive/Snap/Max Speed (m/s)", 1.5).setPersistent();
-    public static final NTEntry<Double> kSnapMaxTurnSpeed = new NTDouble("Drive/Snap/Max Turn Speed (rot/s)", 1.2).setPersistent();
+    public static final NTEntry<Double> kSnapMaxSpeed = new NTDouble("Drive/Snap/Max Speed (meters per sec)", 1.5).setPersistent();
+    public static final NTEntry<Double> kSnapMaxTurnSpeed = new NTDouble("Drive/Snap/Max Turn Speed (rot per sec)", 1.2).setPersistent();
     public static final NTEntry<Double> kSnapDriveKp = new NTDouble("Drive/Snap/Drive kP", 3).setPersistent();
     public static final NTEntry<Double> kSnapDriveKd = new NTDouble("Drive/Snap/Drive kD", 0).setPersistent();
     public static final NTEntry<Double> kSnapTurnKp = new NTDouble("Drive/Snap/Turn kP", 5).setPersistent();
