@@ -38,7 +38,7 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
     @Override
     public void updateInputs(Inputs inputs) {
         inputs.voltage = 0;
-        inputs.hasPiece = !beamBreak.get();
+        inputs.hasCoral = !beamBreak.get();
     }
 
     @Override

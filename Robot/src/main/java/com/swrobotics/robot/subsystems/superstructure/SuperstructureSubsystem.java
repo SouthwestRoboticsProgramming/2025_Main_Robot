@@ -3,7 +3,7 @@ package com.swrobotics.robot.subsystems.superstructure;
 import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.logging.RobotView;
-import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
+import com.swrobotics.robot.subsystems.outtake.OuttakeSubsystem;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -55,11 +55,11 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private final OuttakePivotIO pivotIO;
     private final OuttakePivotIO.Inputs pivotInputs;
 
-    private final CoralHandlingSubsystem coralHandlingSubsystem;
+    private final OuttakeSubsystem outtakeSubsystem;
 
     private State targetState;
 
-    public SuperstructureSubsystem(CoralHandlingSubsystem coralHandlingSubsystem) {
+    public SuperstructureSubsystem(OuttakeSubsystem outtakeSubsystem) {
         if (RobotBase.isReal()) {
             elevatorIO = new ElevatorIOReal();
             pivotIO = new OuttakePivotIOReal();
@@ -70,7 +70,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         elevatorInputs = new ElevatorIO.Inputs();
         pivotInputs = new OuttakePivotIO.Inputs();
 
-        this.coralHandlingSubsystem = coralHandlingSubsystem;
+        this.outtakeSubsystem = outtakeSubsystem;
 
         targetState = State.RECEIVE_CORAL_FROM_INDEXER;
     }
@@ -139,7 +139,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
         RobotView.setTargetSuperstructureState(elevatorTarget, pivotTarget);
 
-        boolean hasCoral = coralHandlingSubsystem.hasPiece();
+        boolean hasCoral = outtakeSubsystem.hasCoral();
 
         if (elevatorTarget == 0.0 && Math.abs(elevatorInputs.currentHeightPct) < Constants.kElevatorTolerance.get()) {
             // Conserve battery power when we can

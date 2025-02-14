@@ -5,7 +5,7 @@ import com.swrobotics.robot.logging.AutoLoggedInputs;
 public interface CoralOuttakeIO {
     class Inputs extends AutoLoggedInputs {
         public double voltage;
-        public boolean hasPiece;
+        public boolean hasCoral;
     }
 
     void updateInputs(Inputs inputs);

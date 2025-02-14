@@ -216,9 +216,6 @@ public final class Constants {
     public static final NTEntry<Double> kOuttakeRollerIntakeVoltage = new NTDouble("Outtake/Intake Voltage", 2).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreVoltage = new NTDouble("Outtake/Score Voltage", 3).setPersistent();
 
-    // Indexer
-    public static final NTEntry<Double> kIndexerIntakeVoltage = new NTDouble("Indexer/Intake Voltage", 5).setPersistent();
-
     // Lights
     public static final int kLedStripLength = 22;
     public static final int kLowBatteryThreshold = 10; // Volts
