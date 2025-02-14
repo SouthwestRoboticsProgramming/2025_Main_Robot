@@ -17,6 +17,7 @@ import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.PathfindingTest;
 import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
+import com.swrobotics.robot.subsystems.tunnel.TunnelSubsystem;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -61,6 +62,7 @@ public class RobotContainer {
     public final VisionSubsystem vision;
     public final SuperstructureSubsystem superstructure;
     public final AlgaeIntakeSubsystem algaeIntake;
+    public final TunnelSubsystem tunnel;
     public final CoralHandlingSubsystem coralHandler;
 
     public final LightsSubsystem lights;
@@ -81,6 +83,7 @@ public class RobotContainer {
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
         algaeIntake = new AlgaeIntakeSubsystem();
+        tunnel = new TunnelSubsystem();
         coralHandler = new CoralHandlingSubsystem();
         superstructure = new SuperstructureSubsystem(coralHandler);
 

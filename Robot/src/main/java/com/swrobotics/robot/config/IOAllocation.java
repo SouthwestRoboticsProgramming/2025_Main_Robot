@@ -27,11 +27,11 @@ public final class IOAllocation {
         public static final CanId kAlgaeIntakePivotMotor = new CanId(17, kGerald);
         public static final CanId kAlgaeIntakePivotEncoder = new CanId(18, kGerald);
 
+        public static final CanId kTunnelMotor = new CanId(19, kGerald);
+
         public static final CanId kOuttakePivotMotor = new CanId(1, kRIO);
         public static final CanId kOuttakePivotEncoder = new CanId(2, kRIO);
         public static final CanId kOuttakeMotor = new CanId(3, kRIO);
-
-        public static final CanId kIndexerMotor = new CanId(4, kRIO);
 
         public static final CanId kPDP = new CanId(62, kRIO);
     }
@@ -40,6 +40,7 @@ public final class IOAllocation {
         public static final int kPWM_LEDs = 4;
 
         public static final int kDIO_OuttakeBeamBreak = 0;
+        public static final int kDIO_TunnelBeamBreak = 1;
     }
 
     /** IDs of the devices within one swerve module */
