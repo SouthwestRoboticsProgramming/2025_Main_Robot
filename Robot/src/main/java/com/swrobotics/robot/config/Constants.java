@@ -206,7 +206,12 @@ public final class Constants {
             new NTSlot0Configs("Intake/Pivot/PID", 50, 5, 0.122, 0.1, 17, 0.2);
     public static final NTMotionMagicConfigs kIntakePivotMotionMagic =
             new NTMotionMagicConfigs("Intake/Pivot/Motion Magic", 20, 4, 0);
-    
+
+    // Tunnel
+    public static final NTEntry<Double> kTunnelReceiveVoltage = new NTDouble("Tunnel/Receive From Intake Volts", 2).setPersistent();
+    public static final NTEntry<Double> kTunnelFeedVoltage = new NTDouble("Tunnel/Feed to Outtake Volts", 2).setPersistent();
+    public static final NTEntry<Double> kTunnelEjectVoltage = new NTDouble("Tunnel/Eject Volts", 2).setPersistent();
+
     // Coral outtake
     public static final NTEntry<Double> kOuttakeRollerIntakeVoltage = new NTDouble("Outtake/Intake Voltage", 2).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreVoltage = new NTDouble("Outtake/Score Voltage", 3).setPersistent();
