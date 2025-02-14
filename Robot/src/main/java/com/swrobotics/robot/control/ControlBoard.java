@@ -13,8 +13,9 @@ import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
 import com.swrobotics.robot.subsystems.intake.IntakeSubsystem;
-import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
+import com.swrobotics.robot.subsystems.outtake.OuttakeSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
+import com.swrobotics.robot.subsystems.tunnel.TunnelSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -105,32 +106,6 @@ public final class ControlBoard extends SubsystemBase {
                         () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
 
-        robot.superstructure.setDefaultCommand(
-                robot.superstructure.commandSetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER));
-        operator.x.trigger()
-                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L1));
-        operator.a.trigger()
-                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L2));
-        operator.b.trigger()
-                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L3));
-        operator.y.trigger()
-                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
-
-
-        robot.intake.setDefaultCommand(
-                robot.intake.commandSetState(IntakeSubsystem.State.STOW));
-        driver.leftTrigger.triggerOutside(0.25)
-                .whileTrue(robot.intake.commandSetState(IntakeSubsystem.State.INTAKE));
-        driver.rightTrigger.triggerOutside(0.25)
-                .whileTrue(robot.intake.commandSetState(IntakeSubsystem.State.OUTTAKE));
-                
-        robot.coralHandler.setDefaultCommand(
-                robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.HOLD));
-        new Trigger(() -> operator.leftTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
-        new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.SCORE));
-
         // Everything past here is for testing and should eventually be removed
 
         // Test LEDs
@@ -177,5 +152,68 @@ public final class ControlBoard extends SubsystemBase {
     private double getDriveRotation() {
         double input = MathUtil.powerWithSign(-driver.rightStickX.get(), Constants.kDriveControlTurnPower);
         return Units.rotationsToRadians(input * Constants.kDriveControlMaxTurnSpeed);
+    }
+
+    SuperstructureSubsystem.State previousSuperstructureState = SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER;
+
+    @Override
+    public void periodic() {
+        boolean intakeAlgae = operator.leftBumper.get();
+        boolean intakeCoral = operator.leftTrigger.isOutside(Constants.kTriggerThreshold);
+        boolean intakeEject = operator.rightBumper.get();
+        boolean scoreCoral = operator.rightTrigger.isOutside(Constants.kTriggerThreshold);
+        boolean scoreL1 = operator.x.get();
+        boolean scoreL2 = operator.a.get();
+        boolean scoreL3 = operator.b.get();
+        boolean scoreL4 = operator.y.get();
+
+        IntakeSubsystem.State intakeState = IntakeSubsystem.State.STOW;
+        if (intakeAlgae)
+            intakeState = IntakeSubsystem.State.INTAKE_ALGAE;
+        if (intakeCoral)
+            intakeState = IntakeSubsystem.State.INTAKE_CORAL;
+        if (intakeEject)
+            intakeState = intakeState == IntakeSubsystem.State.INTAKE_ALGAE
+                    ? IntakeSubsystem.State.EJECT_ALGAE
+                    : IntakeSubsystem.State.EJECT_CORAL;
+        robot.intake.setTargetState(intakeState);
+
+        var superstructureState = SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER;
+        if (robot.outtake.hasCoral()
+                && previousSuperstructureState == SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_TUNNEL)
+            // It's faster to keep the superstructure down since the elevator
+            // won't need to move as far when scoring
+            superstructureState = SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_TUNNEL;
+        if (intakeState == IntakeSubsystem.State.INTAKE_CORAL)
+            superstructureState = SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_TUNNEL;
+        if (scoreL1)
+            superstructureState = SuperstructureSubsystem.State.SCORE_L1;
+        if (scoreL2)
+            superstructureState = SuperstructureSubsystem.State.SCORE_L2;
+        if (scoreL3)
+            superstructureState = SuperstructureSubsystem.State.SCORE_L3;
+        if (scoreL4)
+            superstructureState = SuperstructureSubsystem.State.SCORE_L4;
+        robot.superstructure.setTargetState(superstructureState);
+
+        TunnelSubsystem.State tunnelState = TunnelSubsystem.State.RECEIVE_FROM_INTAKE;
+        if (superstructureState == SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_TUNNEL
+                && !robot.outtake.hasCoral()
+                && robot.superstructure.isInTolerance())
+            tunnelState = TunnelSubsystem.State.FEED_TO_OUTTAKE;
+        if (intakeState == IntakeSubsystem.State.EJECT_CORAL)
+            tunnelState = TunnelSubsystem.State.EJECT;
+        robot.tunnel.setState(tunnelState);
+
+        OuttakeSubsystem.State outtakeState = switch (superstructureState) {
+            case RECEIVE_CORAL_FROM_INDEXER -> OuttakeSubsystem.State.RECEIVE_FROM_INDEXER;
+            case RECEIVE_CORAL_FROM_TUNNEL -> OuttakeSubsystem.State.RECEIVE_FROM_TUNNEL;
+            case SCORE_L1, SCORE_L2, SCORE_L3, SCORE_L4 -> scoreCoral
+                    ? OuttakeSubsystem.State.SCORE
+                    : OuttakeSubsystem.State.HOLD;
+        };
+        robot.outtake.setTargetState(outtakeState);
+
+        previousSuperstructureState = superstructureState;
     }
 }

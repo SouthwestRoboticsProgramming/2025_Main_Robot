@@ -19,8 +19,10 @@ public final class IntakeSubsystem extends SubsystemBase {
 
     public enum State {
         STOW(Constants.kIntakeStowAngle, () -> 0.0),
-        INTAKE(Constants.kIntakeAlgaeAngle, Constants.kIntakeAlgaeVoltage),
-        OUTTAKE(Constants.kIntakeAlgaeAngle, () -> -Constants.kIntakeAlgaeOuttakeVoltage.get());
+        INTAKE_CORAL(Constants.kIntakeCoralAngle, Constants.kIntakeCoralVoltage),
+        EJECT_CORAL(Constants.kIntakeStowAngle, () -> -Constants.kIntakeCoralEjectVoltage.get()),
+        INTAKE_ALGAE(Constants.kIntakeAlgaeAngle, () -> -Constants.kIntakeAlgaeVoltage.get()),
+        EJECT_ALGAE(Constants.kIntakeAlgaeAngle, Constants.kIntakeAlgaeEjectVoltage);
 
         private final Supplier<Double> angleGetter;
         private final Supplier<Double> voltageGetter;

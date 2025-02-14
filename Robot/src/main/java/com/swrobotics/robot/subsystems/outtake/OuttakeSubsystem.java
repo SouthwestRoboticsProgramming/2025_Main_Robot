@@ -13,7 +13,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class OuttakeSubsystem extends SubsystemBase {
     public enum State {
-        INTAKE(Constants.kOuttakeRollerIntakeVoltage),
+        RECEIVE_FROM_INDEXER(Constants.kOuttakeReceiveFromIndexerVoltage),
+        RECEIVE_FROM_TUNNEL(() -> -Constants.kOuttakeReceiveFromTunnelVoltage.get()),
         SCORE(Constants.kOuttakeRollerScoreVoltage),
         HOLD(() -> 0.0);
 

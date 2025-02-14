@@ -28,12 +28,12 @@ public final class RobotView {
             new MechanismLigament2d("Outtake", 0.7, 0, 3, new Color8Bit(Color.kLightBlue)));
 
     public static void setSuperstructureState(double elevatorHeightPct, double pivotAngleRot) {
-        outtakePivot.setPosition(1, 2 * elevatorHeightPct);
+        outtakePivot.setPosition(1, 0.5 + 2 * elevatorHeightPct);
         outtake.setAngle(Units.rotationsToDegrees(pivotAngleRot));
     }
 
     public static void setTargetSuperstructureState(double elevatorHeightPct, double pivotAngleRot) {
-        outtakeTargetPivot.setPosition(1, 2 * elevatorHeightPct);
+        outtakeTargetPivot.setPosition(1, 0.5 + 2 * elevatorHeightPct);
         outtakeTarget.setAngle(Units.rotationsToDegrees(pivotAngleRot));
     }
 

@@ -18,6 +18,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
     public enum State {
         RECEIVE_CORAL_FROM_INDEXER(Constants.kElevatorHeightBottom, Constants.kOuttakePivotInAngle),
+        RECEIVE_CORAL_FROM_TUNNEL(Constants.kElevatorHeightTunnel, Constants.kOuttakePivotTunnelAngle),
         SCORE_L1(Constants.kElevatorHeightL1, Constants.kOuttakePivotScoreL1Angle),
         SCORE_L2(Constants.kElevatorHeightL2, Constants.kOuttakePivotScoreL2Angle),
         SCORE_L3(Constants.kElevatorHeightL3, Constants.kOuttakePivotScoreL3Angle),

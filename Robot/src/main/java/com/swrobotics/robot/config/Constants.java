@@ -167,6 +167,7 @@ public final class Constants {
     public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorMaxHeightWithArmInBelowBar = new NTDouble("Superstructure/Elevator/Max Height With Arm In Below Bar", 0.047993).setPersistent();
     public static final NTEntry<Double> kElevatorHeightBottom = new NTDouble("Superstructure/Elevator/Bottom Height", 0.002).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightTunnel = new NTDouble("Superstructure/Elevator/Tunnel Height", 0.25).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL1 = new NTDouble("Superstructure/Elevator/L1 Height", 0.25).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL2 = new NTDouble("Superstructure/Elevator/L2 Height", 0.375).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL3 = new NTDouble("Superstructure/Elevator/L3 Height", 0.55).setPersistent();
@@ -188,6 +189,7 @@ public final class Constants {
     public static final NTEntry<Double> kOuttakePivotCollisionTolerance = new NTDouble("Superstructure/Pivot/Collision Tolerance (deg)", 5).setPersistent();
     public static final NTEntry<Double> kOuttakePivotMaxAngleNearBar = new NTDouble("Superstructure/Pivot/Max Angle Near Bar", 68.203080).setPersistent();
     public static final NTEntry<Double> kOuttakePivotInAngle = new NTDouble("Superstructure/Pivot/In Angle (deg)", 90).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotTunnelAngle = new NTDouble("Superstructure/Pivot/Tunnel Angle (deg)", -45).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL1Angle = new NTDouble("Superstructure/Pivot/Score L1 Angle (deg)", 70).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL2Angle = new NTDouble("Superstructure/Pivot/Score L2 Angle (deg)", 75).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL3Angle = new NTDouble("Superstructure/Pivot/Score L3 Angle (deg)", 75).setPersistent();
@@ -197,9 +199,12 @@ public final class Constants {
     public static final double kIntakePivotMotorToArmRatio = (36.0 / 16.0) * (56.0 / 24.0) * 25;
     public static final double kIntakePivotCANcoderToArmRatio = (36.0 / 16.0);
     public static final NTEntry<Double> kIntakeStowAngle = new NTDouble("Intake/Pivot/Stow Angle (deg)", 85).setPersistent();
-    public static final NTEntry<Double> kIntakeAlgaeAngle = new NTDouble("Intake/Pivot/Intake Angle (deg)", 35.0).setPersistent();
-    public static final NTEntry<Double> kIntakeAlgaeVoltage = new NTDouble("Intake/Roller/Intake Voltage", 8).setPersistent();
-    public static final NTEntry<Double> kIntakeAlgaeOuttakeVoltage = new NTDouble("Intake/Roller/Outtake Voltage", 8).setPersistent();
+    public static final NTEntry<Double> kIntakeAlgaeAngle = new NTDouble("Intake/Pivot/Algae Angle (deg)", 35.0).setPersistent();
+    public static final NTEntry<Double> kIntakeAlgaeVoltage = new NTDouble("Intake/Roller/Algae Voltage", 8).setPersistent();
+    public static final NTEntry<Double> kIntakeAlgaeEjectVoltage = new NTDouble("Intake/Roller/Algae Eject Voltage", 8).setPersistent();
+    public static final NTEntry<Double> kIntakeCoralAngle = new NTDouble("Intake/Pivot/Coral Angle (deg)", 35.0).setPersistent();
+    public static final NTEntry<Double> kIntakeCoralVoltage = new NTDouble("Intake/Roller/Coral Voltage", 8).setPersistent();
+    public static final NTEntry<Double> kIntakeCoralEjectVoltage = new NTDouble("Intake/Roller/Coral Eject Voltage", 8).setPersistent();
     public static final NTEntry<Double> kIntakePivotEncoderOffset = new NTDouble("Intake/Pivot/Offset (rot)", -0.244141).setPersistent();
     public static final NTEntry<Double> kIntakeCurrentLimit = new NTDouble("Intake/Roller/Current Limit (A)", 24).setPersistent();
     public static final NTSlot0Configs kIntakePivotPID =
@@ -213,7 +218,8 @@ public final class Constants {
     public static final NTEntry<Double> kTunnelEjectVoltage = new NTDouble("Tunnel/Eject Volts", 2).setPersistent();
 
     // Coral outtake
-    public static final NTEntry<Double> kOuttakeRollerIntakeVoltage = new NTDouble("Outtake/Intake Voltage", 2).setPersistent();
+    public static final NTEntry<Double> kOuttakeReceiveFromIndexerVoltage = new NTDouble("Outtake/Receive From Indexer Voltage", 2).setPersistent();
+    public static final NTEntry<Double> kOuttakeReceiveFromTunnelVoltage = new NTDouble("Outtake/Receive From Tunnel Voltage", 2).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreVoltage = new NTDouble("Outtake/Score Voltage", 3).setPersistent();
 
     // Lights
