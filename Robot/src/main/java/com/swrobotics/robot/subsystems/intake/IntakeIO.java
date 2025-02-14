@@ -1,10 +1,8 @@
-package com.swrobotics.robot.subsystems.algae;
+package com.swrobotics.robot.subsystems.intake;
 
 import com.swrobotics.robot.logging.AutoLoggedInputs;
 
-import edu.wpi.first.units.measure.Angle;
-
-public interface AlgaeIO {
+public interface IntakeIO {
     class Inputs extends AutoLoggedInputs {
         // Rotations, from horizontal
         public double currentAngleRot;

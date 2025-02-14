@@ -2,7 +2,6 @@ package com.swrobotics.robot;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -15,8 +14,7 @@ import com.swrobotics.robot.config.PathEnvironments;
 import com.swrobotics.robot.logging.RobotView;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
-import com.swrobotics.robot.subsystems.PathfindingTest;
-import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
+import com.swrobotics.robot.subsystems.intake.IntakeSubsystem;
 import com.swrobotics.robot.subsystems.tunnel.TunnelSubsystem;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -61,7 +59,7 @@ public class RobotContainer {
     public final SwerveDriveSubsystem drive;
     public final VisionSubsystem vision;
     public final SuperstructureSubsystem superstructure;
-    public final AlgaeIntakeSubsystem algaeIntake;
+    public final IntakeSubsystem intake;
     public final TunnelSubsystem tunnel;
     public final CoralHandlingSubsystem coralHandler;
 
@@ -82,7 +80,7 @@ public class RobotContainer {
 
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
-        algaeIntake = new AlgaeIntakeSubsystem();
+        intake = new IntakeSubsystem();
         tunnel = new TunnelSubsystem();
         coralHandler = new CoralHandlingSubsystem();
         superstructure = new SuperstructureSubsystem(coralHandler);

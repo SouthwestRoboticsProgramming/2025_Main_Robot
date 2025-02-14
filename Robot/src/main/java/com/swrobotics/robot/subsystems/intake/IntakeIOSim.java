@@ -1,13 +1,8 @@
-package com.swrobotics.robot.subsystems.algae;
-
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Rotations;
+package com.swrobotics.robot.subsystems.intake;
 
 import com.swrobotics.lib.utils.MathUtil;
 
-import edu.wpi.first.units.measure.Angle;
-
-public class AlgaeIOSim implements AlgaeIO {
+public final class IntakeIOSim implements IntakeIO {
     private double currentAngle;
     private double targetAngle;
     private double voltage;
@@ -31,5 +26,4 @@ public class AlgaeIOSim implements AlgaeIO {
 
     @Override
     public void calibrateEncoder() {}
-    
 }

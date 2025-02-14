@@ -12,20 +12,15 @@ import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
-import com.swrobotics.robot.logging.FieldView;
-import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
+import com.swrobotics.robot.subsystems.intake.IntakeSubsystem;
 import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
-import java.util.Collections;
 
 public final class ControlBoard extends SubsystemBase {
     /*
@@ -122,12 +117,12 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
 
 
-        robot.algaeIntake.setDefaultCommand(
-                robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
+        robot.intake.setDefaultCommand(
+                robot.intake.commandSetState(IntakeSubsystem.State.STOW));
         driver.leftTrigger.triggerOutside(0.25)
-                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
+                .whileTrue(robot.intake.commandSetState(IntakeSubsystem.State.INTAKE));
         driver.rightTrigger.triggerOutside(0.25)
-                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
+                .whileTrue(robot.intake.commandSetState(IntakeSubsystem.State.OUTTAKE));
                 
         robot.coralHandler.setDefaultCommand(
                 robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.HOLD));

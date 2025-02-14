@@ -1,6 +1,4 @@
-package com.swrobotics.robot.subsystems.algae;
-
-import static edu.wpi.first.units.Units.Degrees;
+package com.swrobotics.robot.subsystems.intake;
 
 import java.util.function.Supplier;
 
@@ -16,13 +14,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class AlgaeIntakeSubsystem extends SubsystemBase {
-    private static final NTBoolean CALIBRATE_PIVOT = new NTBoolean("Algae/Pivot/Calibrate", false);
+public final class IntakeSubsystem extends SubsystemBase {
+    private static final NTBoolean CALIBRATE_PIVOT = new NTBoolean("Intake/Pivot/Calibrate", false);
 
     public enum State {
-        STOW(Constants.kAlgaeStowAngle, () -> 0.0),
-        INTAKE(Constants.kAlgaeIntakeAngle, Constants.kAlgaeIntakeVoltage),
-        OUTTAKE(Constants.kAlgaeIntakeAngle, () -> -Constants.kAlgaeOuttakeVoltage.get());
+        STOW(Constants.kIntakeStowAngle, () -> 0.0),
+        INTAKE(Constants.kIntakeAlgaeAngle, Constants.kIntakeAlgaeVoltage),
+        OUTTAKE(Constants.kIntakeAlgaeAngle, () -> -Constants.kIntakeAlgaeOuttakeVoltage.get());
 
         private final Supplier<Double> angleGetter;
         private final Supplier<Double> voltageGetter;
@@ -41,18 +39,18 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
         }
     }
 
-    private final AlgaeIO algaeIO;
-    private final AlgaeIO.Inputs algaeInputs;
+    private final IntakeIO io;
+    private final IntakeIO.Inputs inputs;
 
     private State targetState;
 
-    public AlgaeIntakeSubsystem() {
+    public IntakeSubsystem() {
         if (RobotBase.isReal()) {
-            algaeIO = new AlgaeIOReal();
+            io = new IntakeIOReal();
         } else {
-            algaeIO = new AlgaeIOSim();
+            io = new IntakeIOSim();
         }
-        algaeInputs = new AlgaeIO.Inputs();
+        inputs = new IntakeIO.Inputs();
 
         targetState = State.STOW;
     }
@@ -72,17 +70,17 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        algaeIO.updateInputs(algaeInputs);
-        Logger.processInputs("Algae", algaeInputs);
+        io.updateInputs(inputs);
+        Logger.processInputs("Intake", inputs);
 
         if (CALIBRATE_PIVOT.get()) {
             CALIBRATE_PIVOT.set(false);
-            algaeIO.calibrateEncoder();
+            io.calibrateEncoder();
         }
 
-        RobotView.setAlgaeIntakeState(algaeInputs.currentAngleRot, algaeInputs.voltageOut);
+        RobotView.setIntakeState(inputs.currentAngleRot, inputs.voltageOut);
 
-        algaeIO.setTargetAngle(targetState.getAngle());
-        algaeIO.setVoltage(targetState.getVoltage());
+        io.setTargetAngle(targetState.getAngle());
+        io.setVoltage(targetState.getVoltage());
     }
 }

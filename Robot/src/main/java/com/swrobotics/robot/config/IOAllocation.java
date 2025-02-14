@@ -23,9 +23,9 @@ public final class IOAllocation {
         public static final CanId kElevatorMotor1 = new CanId(14, kGerald);
         public static final CanId kElevatorMotor2 = new CanId(15, kGerald);
 
-        public static final CanId kAlgaeIntakeSpinMotor = new CanId(16, kGerald);
-        public static final CanId kAlgaeIntakePivotMotor = new CanId(17, kGerald);
-        public static final CanId kAlgaeIntakePivotEncoder = new CanId(18, kGerald);
+        public static final CanId kIntakeSpinMotor = new CanId(16, kGerald);
+        public static final CanId kIntakePivotMotor = new CanId(17, kGerald);
+        public static final CanId kIntakePivotEncoder = new CanId(18, kGerald);
 
         public static final CanId kTunnelMotor = new CanId(19, kGerald);
 
