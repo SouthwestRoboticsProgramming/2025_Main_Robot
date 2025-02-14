@@ -13,6 +13,8 @@ import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
 import com.swrobotics.robot.logging.FieldView;
+import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
+import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -51,6 +53,9 @@ public final class ControlBoard extends SubsystemBase {
      * Down: Climb
      * 
      * Right trigger: Score coral
+     * 
+     * Inverted: 3
+     * Not inverted: 2
      */
 
     private static final NTEntry<Boolean> CHARACTERISE_WHEEL_RADIUS = new NTBoolean("Drive/Characterize Wheel Radius", false);
@@ -123,6 +128,20 @@ public final class ControlBoard extends SubsystemBase {
                 .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
         operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
                 .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
+
+        robot.algaeIntake.setDefaultCommand(
+                robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
+        driver.leftTrigger.triggerOutside(0.25)
+                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
+        driver.rightTrigger.triggerOutside(0.25)
+                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
+                
+        robot.coralHandler.setDefaultCommand(
+                robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.HOLD));
+        new Trigger(() -> operator.leftTrigger.isOutside(Constants.kTriggerThreshold))
+                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
+        new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
+                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.SCORE));
 
         // Everything past here is for testing and should eventually be removed
 

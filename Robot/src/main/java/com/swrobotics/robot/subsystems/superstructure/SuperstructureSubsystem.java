@@ -3,6 +3,7 @@ package com.swrobotics.robot.subsystems.superstructure;
 import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.logging.RobotView;
+import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,7 +17,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private static final NTBoolean CALIBRATE_PIVOT = new NTBoolean("Superstructure/Pivot/Encoder/Calibrate", false);
 
     public enum State {
-        RECEIVE_CORAL_FROM_INDEXER(() -> 0.0, Constants.kOuttakePivotInAngle),
+        RECEIVE_CORAL_FROM_INDEXER(Constants.kElevatorHeightBottom, Constants.kOuttakePivotInAngle),
         SCORE_L1(Constants.kElevatorHeightL1, Constants.kOuttakePivotScoreL1Angle),
         SCORE_L2(Constants.kElevatorHeightL2, Constants.kOuttakePivotScoreL2Angle),
         SCORE_L3(Constants.kElevatorHeightL3, Constants.kOuttakePivotScoreL3Angle),
@@ -56,9 +57,11 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private final OuttakePivotIO pivotIO;
     private final OuttakePivotIO.Inputs pivotInputs;
 
+    private final CoralHandlingSubsystem coralHandlingSubsystem;
+
     private State targetState;
 
-    public SuperstructureSubsystem() {
+    public SuperstructureSubsystem(CoralHandlingSubsystem coralHandlingSubsystem) {
         if (RobotBase.isReal()) {
             elevatorIO = new ElevatorIOReal();
             pivotIO = new OuttakePivotIOReal();
@@ -68,6 +71,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         }
         elevatorInputs = new ElevatorIO.Inputs();
         pivotInputs = new OuttakePivotIO.Inputs();
+
+        this.coralHandlingSubsystem = coralHandlingSubsystem;
 
         targetState = State.RECEIVE_CORAL_FROM_INDEXER;
     }
@@ -103,50 +108,59 @@ public final class SuperstructureSubsystem extends SubsystemBase {
             pivotIO.calibrateEncoder();
         }
 
-        RobotView.setSuperstructureState(elevatorInputs.currentHeightMeters, pivotInputs.currentAngleRot);
+        RobotView.setSuperstructureState(elevatorInputs.currentHeightPct, pivotInputs.currentAngleRot);
 
-        double elevatorCurrent = elevatorInputs.currentHeightMeters;
+        double elevatorCurrent = elevatorInputs.currentHeightPct;
         double pivotCurrent = pivotInputs.currentAngleRot;
         double elevatorTarget = targetState.getElevatorHeight();
         double pivotTarget = targetState.getPivotAngle();
 
-        double collisionBottom = Constants.kElevatorMaxHeightWithArmInBelowBar.get();
-        double collisionTop = Constants.kElevatorMinHeightWithArmInAboveBar.get();
-        double collisionPivot = Units.degreesToRotations(Constants.kOuttakePivotMaxAngleNearBar.get());
-        double elevatorTolerance = Constants.kElevatorCollisionTolerance.get();
-        double pivotTolerance = Constants.kOuttakePivotCollisionTolerance.get();
+        double elevatorTol = Constants.kElevatorCollisionTolerance.get();
+        double elevatorCollisionHeight = Constants.kElevatorMaxHeightWithArmInBelowBar.get();
+        double pivotTol = Units.degreesToRotations(Constants.kOuttakePivotCollisionTolerance.get());
+        double pivotCollisionAngle = Units.degreesToRotations(Constants.kOuttakePivotMaxAngleNearBar.get());
 
-        // Prevent collision with elevator crossbar
-        boolean sameSideOfBar = (elevatorCurrent < collisionBottom && elevatorTarget < collisionBottom)
-                || (elevatorCurrent > collisionTop && elevatorTarget > collisionTop);
-        if (!sameSideOfBar) {
-            // Pivot must get out of the way of the bar
-            // Subtract tolerance so it goes a little farther out than necessary
-            pivotTarget = Math.min(pivotTarget, collisionPivot - Units.degreesToRotations(pivotTolerance));
+        // When pivot is too far in:
+        //   if pivot and target are below bar, no change
+        //   if pivot above bar, target below bar: elevator not move
+        //   if target above bar, pivot below bar: target is max collision height
+        //   if both above bar: elevator not move
 
-            boolean pivotIsOutOfWay = pivotCurrent <= collisionPivot;
-            if (!pivotIsOutOfWay) {
-                // Wait for pivot to move
-                if (elevatorCurrent < collisionBottom)
-                    elevatorTarget = collisionBottom - elevatorTolerance;
-                else if (elevatorCurrent > collisionTop)
-                    elevatorTarget = collisionTop + elevatorTolerance;
-                else
-                    elevatorTarget = elevatorCurrent;
+        // If pivot target is too far in:
+        //   if elevator current and target below bar, go to target
+        //   if elevator above, target below: get out of way (case should be impossible)
+        //   if elevator below, target above: get out of way
+        //   if elevator above, target above: get out of way (case should be impossible)
+
+        if (pivotTarget > pivotCollisionAngle - pivotTol) {
+            if (elevatorCurrent > elevatorCollisionHeight - elevatorTol || elevatorTarget > elevatorCollisionHeight - elevatorTol) {
+                pivotTarget = pivotCollisionAngle - pivotTol;
             }
         }
 
-        if (elevatorTarget == 0.0 && Math.abs(elevatorInputs.currentHeightMeters) < Constants.kElevatorTolerance.get()) {
+        if (pivotCurrent > pivotCollisionAngle) {
+            if (elevatorCurrent > elevatorCollisionHeight - elevatorTol) {
+                elevatorTarget = elevatorCurrent; // Don't move until the pivot gets out
+            } else if (elevatorTarget > elevatorCollisionHeight - elevatorTol) {
+                elevatorTarget = elevatorCollisionHeight - elevatorTol;
+            }
+        }
+
+        RobotView.setTargetSuperstructureState(elevatorTarget, pivotTarget);
+
+        boolean hasCoral = coralHandlingSubsystem.hasPiece();
+
+        if (elevatorTarget == 0.0 && Math.abs(elevatorInputs.currentHeightPct) < Constants.kElevatorTolerance.get()) {
             // Conserve battery power when we can
             elevatorIO.setNeutral();
         } else {
             elevatorIO.setTargetHeight(elevatorTarget);
         }
-        pivotIO.setTargetAngle(pivotTarget);
+        pivotIO.setTargetAngle(pivotTarget, hasCoral);
     }
 
     public boolean isInTolerance() {
-        boolean elevator = Math.abs(elevatorInputs.currentHeightMeters - targetState.getElevatorHeight())
+        boolean elevator = Math.abs(elevatorInputs.currentHeightPct - targetState.getElevatorHeight())
                 < Constants.kElevatorTolerance.get();
 
         boolean pivot = Math.abs(pivotInputs.currentAngleRot - targetState.getPivotAngle())

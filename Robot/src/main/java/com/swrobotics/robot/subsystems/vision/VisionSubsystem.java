@@ -1,6 +1,7 @@
 package com.swrobotics.robot.subsystems.vision;
 
 import com.swrobotics.robot.config.Constants;
+import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.vision.limelight.LimelightCamera;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,14 +20,13 @@ public final class VisionSubsystem extends SubsystemBase {
 
         cameras = List.of(
                 new LimelightCamera(
-                        "front-left",
+                        "limelight-ftleft",
                         Constants.kLimelightFrontLeftLocation,
                         Constants.kLimelightConfig),
                 new LimelightCamera(
-                        "front-right",
+                        "limelight-ftright",
                         Constants.kLimelightFrontRightLocation,
-                        Constants.kLimelightConfig
-                )
+                        Constants.kLimelightConfig)
                 // Add more cameras here...
         );
     }
@@ -52,6 +52,12 @@ public final class VisionSubsystem extends SubsystemBase {
         for (LimelightCamera camera : cameras) {
             camera.getNewUpdates(updates, useMegaTag2);
         }
+
+        Pose2d[] poses = new Pose2d[updates.size()];
+        for (int i = 0; i < poses.length; i++) {
+            poses[i] = updates.get(i).pose();
+        }
+        FieldView.visionEstimates.setPoses(poses);
 
         for (LimelightCamera.Update update : updates) {
             drive.addVisionMeasurement(update.pose(), update.timestamp(), update.stdDevs());

@@ -4,12 +4,12 @@ import com.swrobotics.robot.logging.AutoLoggedInputs;
 
 public interface ElevatorIO {
     final class Inputs extends AutoLoggedInputs {
-        public double currentHeightMeters;
+        public double currentHeightPct;
     }
 
     void updateInputs(Inputs inputs);
 
-    void setTargetHeight(double heightMeters);
+    void setTargetHeight(double heightPct);
 
     void setNeutral();
 

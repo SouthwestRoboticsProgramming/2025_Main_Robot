@@ -27,17 +27,20 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
     private final StatusSignal<Angle> canCoderPositionStatus;
 
     private final MotionMagicVoltage positionControl;
+    private final MotionMagicVoltage positionControlWithCoral;
 
     public OuttakePivotIOReal() {
         motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
         canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
 
         TalonFXConfigHelper motorConfig = new TalonFXConfigHelper();
-        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // FIXME
+        motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.Feedback.SensorToMechanismRatio = Constants.kOuttakePivotMotorToArmRatio;
         motorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-        motorConfig.withTunable(Constants.kOuttakePivotPID);
+        motorConfig.addTunable(Constants.kOuttakePivotPID);
+        motorConfig.addTunable(Constants.kOuttakePivotPIDWithCoral);
+        motorConfig.addTunable(Constants.kOuttakePivotMotionMagic);
         motorConfig.apply(motor);
 
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
@@ -52,36 +55,48 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
         positionControl = new MotionMagicVoltage(0)
                 .withEnableFOC(true);
+        positionControlWithCoral = new MotionMagicVoltage(0)
+                .withSlot(1)
+                .withEnableFOC(true);
 
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
-        canCoderPositionStatus.waitForUpdate(1);
 
+        double centerOfRange = 45 / 360.0;
         double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
         double armPos = MathUtil.wrap(
-                canCoderPos + Constants.kOuttakePivotEncoderOffset.get(),
-                -0.5, 0.5
-        ) / Constants.kOuttakePivotCANcoderToArmRatio;
-
+                (canCoderPos + Constants.kOuttakePivotEncoderOffset.get())
+                        / Constants.kOuttakePivotCANcoderToArmRatio,
+                centerOfRange - 0.5/Constants.kOuttakePivotCANcoderToArmRatio,
+                centerOfRange + 0.5/Constants.kOuttakePivotCANcoderToArmRatio
+        );
         CTREUtil.retryUntilOk(motor, () -> motor.setPosition(armPos));
     }
 
     @Override
     public void updateInputs(Inputs inputs) {
+        motorPositionStatus.refresh();
         inputs.currentAngleRot = motorPositionStatus.getValueAsDouble();
     }
 
     @Override
-    public void setTargetAngle(double targetAngleRot) {
-        motor.setControl(positionControl.withPosition(targetAngleRot));
+    public void setTargetAngle(double targetAngleRot, boolean hasCoral) {
+        MotionMagicVoltage control = hasCoral
+                ? positionControl
+                : positionControlWithCoral;
+
+        motor.setControl(control.withPosition(targetAngleRot));
     }
 
     @Override
     public void calibrateEncoder() {
-        // Assumes that the arm is currently in horizontal position (angle 0)
-        canCoderPositionStatus.refresh();
-        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
-        Constants.kOuttakePivotEncoderOffset.set(-canCoderPos);
+        // Assumes that the arm is currently in vertical position
+        double calibrationAngle = 0.25; // Rotations from horizontal
 
-        CTREUtil.retryUntilOk(motor, () -> motor.setPosition(0));
+        CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
+        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
+        double offset = calibrationAngle * Constants.kOuttakePivotCANcoderToArmRatio - canCoderPos;
+        Constants.kOuttakePivotEncoderOffset.set(offset);
+
+        CTREUtil.retryUntilOk(motor, () -> motor.setPosition(calibrationAngle));
     }
 }
