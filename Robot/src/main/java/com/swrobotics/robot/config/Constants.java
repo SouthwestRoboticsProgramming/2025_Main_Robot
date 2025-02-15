@@ -72,6 +72,8 @@ public final class Constants {
     public static final NTEntry<Double> kSnapDriveKd = new NTDouble("Drive/Snap/Drive kD", 0).setPersistent();
     public static final NTEntry<Double> kSnapTurnKp = new NTDouble("Drive/Snap/Turn kP", 5).setPersistent();
     public static final NTEntry<Double> kSnapTurnKd = new NTDouble("Drive/Snap/Turn kD", 0).setPersistent();
+    public static final NTEntry<Double> kSnapXYDeadzone = new NTDouble("Drive/Snap/XY Deadzone (m)", 0.02).setPersistent();
+    public static final NTEntry<Double> kSnapThetaDeadzone = new NTDouble("Drive/Snap/Theta Deadzone (deg)", 2).setPersistent();
 
     // Drive
     public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
@@ -175,7 +177,7 @@ public final class Constants {
     // Coral outtake pivot
     // 60:24 CANcoder
     public static final double kOuttakePivotMotorToArmRatio = (60.0 / 27.0) * (58.0 / 18.0) * (60.0 / 8.0);
-    public static final double kOuttakePivotCANcoderToArmRatio = 60.0 / 27.0;
+    public static final double kOuttakePivotCANcoderToArmRatio = 48.0 / 36.0;
     public static final NTEntry<Double> kOuttakePivotEncoderOffset = new NTDouble("Superstructure/Pivot/Encoder/Offset (rot)", 0).setPersistent();
     public static final NTSlot0Configs kOuttakePivotPID =
             new NTSlot0Configs("Superstructure/Pivot/PID", 200, 0, 0.316, 0, 7.021702, 0);
@@ -208,8 +210,12 @@ public final class Constants {
             new NTMotionMagicConfigs("Algae/Pivot/Motion Magic", 20, 4, 0);
     
     // Coral outtake
+    public static final int kOuttakeRefreshFreq = 100; // Hz
     public static final NTEntry<Double> kOuttakeRollerIntakeVoltage = new NTDouble("Outtake/Intake Voltage", 2).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreVoltage = new NTDouble("Outtake/Score Voltage", 3).setPersistent();
+    public static final NTEntry<Double> kOuttakeHoldPositionOffset = new NTDouble("Outtake/Hold Position Offset", 0).setPersistent();
+    public static final NTSlot0Configs kOuttakeRollerPID =
+            new NTSlot0Configs("Outtake/PID", 0, 0, 0, 0, 0, 0);
 
     // Indexer
     public static final NTEntry<Double> kIndexerIntakeVoltage = new NTDouble("Indexer/Intake Voltage", 5).setPersistent();
