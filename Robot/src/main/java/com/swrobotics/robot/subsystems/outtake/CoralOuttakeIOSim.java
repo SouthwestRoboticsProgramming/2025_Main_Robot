@@ -8,6 +8,9 @@ public class CoralOuttakeIOSim implements CoralOuttakeIO {
 
     @Override
     public void setVoltage(double voltage) {
+    }
 
+    @Override
+    public void setHoldPosition(double position) {
     }
 }

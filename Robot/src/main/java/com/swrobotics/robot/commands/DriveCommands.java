@@ -80,12 +80,21 @@ public final class DriveCommands {
             Pose2d currentPose = drive.getEstimatedPose();
             Pose2d targetPose = targetPoseSupplier.get();
 
-            double xOutput = driveXPid.calculate(currentPose.getX(), targetPose.getX());
-            double yOutput = driveYPid.calculate(currentPose.getY(), targetPose.getY());
-            double rotOutput = turnPid.calculate(
-                    MathUtil.wrap(currentPose.getRotation().getRadians(), -Math.PI, Math.PI),
-                    MathUtil.wrap(targetPose.getRotation().getRadians(), -Math.PI, Math.PI)
-            );
+            double xyError = currentPose.getTranslation().getDistance(targetPose.getTranslation());
+            double thetaError = MathUtil.absDiffRad(currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
+
+            double xOutput = 0, yOutput = 0;
+            if (xyError > Constants.kSnapXYDeadzone.get()) {
+                xOutput = driveXPid.calculate(currentPose.getX(), targetPose.getX());
+                yOutput = driveYPid.calculate(currentPose.getY(), targetPose.getY());
+            }
+            double rotOutput = 0;
+            if (thetaError > Math.toRadians(Constants.kSnapThetaDeadzone.get())) {
+                rotOutput = turnPid.calculate(
+                        MathUtil.wrap(currentPose.getRotation().getRadians(), -Math.PI, Math.PI),
+                        MathUtil.wrap(targetPose.getRotation().getRadians(), -Math.PI, Math.PI)
+                );
+            }
 
             double maxDriveSpeed = Constants.kSnapMaxSpeed.get();
             double driveSpeed = Math.hypot(xOutput, yOutput);
