@@ -137,11 +137,14 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
                 
         robot.coralHandler.setDefaultCommand(
-                robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.HOLD));
+                robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
         new Trigger(() -> operator.leftTrigger.isOutside(Constants.kTriggerThreshold))
                 .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
         new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
                 .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.SCORE));
+//        operator.leftBumper.trigger()
+//                .onTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.REVERSE)
+//                        .withTimeout(0.05));
 
         // Everything past here is for testing and should eventually be removed
 

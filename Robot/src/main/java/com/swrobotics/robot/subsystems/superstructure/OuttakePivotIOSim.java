@@ -25,6 +25,11 @@ public final class OuttakePivotIOSim implements OuttakePivotIO {
     }
 
     @Override
+    public void syncWithEncoder() {
+        // no
+    }
+
+    @Override
     public void calibrateEncoder() {
         // no encoder
         currentAngle = 0;

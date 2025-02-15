@@ -6,6 +6,7 @@ import com.swrobotics.robot.logging.RobotView;
 import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -15,6 +16,7 @@ import java.util.function.Supplier;
 
 public final class SuperstructureSubsystem extends SubsystemBase {
     private static final NTBoolean CALIBRATE_PIVOT = new NTBoolean("Superstructure/Pivot/Encoder/Calibrate", false);
+    private static final NTBoolean SYNC_PIVOT = new NTBoolean("Superstructure/Pivot/Encoder/Sync", false);
 
     public enum State {
         RECEIVE_CORAL_FROM_INDEXER(Constants.kElevatorHeightBottom, Constants.kOuttakePivotInAngle),
@@ -59,6 +61,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
     private final CoralHandlingSubsystem coralHandlingSubsystem;
 
+    private final Timer pivotSyncTimer;
     private State targetState;
 
     public SuperstructureSubsystem(CoralHandlingSubsystem coralHandlingSubsystem) {
@@ -74,6 +77,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
         this.coralHandlingSubsystem = coralHandlingSubsystem;
 
+        pivotSyncTimer = new Timer();
+        pivotSyncTimer.start();
         targetState = State.RECEIVE_CORAL_FROM_INDEXER;
     }
 
@@ -103,9 +108,18 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         // Set elevator climb mode
         elevatorIO.setClimbMode(targetState == State.CLIMB);
 
+        if (pivotSyncTimer.advanceIfElapsed(1)) {
+            pivotIO.syncWithEncoder();
+        }
+
         if (CALIBRATE_PIVOT.get()) {
             CALIBRATE_PIVOT.set(false);
             pivotIO.calibrateEncoder();
+        }
+
+        if (SYNC_PIVOT.get()) {
+            SYNC_PIVOT.set(false);
+            pivotIO.syncWithEncoder();
         }
 
         RobotView.setSuperstructureState(elevatorInputs.currentHeightPct, pivotInputs.currentAngleRot);
@@ -139,7 +153,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         }
 
         if (pivotCurrent > pivotCollisionAngle) {
-            if (elevatorCurrent > elevatorCollisionHeight - elevatorTol) {
+            if (elevatorCurrent > elevatorCollisionHeight) {
                 elevatorTarget = elevatorCurrent; // Don't move until the pivot gets out
             } else if (elevatorTarget > elevatorCollisionHeight - elevatorTol) {
                 elevatorTarget = elevatorCollisionHeight - elevatorTol;
