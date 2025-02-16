@@ -15,6 +15,22 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.Supplier;
 
 public final class DriveCommands {
+    public static Command driveRobotRelative(
+            SwerveDriveSubsystem drive,
+            Supplier<Translation2d> translationSupplier, // m/s
+            Supplier<Double> rotationSupplier // rad/s
+    ) {
+        return Commands.run(() -> {
+            Translation2d tx = translationSupplier.get();
+            double rot = rotationSupplier.get();
+
+            drive.setControl(new SwerveRequest.RobotCentric()
+                    .withVelocityX(tx.getX())
+                    .withVelocityY(tx.getY())
+                    .withRotationalRate(rot));
+        }, drive);
+    }
+
     public static Command driveFieldRelative(
             SwerveDriveSubsystem drive,
             Supplier<Translation2d> translationSupplier, // m/s

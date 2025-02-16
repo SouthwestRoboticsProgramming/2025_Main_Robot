@@ -10,6 +10,7 @@ import com.swrobotics.robot.config.PathEnvironments;
 import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,7 +34,10 @@ public final class Autonomous {
      */
 
     public static Command behindReef1Piece(RobotContainer robot) {
-        return scoreAt(robot, 6, 4);
+        return Commands.sequence(
+                scoreAt(robot, 6, 4),
+                backUp(robot)
+        );
     }
 
     public static Command leftSide4Piece(RobotContainer robot) {
@@ -44,7 +48,8 @@ public final class Autonomous {
                 humanPlayerPickupLeft(robot),
                 scoreAt(robot, 11, 4),
                 humanPlayerPickupLeft(robot),
-                scoreAt(robot, 10, 4)
+                scoreAt(robot, 10, 4),
+                backUp(robot)
         );
     }
 
@@ -123,5 +128,10 @@ public final class Autonomous {
                 // No timeout because it's better to wait long then leave without coral
                 Commands.waitUntil(() -> robot.coralHandler.hasPiece() || RobotBase.isSimulation())
         );
+    }
+
+    private static Command backUp(RobotContainer robot) {
+        return DriveCommands.driveRobotRelative(robot.drive, () -> new Translation2d(-1, 0), () -> 0.0)
+                .withTimeout(0.4);
     }
 }
