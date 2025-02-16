@@ -126,7 +126,7 @@ public final class Constants {
                     .withWheelRadius(Meters.of(0.048344))
                     // Gains taken from 254 2024 robot code
                     .withSteerMotorGains(new Slot0Configs().withKP(50).withKD(0.01).withKV(0.1))
-                    .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(0.5896768661127598))
+                    .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(0.5896768661127598 / (Math.PI * 2)))
                     // TODO: Torque current FOC
                     .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
                     .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
