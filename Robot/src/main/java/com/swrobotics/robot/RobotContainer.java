@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import com.pathplanner.lib.path.PathConstraints;
 import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
@@ -22,6 +23,8 @@ import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -38,6 +41,7 @@ import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -54,6 +58,7 @@ public class RobotContainer {
 //    public static final Logging.SimMode SIM_MODE = Logging.SimMode.REPLAY;
 
     // Create dashboard choosers
+    private final LoggedDashboardChooser<Boolean> autoFlipSelector;
     private final LoggedDashboardChooser<Command> autoSelector;
     private final LoggedDashboardChooser<Double> autoDelaySelector;
 
@@ -93,13 +98,26 @@ public class RobotContainer {
         // Register Named Commands for Auto
         NamedCommands.registerCommand("Example Named Command", Commands.print("The command ran!"));
 
+        autoFlipSelector = new LoggedDashboardChooser<>("Auto Flip");
+        autoFlipSelector.addDefaultOption("No", false);
+        autoFlipSelector.addDefaultOption("Yes", true);
+
         // Create a chooser to select the autonomous
         List<AutoEntry> autos = buildPathPlannerAutos();
         autos.sort(Comparator.comparing(AutoEntry::name, String.CASE_INSENSITIVE_ORDER));
         autoSelector = new LoggedDashboardChooser<>("Auto Selector");
         autoSelector.addDefaultOption("None", Commands.none());
-        autoSelector.addOption("One", Autonomous.behindReef1Piece(this));
-        autoSelector.addOption("Four", Autonomous.leftSide4Piece(this));
+
+        autoSelector.addOption("One", Commands.select(
+            Map.ofEntries(
+                Map.entry(true, Autonomous.behindReef1Piece(this, true)),
+                Map.entry(false, Autonomous.behindReef1Piece(this, false))), () -> getAutoFlip()));
+
+        autoSelector.addOption("Four", Commands.select(
+            Map.ofEntries(
+                Map.entry(true, Autonomous.fourPiece(this, true)),
+                Map.entry(false, Autonomous.fourPiece(this, false))), () -> getAutoFlip()));
+                
         autoSelector.addOption("Test", testAutoCommand());
         for (AutoEntry auto : autos)
             autoSelector.addOption(auto.name(), auto.cmd());
@@ -204,6 +222,13 @@ public class RobotContainer {
 
     public double getAutoDelay() {
         return autoDelaySelector.get();
+    }
+
+    public boolean getAutoFlip() {
+        Boolean flipped = autoFlipSelector.get();
+        if (flipped == null) { return false; }
+        Logger.recordOutput("Auto/Flip", flipped);
+        return flipped;
     }
 
     public Command getAutonomousCommand() {

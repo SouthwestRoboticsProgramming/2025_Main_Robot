@@ -16,7 +16,10 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 public final class Autonomous {
     /*
@@ -33,22 +36,27 @@ public final class Autonomous {
      *
      */
 
-    public static Command behindReef1Piece(RobotContainer robot) {
+    /*
+     * Conventions:
+     *  - Left side is default (flip will make it go right relative to the driver instead)
+     */
+
+    public static Command behindReef1Piece(RobotContainer robot, boolean flipped) {
         return Commands.sequence(
-                scoreAt(robot, 6, 4),
+                scoreAt(robot, 7, 4, flipped),
                 backUp(robot)
         );
     }
 
-    public static Command leftSide4Piece(RobotContainer robot) {
+    public static Command fourPiece(RobotContainer robot, boolean flipped) {
         return Commands.sequence(
-                scoreAt(robot, 9, 4),
-                humanPlayerPickupLeft(robot),
-                scoreAt(robot, 0, 4),
-                humanPlayerPickupLeft(robot),
-                scoreAt(robot, 11, 4),
-                humanPlayerPickupLeft(robot),
-                scoreAt(robot, 10, 4),
+                scoreAt(robot, 9, 4, flipped),
+                humanPlayerPickupLeft(robot, flipped),
+                scoreAt(robot, 0, 4, flipped),
+                humanPlayerPickupLeft(robot, flipped),
+                scoreAt(robot, 11, 4, flipped),
+                humanPlayerPickupLeft(robot, flipped),
+                scoreAt(robot, 10, 4, flipped),
                 backUp(robot)
         );
     }
@@ -60,6 +68,13 @@ public final class Autonomous {
                 Units.rotationsToRadians(Constants.kAutoMaxTurnSpeed),
                 Units.rotationsToRadians(Constants.kAutoMaxTurnAccel)
         );
+    }
+
+    private static Command scoreAt(RobotContainer robot, int position, int height, boolean flip) {
+        if (!flip) {
+            return scoreAt(robot, position, height);
+        }
+        return scoreAt(robot, getFlippedPosition(position), height);
     }
 
     private static Command scoreAt(RobotContainer robot, int position, int height) {
@@ -101,8 +116,18 @@ public final class Autonomous {
         );
     }
 
+    private static Command humanPlayerPickupLeft(RobotContainer robot, boolean flip) {
+        if (!flip) { return humanPlayerPickupLeft(robot); }
+        return humanPlayerPickupRight(robot);
+    }
+
     private static Command humanPlayerPickupLeft(RobotContainer robot) {
         return humanPlayerPickup(robot, FieldPositions.getLeftCoralStationPickup());
+    }
+
+    private static Command humanPlayerPickupRight(RobotContainer robot, boolean flip) {
+        if (!flip) { return humanPlayerPickupRight(robot); }
+        return humanPlayerPickupLeft(robot);
     }
 
     private static Command humanPlayerPickupRight(RobotContainer robot) {
@@ -133,5 +158,12 @@ public final class Autonomous {
     private static Command backUp(RobotContainer robot) {
         return DriveCommands.driveRobotRelative(robot.drive, () -> new Translation2d(-1, 0), () -> 0.0)
                 .withTimeout(0.4);
+    }
+
+    private static int getFlippedPosition(int position) {
+        if (position == 0) { return 1; } // The math doesn't work with computer counting
+        if (position == 1) { return 0; }
+
+        return 13 - position;
     }
 }
