@@ -8,6 +8,7 @@ import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
 import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
 import com.swrobotics.robot.commands.DriveCommands;
+import com.swrobotics.robot.commands.DriveKVCharacterizationCommand;
 import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
@@ -156,6 +157,9 @@ public final class ControlBoard extends SubsystemBase {
 
 //        driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
 //        driver.y.onPressed(() -> FieldView.pathfindingGoal.setPose(robot.drive.getEstimatedPose()));
+
+        operator.start.trigger()
+                .whileTrue(new DriveKVCharacterizationCommand(robot.drive));
     }
 
     /**
