@@ -1,5 +1,6 @@
 package com.swrobotics.robot.subsystems.superstructure;
 
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -60,16 +61,7 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
                 .withEnableFOC(true);
 
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
-
-        double centerOfRange = 45 / 360.0;
-        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
-        double armPos = MathUtil.wrap(
-                (canCoderPos + Constants.kOuttakePivotEncoderOffset.get())
-                        / Constants.kOuttakePivotCANcoderToArmRatio,
-                centerOfRange - 0.5/Constants.kOuttakePivotCANcoderToArmRatio,
-                centerOfRange + 0.5/Constants.kOuttakePivotCANcoderToArmRatio
-        );
-        CTREUtil.retryUntilOk(motor, () -> motor.setPosition(armPos));
+        CTREUtil.retryUntilOk(motor, this::trySyncWithEncoder);
     }
 
     @Override
@@ -85,6 +77,24 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
                 : positionControlWithCoral;
 
         motor.setControl(control.withPosition(targetAngleRot));
+    }
+
+    private StatusCode trySyncWithEncoder() {
+        double centerOfRange = 0;
+        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
+        double armPos = MathUtil.wrap(
+                (canCoderPos + Constants.kOuttakePivotEncoderOffset.get())
+                        / Constants.kOuttakePivotCANcoderToArmRatio,
+                centerOfRange - 0.5/Constants.kOuttakePivotCANcoderToArmRatio,
+                centerOfRange + 0.5/Constants.kOuttakePivotCANcoderToArmRatio
+        );
+        return motor.setPosition(armPos);
+    }
+
+    @Override
+    public void syncWithEncoder() {
+        canCoderPositionStatus.refresh();
+        trySyncWithEncoder();
     }
 
     @Override

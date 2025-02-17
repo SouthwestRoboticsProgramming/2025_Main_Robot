@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class CoralHandlingSubsystem extends SubsystemBase {
     public enum State {
         INTAKE(Constants.kOuttakeRollerIntakeVoltage, Constants.kIndexerIntakeVoltage),
+        REVERSE(() -> -Constants.kOuttakeRollerIntakeVoltage.get(), () -> 0.0),
         SCORE(Constants.kOuttakeRollerScoreVoltage, () -> 0.0),
         HOLD(() -> 0.0, () -> 0.0);
 
@@ -39,7 +40,7 @@ public class CoralHandlingSubsystem extends SubsystemBase {
     private final CoralOuttakeIO.Inputs outtakeInputs;
 
     private State targetState;
-    private double beamBreakDetectTime;
+    private double holdPosition;
 
     public CoralHandlingSubsystem() {
         if (RobotBase.isReal()) {
@@ -65,22 +66,28 @@ public class CoralHandlingSubsystem extends SubsystemBase {
         return Commands.runOnce(() -> setTargetState(targetState), this);
     }
 
+    public Command score(double seconds) {
+        return commandSetState(State.SCORE)
+                .withTimeout(seconds)
+                .finallyDo(() -> setTargetState(State.HOLD));
+    }
+
     @Override
     public void periodic() {
-        boolean hadPiece = outtakeInputs.hasPiece;
         outtakeIO.updateInputs(outtakeInputs);
         Logger.processInputs("Outtake", outtakeInputs);
-        boolean hasPiece = outtakeInputs.hasPiece;
 
-//        if (!hadPiece && hasPiece) {
-//            beamBreakDetectTime = Timer.getTimestamp();
-//        }
-
-        if (outtakeInputs.hasPiece && targetState != State.SCORE) {
+        if (outtakeInputs.hasPiece && targetState != State.SCORE && targetState != State.REVERSE) {
             setTargetState(State.HOLD);
         }
 
-        outtakeIO.setVoltage(targetState.getOuttakeVoltage());
+        Logger.recordOutput("Outtake/Output State", targetState.toString());
+        if (targetState == State.HOLD) {
+            outtakeIO.setHoldPosition(outtakeInputs.positionAtPieceDetect + Constants.kOuttakeHoldPositionOffset.get());
+        } else {
+            Logger.recordOutput("Outtake/Output Voltage", targetState.getOuttakeVoltage());
+            outtakeIO.setVoltage(targetState.getOuttakeVoltage());
+        }
     }
 
     public boolean hasPiece() {

@@ -54,24 +54,38 @@ public final class Constants {
     public static final double kDeadband = 0.15;
     public static final double kTriggerThreshold = 0.3;
 
-    public static final double kDriveControlMaxAccel = 5.5; // m/s^2
+    public static final double kDriveControlMaxAccel = 3.5; // m/s^2
     public static final double kDriveControlMaxTurnSpeed = 1; // rot/s
     public static final double kDriveControlDrivePower = 2; // Exponent input is raised to
     public static final double kDriveControlTurnPower = 2;
 
     // Auto (TODO: Tune)
-    public static final double kAutoDriveKp = 8;
+    public static final double kAutoDriveKp = 4;
     public static final double kAutoDriveKd = 0;
     public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Drive/Auto/Turn PID/kP", 9).setPersistent();
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Drive/Auto/Turn PID/kD", 0.5).setPersistent();
 
+    public static final double kAutoMaxDriveSpeed = 2.5;//Units.feetToMeters(18);
+    public static final double kAutoMaxDriveAccel = 3;//5.5;
+    public static final double kAutoMaxTurnSpeed = 1;
+    public static final double kAutoMaxTurnAccel = 3;
+
+    public static final double kAutoSwitchToSnapDist = 0.2;
+    public static final NTEntry<Double> kAutoScoreXYTolerance = new NTDouble("Drive/Auto/Score XY Tolerance (m)", 0.05).setPersistent();
+    public static final NTEntry<Double> kAutoScoreAngleTolerance = new NTDouble("Drive/Auto/Score Angle Tolerance (deg)", 2).setPersistent();
+    public static final double kAutoToleranceTimeout = 1.5;
+    public static final double kAutoCoralEjectTime = 0.5;
+    public static final double kAutoElevatorDownDelay = 0.5;
+
     public static final NTEntry<Double> kSnapOffset = new NTDouble("Drive/Snap/Offset (m)", 0.025).setPersistent();
-    public static final NTEntry<Double> kSnapMaxSpeed = new NTDouble("Drive/Snap/Max Speed (m/s)", 1.5).setPersistent();
-    public static final NTEntry<Double> kSnapMaxTurnSpeed = new NTDouble("Drive/Snap/Max Turn Speed (rot/s)", 1.2).setPersistent();
+    public static final NTEntry<Double> kSnapMaxSpeed = new NTDouble("Drive/Snap/Max Speed (meters per sec)", 1.5).setPersistent();
+    public static final NTEntry<Double> kSnapMaxTurnSpeed = new NTDouble("Drive/Snap/Max Turn Speed (rot per sec)", 1.2).setPersistent();
     public static final NTEntry<Double> kSnapDriveKp = new NTDouble("Drive/Snap/Drive kP", 3).setPersistent();
     public static final NTEntry<Double> kSnapDriveKd = new NTDouble("Drive/Snap/Drive kD", 0).setPersistent();
     public static final NTEntry<Double> kSnapTurnKp = new NTDouble("Drive/Snap/Turn kP", 5).setPersistent();
     public static final NTEntry<Double> kSnapTurnKd = new NTDouble("Drive/Snap/Turn kD", 0).setPersistent();
+    public static final NTEntry<Double> kSnapXYDeadzone = new NTDouble("Drive/Snap/XY Deadzone (m)", 0.02).setPersistent();
+    public static final NTEntry<Double> kSnapThetaDeadzone = new NTDouble("Drive/Snap/Theta Deadzone (deg)", 2).setPersistent();
 
     // Drive
     public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
@@ -109,10 +123,10 @@ public final class Constants {
                     .withDriveMotorGearRatio((50.0/16) * (16.0/28) * (45.0/15))
                     .withSteerMotorGearRatio(150.0 / 7)
                     .withCouplingGearRatio(50.0 / 16)
-                    .withWheelRadius(Inches.of(1.9))
+                    .withWheelRadius(Meters.of(0.04804554122609211 ))
                     // Gains taken from 254 2024 robot code
                     .withSteerMotorGains(new Slot0Configs().withKP(50).withKD(0.01).withKV(0.1))
-                    .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(12.0 / 88.2142857143))
+                    .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(0.012621).withKS(0.22109))
                     // TODO: Torque current FOC
                     .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
                     .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
@@ -165,8 +179,8 @@ public final class Constants {
 
     // Coral outtake pivot
     // 60:24 CANcoder
-    public static final double kOuttakePivotMotorToArmRatio = (60.0 / 24.0) * (58.0 / 18.0) * (60.0 / 8.0);
-    public static final double kOuttakePivotCANcoderToArmRatio = 60.0 / 24.0;
+    public static final double kOuttakePivotMotorToArmRatio = (60.0 / 27.0) * (58.0 / 18.0) * (60.0 / 8.0);
+    public static final double kOuttakePivotCANcoderToArmRatio = 48.0 / 36.0;
     public static final NTEntry<Double> kOuttakePivotEncoderOffset = new NTDouble("Superstructure/Pivot/Encoder/Offset (rot)", 0).setPersistent();
     public static final NTSlot0Configs kOuttakePivotPID =
             new NTSlot0Configs("Superstructure/Pivot/PID", 200, 0, 0.316, 0, 7.021702, 0);
@@ -199,8 +213,12 @@ public final class Constants {
             new NTMotionMagicConfigs("Algae/Pivot/Motion Magic", 20, 4, 0);
     
     // Coral outtake
+    public static final int kOuttakeRefreshFreq = 100; // Hz
     public static final NTEntry<Double> kOuttakeRollerIntakeVoltage = new NTDouble("Outtake/Intake Voltage", 2).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreVoltage = new NTDouble("Outtake/Score Voltage", 3).setPersistent();
+    public static final NTEntry<Double> kOuttakeHoldPositionOffset = new NTDouble("Outtake/Hold Position Offset", 0).setPersistent();
+    public static final NTSlot0Configs kOuttakeRollerPID =
+            new NTSlot0Configs("Outtake/PID", 0, 0, 0, 0, 0, 0);
 
     // Indexer
     public static final NTEntry<Double> kIndexerIntakeVoltage = new NTDouble("Indexer/Intake Voltage", 5).setPersistent();

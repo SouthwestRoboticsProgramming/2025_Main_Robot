@@ -15,13 +15,18 @@ public final class OuttakePivotIOSim implements OuttakePivotIO {
 
     @Override
     public void updateInputs(Inputs inputs) {
-        currentAngle = MathUtil.lerp(currentAngle, targetAngle, 0.01);
+        currentAngle = MathUtil.lerp(currentAngle, targetAngle, 0.1);
         inputs.currentAngleRot = currentAngle;
     }
 
     @Override
     public void setTargetAngle(double targetAngleRot, boolean hasCoral) {
         targetAngle = targetAngleRot;
+    }
+
+    @Override
+    public void syncWithEncoder() {
+        // no
     }
 
     @Override

@@ -28,7 +28,7 @@ public final class CharacterizeWheelsCommand extends Command {
 
     @Override
     public void initialize() {
-        startingPositions = drive.getModulePositions();
+        startingPositions = drive.getModulePositions().clone();
         gyroAccumulatorRad = 0;
         lastGyroRad = drive.getRawGyroRotation().getRadians();
     }

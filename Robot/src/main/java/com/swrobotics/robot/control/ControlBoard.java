@@ -121,7 +121,6 @@ public final class ControlBoard extends SubsystemBase {
         operator.y.trigger()
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
 
-
         robot.algaeIntake.setDefaultCommand(
                 robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
         driver.leftTrigger.triggerOutside(0.25)
@@ -130,11 +129,14 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
                 
         robot.coralHandler.setDefaultCommand(
-                robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.HOLD));
+                robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
         new Trigger(() -> operator.leftTrigger.isOutside(Constants.kTriggerThreshold))
                 .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
         new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
                 .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.SCORE));
+//        operator.leftBumper.trigger()
+//                .onTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.REVERSE)
+//                        .withTimeout(0.05));
 
         // Everything past here is for testing and should eventually be removed
 
@@ -146,6 +148,9 @@ public final class ControlBoard extends SubsystemBase {
 
 //        driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
 //        driver.y.onPressed(() -> FieldView.pathfindingGoal.setPose(robot.drive.getEstimatedPose()));
+
+        operator.start.trigger()
+                .whileTrue(DriveCommands.feedforwardCharacterization(robot.drive));
     }
 
     /**
