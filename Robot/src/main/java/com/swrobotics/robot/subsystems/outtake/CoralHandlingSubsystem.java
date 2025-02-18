@@ -74,10 +74,12 @@ public class CoralHandlingSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        outtakeIO.setBeamBreakIgnored(targetState == State.SCORE || targetState == State.REVERSE);
+
         outtakeIO.updateInputs(outtakeInputs);
         Logger.processInputs("Outtake", outtakeInputs);
 
-        if (outtakeInputs.hasPiece && targetState != State.SCORE && targetState != State.REVERSE) {
+        if (outtakeInputs.hasPiece) {
             setTargetState(State.HOLD);
         }
 

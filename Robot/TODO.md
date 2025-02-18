@@ -1,4 +1,4 @@
-# To Do Before Week 0
+## Before Week 0
 
 - Make sure all vendordeps are up to date
 - Make AdvantageKit log to USB work
@@ -9,3 +9,8 @@
 - Copy all NT constant values to `Constants`
 - Add flipping autos left/right
 - Fix outtake launching coral out the back sometimes
+
+## Before Week 3
+
+- Use `SimpleDifferentialMechanism` on elevator to ensure motors are in phase
+  https://www.chiefdelphi.com/t/the-follower-control-logic-of-ctre-is-not-working/491787/

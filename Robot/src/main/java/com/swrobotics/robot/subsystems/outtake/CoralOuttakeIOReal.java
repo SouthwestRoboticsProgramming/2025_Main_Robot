@@ -25,6 +25,7 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
 
     private final StatusSignal<Angle> positionStatus;
 
+    private volatile boolean ignoreBeamBreak;
     private volatile boolean hasPiece;
     private volatile double positionAtPieceDetect;
 
@@ -52,6 +53,8 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
         positionVoltage = new PositionVoltage(0)
                 .withEnableFOC(true);
 
+        ignoreBeamBreak = false;
+
         new Thread(this::runFastThread).start();
     }
 
@@ -63,7 +66,7 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
             positionStatus.refresh();
 
             boolean hadPiece = hasPiece;
-            boolean hasPiece = !beamBreak.get();
+            boolean hasPiece = !ignoreBeamBreak && !beamBreak.get();
             if (!hadPiece && hasPiece)
                 positionAtPieceDetect = positionStatus.getValueAsDouble();
             this.hasPiece = hasPiece;
@@ -86,5 +89,10 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
     @Override
     public void setHoldPosition(double position) {
         motor.setControl(positionVoltage.withPosition(position));
+    }
+
+    @Override
+    public void setBeamBreakIgnored(boolean ignored) {
+        ignoreBeamBreak = ignored;
     }
 }
