@@ -21,6 +21,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -136,7 +137,13 @@ public final class Constants {
                     .withDriveMotorInitialConfigs(new TalonFXConfiguration())
                     .withSteerMotorInitialConfigs(new TalonFXConfiguration())
                     .withEncoderInitialConfigs(new CANcoderConfiguration());
-    // Simulation constants left at defaults for now
+    static {
+        if (RobotBase.isSimulation()) {
+            kModuleConstantsFactory.DriveMotorGains
+                    .withKV(0.12612)
+                    .withKS(0.22510);
+        }
+    }
 
     // Pathfinding
     public static final String kPathfindingJson = "reefscape_pathfinding.json";
