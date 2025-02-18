@@ -2,7 +2,6 @@ package com.swrobotics.robot;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,7 +15,6 @@ import com.swrobotics.robot.config.PathEnvironments;
 import com.swrobotics.robot.logging.RobotView;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
-import com.swrobotics.robot.subsystems.PathfindingTest;
 import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,7 +31,7 @@ import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.logging.Logging;
 import com.swrobotics.robot.subsystems.lights.LightsSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
-import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
+import com.swrobotics.robot.subsystems.outtake.CoralOuttakeSubsystem;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -62,7 +60,7 @@ public class RobotContainer {
     public final VisionSubsystem vision;
     public final SuperstructureSubsystem superstructure;
     public final AlgaeIntakeSubsystem algaeIntake;
-    public final CoralHandlingSubsystem coralHandler;
+    public final CoralOuttakeSubsystem coralOuttake;
 
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
@@ -82,8 +80,8 @@ public class RobotContainer {
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
         algaeIntake = new AlgaeIntakeSubsystem();
-        coralHandler = new CoralHandlingSubsystem();
-        superstructure = new SuperstructureSubsystem(coralHandler);
+        coralOuttake = new CoralOuttakeSubsystem();
+        superstructure = new SuperstructureSubsystem(coralOuttake);
 
         lights = new LightsSubsystem(this);
 

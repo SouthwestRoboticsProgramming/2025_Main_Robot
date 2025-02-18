@@ -2,7 +2,6 @@ package com.swrobotics.robot.subsystems.outtake;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.Logger;
 
 import com.swrobotics.robot.config.Constants;
@@ -12,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class CoralHandlingSubsystem extends SubsystemBase {
+public class CoralOuttakeSubsystem extends SubsystemBase {
     public enum State {
         INTAKE(Constants.kOuttakeRollerIntakeVoltage, Constants.kIndexerIntakeVoltage),
         REVERSE(() -> -Constants.kOuttakeRollerIntakeVoltage.get(), () -> 0.0),
@@ -42,7 +41,7 @@ public class CoralHandlingSubsystem extends SubsystemBase {
     private State targetState;
     private double holdPosition;
 
-    public CoralHandlingSubsystem() {
+    public CoralOuttakeSubsystem() {
         if (RobotBase.isReal()) {
             outtakeIO = new CoralOuttakeIOReal();
         } else {

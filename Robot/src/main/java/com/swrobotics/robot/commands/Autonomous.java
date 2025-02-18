@@ -7,7 +7,7 @@ import com.swrobotics.robot.RobotContainer;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 import com.swrobotics.robot.config.PathEnvironments;
-import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
+import com.swrobotics.robot.subsystems.outtake.CoralOuttakeSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -15,8 +15,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-
-import java.util.List;
 
 public final class Autonomous {
     /*
@@ -96,7 +94,7 @@ public final class Autonomous {
                         .withTimeout(Constants.kAutoToleranceTimeout),
                 Commands.print("SCOREY"),
 
-                robot.coralHandler.score(Constants.kAutoCoralEjectTime)
+                robot.coralOuttake.score(Constants.kAutoCoralEjectTime)
                 ,Commands.print("YAYYY")
         );
     }
@@ -120,13 +118,13 @@ public final class Autonomous {
                         constraints
                 ).alongWith(Commands.sequence(
                         Commands.waitSeconds(Constants.kAutoElevatorDownDelay),
-                        robot.coralHandler.commandSetStateOnce(CoralHandlingSubsystem.State.INTAKE),
+                        robot.coralOuttake.commandSetStateOnce(CoralOuttakeSubsystem.State.INTAKE),
                         robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER)
                 )),
 
                 Commands.print("WAITING FOR HP"),
                 // No timeout because it's better to wait long then leave without coral
-                Commands.waitUntil(() -> robot.coralHandler.hasPiece() || RobotBase.isSimulation())
+                Commands.waitUntil(() -> robot.coralOuttake.hasPiece() || RobotBase.isSimulation())
         );
     }
 

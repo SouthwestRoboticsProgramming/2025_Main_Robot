@@ -12,20 +12,15 @@ import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
-import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
-import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
+import com.swrobotics.robot.subsystems.outtake.CoralOuttakeSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
-import java.util.Collections;
 
 public final class ControlBoard extends SubsystemBase {
     /*
@@ -128,14 +123,14 @@ public final class ControlBoard extends SubsystemBase {
         driver.rightTrigger.triggerOutside(0.25)
                 .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
                 
-        robot.coralHandler.setDefaultCommand(
-                robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
+        robot.coralOuttake.setDefaultCommand(
+                robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.INTAKE));
         new Trigger(() -> operator.leftTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
+                .whileTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.INTAKE));
         new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.SCORE));
+                .whileTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE));
        operator.leftBumper.trigger()
-               .onTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.REVERSE)
+               .onTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.REVERSE)
                        .withTimeout(0.05));
 
         // Everything past here is for testing and should eventually be removed
