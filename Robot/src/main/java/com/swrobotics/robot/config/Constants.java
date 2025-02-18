@@ -164,7 +164,7 @@ public final class Constants {
     // have the same config
     public static final LimelightCamera.Config kLimelightConfig = new LimelightCamera.Config(
             // These were tuned at MURA using red alliance speaker AprilTags
-            4,
+            2,
             0.00197,
             0.002,
             0.00117
