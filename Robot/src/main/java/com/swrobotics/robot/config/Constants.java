@@ -55,18 +55,18 @@ public final class Constants {
     public static final double kDeadband = 0.15;
     public static final double kTriggerThreshold = 0.3;
 
-    public static final double kDriveControlMaxAccel = 5.5; // m/s^2
+    public static final double kDriveControlMaxAccel = 3.5; // m/s^2
     public static final double kDriveControlMaxTurnSpeed = 1; // rot/s
     public static final double kDriveControlDrivePower = 2; // Exponent input is raised to
     public static final double kDriveControlTurnPower = 2;
 
     // Auto (TODO: Tune)
-    public static final double kAutoDriveKp = 3;
+    public static final double kAutoDriveKp = 4;
     public static final double kAutoDriveKd = 0;
     public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Drive/Auto/Turn PID/kP", 9).setPersistent();
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Drive/Auto/Turn PID/kD", 0.5).setPersistent();
 
-    public static final double kAutoMaxDriveSpeed = 3;//Units.feetToMeters(18);
+    public static final double kAutoMaxDriveSpeed = 2.5;//Units.feetToMeters(18);
     public static final double kAutoMaxDriveAccel = 3;//5.5;
     public static final double kAutoMaxTurnSpeed = 1;
     public static final double kAutoMaxTurnAccel = 3;
@@ -124,10 +124,10 @@ public final class Constants {
                     .withDriveMotorGearRatio((50.0/16) * (16.0/28) * (45.0/15))
                     .withSteerMotorGearRatio(150.0 / 7)
                     .withCouplingGearRatio(50.0 / 16)
-                    .withWheelRadius(Meters.of(0.048344))
+                    .withWheelRadius(Meters.of(0.04804554122609211 ))
                     // Gains taken from 254 2024 robot code
                     .withSteerMotorGains(new Slot0Configs().withKP(50).withKD(0.01).withKV(0.1))
-                    .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(0.5896768661127598 / (Math.PI * 2)))
+                    .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(0.012621).withKS(0.22109))
                     // TODO: Torque current FOC
                     .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
                     .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
@@ -171,7 +171,7 @@ public final class Constants {
     // have the same config
     public static final LimelightCamera.Config kLimelightConfig = new LimelightCamera.Config(
             // These were tuned at MURA using red alliance speaker AprilTags
-            4,
+            2,
             0.00197,
             0.002,
             0.00117
