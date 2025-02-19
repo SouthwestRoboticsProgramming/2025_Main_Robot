@@ -174,6 +174,11 @@ public final class LightsSubsystem extends SubsystemBase {
             215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
 
     private Color8Bit gammaCorrect(Color desiredColor) {
+        // Simulation shows colors correctly, doesn't need gamma correction
+        if (RobotBase.isSimulation()) {
+            return new Color8Bit(desiredColor);
+        }
+
         int r = GAMMA_CORRECTION[(int) (desiredColor.red * 255.0)];
         int g = GAMMA_CORRECTION[(int) (desiredColor.green * 255.0)];
         int b = GAMMA_CORRECTION[(int) (desiredColor.blue * 255.0)];
