@@ -77,7 +77,7 @@ public final class PrideSequencer {
     }
 
     // Number of times to repeat the flag pattern along the strip
-    private static final int REPEAT = 1;
+    private static final int REPEAT = 2;
     // Time in seconds to scroll through the full pattern
     private static final float SCROLL = 4f;
     // Time in seconds that each flag is shown for
