@@ -240,7 +240,7 @@ public final class Constants {
     public static final NTEntry<Double> kIndexerIntakeVoltage = new NTDouble("Indexer/Intake Voltage", 5).setPersistent();
 
     // Lights
-    public static final int kLedStripLength = 22;
+    public static final int kLedStripLength = 51;
     public static final int kLowBatteryThreshold = 10; // Volts
 
     // Motor tracking

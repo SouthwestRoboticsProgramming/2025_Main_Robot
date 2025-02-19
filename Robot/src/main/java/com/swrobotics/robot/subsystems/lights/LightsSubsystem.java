@@ -7,6 +7,7 @@ import com.swrobotics.robot.config.IOAllocation;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // TODO: Look into new WPILib LED strip patterns API
@@ -82,8 +83,9 @@ public final class LightsSubsystem extends SubsystemBase {
 
     /** Sets all the LEDs to the same color */
     private void applySolid(Color color) {
+        Color8Bit corrected = gammaCorrect(color);
         for (int i = 0; i < Constants.kLedStripLength; i++) {
-            data.setLED(i, color);
+            data.setLED(i, corrected);
         }
         leds.setData(data);
     }
@@ -144,12 +146,38 @@ public final class LightsSubsystem extends SubsystemBase {
             float diff = acc - position;
             float pixelsToEnd = diff / weightPerPixel;
             if (pixelsToEnd > 1)
-                data.setLED(i, color);
+                data.setLED(i, gammaCorrect(color));
             else
-                data.setLED(i, interpolate(color, nextColor, 1 - pixelsToEnd));
+                data.setLED(i, gammaCorrect(interpolate(color, nextColor, 1 - pixelsToEnd)));
         }
 
         leds.setData(data);
+    }
+
+    // From https://learn.adafruit.com/led-tricks-gamma-correction/the-quick-fix
+    private static final int[] GAMMA_CORRECTION = {
+            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,
+            1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  2,  2,
+            2,  3,  3,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,  5,  5,  5,
+            5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  9,  9,  9, 10,
+            10, 10, 11, 11, 11, 12, 12, 13, 13, 13, 14, 14, 15, 15, 16, 16,
+            17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 24, 25,
+            25, 26, 27, 27, 28, 29, 29, 30, 31, 32, 32, 33, 34, 35, 35, 36,
+            37, 38, 39, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 50,
+            51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68,
+            69, 70, 72, 73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89,
+            90, 92, 93, 95, 96, 98, 99,101,102,104,105,107,109,110,112,114,
+            115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142,
+            144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+            177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213,
+            215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255 };
+
+    private Color8Bit gammaCorrect(Color desiredColor) {
+        int r = GAMMA_CORRECTION[(int) (desiredColor.red * 255.0)];
+        int g = GAMMA_CORRECTION[(int) (desiredColor.green * 255.0)];
+        int b = GAMMA_CORRECTION[(int) (desiredColor.blue * 255.0)];
+        return new Color8Bit(r, g, b);
     }
 
     public void disabledInit() {
