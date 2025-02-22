@@ -124,7 +124,7 @@ public final class Constants {
                     .withDriveMotorGearRatio((50.0/16) * (16.0/28) * (45.0/15))
                     .withSteerMotorGearRatio(150.0 / 7)
                     .withCouplingGearRatio(50.0 / 16)
-                    .withWheelRadius(Meters.of(0.04804554122609211 ))
+                    .withWheelRadius(Meters.of(0.048264 ))
                     // Gains taken from 254 2024 robot code
                     .withSteerMotorGains(new Slot0Configs().withKP(50).withKD(0.01).withKV(0.1))
                     .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(0.012621).withKS(0.22109))
@@ -165,6 +165,11 @@ public final class Constants {
             Units.inchesToMeters(9.059),
             // Degrees CCW
             0, 20.6, 33
+    );
+    public static final LimelightCamera.MountingLocation kLimelightBackLocation = new LimelightCamera.MountingLocation(
+            // TODO: These are guesses, they should be measured in CAD
+            0, 0, 0.952,
+            180, 5, 0
     );
 
     // This will be different for each lens type, cameras with same lens should

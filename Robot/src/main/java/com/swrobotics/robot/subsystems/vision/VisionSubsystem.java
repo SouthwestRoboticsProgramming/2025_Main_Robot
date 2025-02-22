@@ -6,6 +6,8 @@ import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.vision.limelight.LimelightCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import java.util.ArrayList;
@@ -14,6 +16,8 @@ import java.util.List;
 public final class VisionSubsystem extends SubsystemBase {
     private final SwerveDriveSubsystem drive;
     private final List<LimelightCamera> cameras;
+
+    private boolean ignoreUpdates;
 
     public VisionSubsystem(SwerveDriveSubsystem drive) {
         this.drive = drive;
@@ -26,9 +30,20 @@ public final class VisionSubsystem extends SubsystemBase {
                 new LimelightCamera(
                         "limelight-ftright",
                         Constants.kLimelightFrontRightLocation,
+                        Constants.kLimelightConfig),
+                new LimelightCamera(
+                        "limelight-back",
+                        Constants.kLimelightBackLocation,
                         Constants.kLimelightConfig)
                 // Add more cameras here...
         );
+
+        ignoreUpdates = false;
+        setDefaultCommand(Commands.run(() -> ignoreUpdates = false, this));
+    }
+
+    public Command commandIgnoreUpdates() {
+        return Commands.run(() -> ignoreUpdates = true, this);
     }
 
     @Override
@@ -52,6 +67,9 @@ public final class VisionSubsystem extends SubsystemBase {
         for (LimelightCamera camera : cameras) {
             camera.getNewUpdates(updates, useMegaTag2);
         }
+
+        if (ignoreUpdates)
+            return;
 
         Pose2d[] poses = new Pose2d[updates.size()];
         for (int i = 0; i < poses.length; i++) {

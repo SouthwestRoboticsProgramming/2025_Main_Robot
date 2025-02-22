@@ -125,6 +125,10 @@ public final class Autonomous {
                 Commands.print("WAITING FOR HP"),
                 // No timeout because it's better to wait long then leave without coral
                 Commands.waitUntil(() -> robot.coralOuttake.hasPiece() || RobotBase.isSimulation())
+
+                        // Quick fix for Week 0 since we weren't able to get the robot to drive to the right spot
+                        // FIXME: Actually go to the spot
+                        .raceWith(DriveCommands.driveRobotRelative(robot.drive, () -> new Translation2d(-0.6, 0), () -> 0.0))
         );
     }
 
