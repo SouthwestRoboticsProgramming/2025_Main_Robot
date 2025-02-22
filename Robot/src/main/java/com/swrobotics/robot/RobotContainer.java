@@ -96,9 +96,10 @@ public class RobotContainer {
         autos.sort(Comparator.comparing(AutoEntry::name, String.CASE_INSENSITIVE_ORDER));
         autoSelector = new LoggedDashboardChooser<>("Auto Selector");
         autoSelector.addDefaultOption("None", Commands.none());
-        autoSelector.addOption("One", Autonomous.behindReef1Piece(this));
-        autoSelector.addOption("Four", Autonomous.leftSide4Piece(this));
-        autoSelector.addOption("Test", testAutoCommand());
+        autoSelector.addOption("One Left", Autonomous.behindReef1PieceLeft(this));
+        autoSelector.addOption("One Right", Autonomous.behindReef1PieceRight(this));
+        autoSelector.addOption("Four Left", Autonomous.leftSide4Piece(this));
+        autoSelector.addOption("Four Right", Autonomous.rightSide4Piece(this));
         for (AutoEntry auto : autos)
             autoSelector.addOption(auto.name(), auto.cmd());
 

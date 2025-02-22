@@ -31,7 +31,14 @@ public final class Autonomous {
      *
      */
 
-    public static Command behindReef1Piece(RobotContainer robot) {
+    public static Command behindReef1PieceLeft(RobotContainer robot) {
+        return Commands.sequence(
+                scoreAt(robot, 7, 4),
+                backUp(robot)
+        );
+    }
+
+    public static Command behindReef1PieceRight(RobotContainer robot) {
         return Commands.sequence(
                 scoreAt(robot, 6, 4),
                 backUp(robot)
@@ -42,11 +49,24 @@ public final class Autonomous {
         return Commands.sequence(
                 scoreAt(robot, 9, 4),
                 humanPlayerPickupLeft(robot),
-                scoreAt(robot, 0, 4),
+                scoreAt(robot, 10, 4),
                 humanPlayerPickupLeft(robot),
                 scoreAt(robot, 11, 4),
                 humanPlayerPickupLeft(robot),
-                scoreAt(robot, 10, 4),
+                scoreAt(robot, 0, 4),
+                backUp(robot)
+        );
+    }
+
+    public static Command rightSide4Piece(RobotContainer robot) {
+        return Commands.sequence(
+                scoreAt(robot, 4, 4),
+                humanPlayerPickupLeft(robot),
+                scoreAt(robot, 3, 4),
+                humanPlayerPickupLeft(robot),
+                scoreAt(robot, 2, 4),
+                humanPlayerPickupLeft(robot),
+                scoreAt(robot, 1, 4),
                 backUp(robot)
         );
     }
