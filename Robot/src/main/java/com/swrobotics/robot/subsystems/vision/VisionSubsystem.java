@@ -6,6 +6,7 @@ import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.vision.limelight.LimelightCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -62,6 +63,12 @@ public final class VisionSubsystem extends SubsystemBase {
         // corrected by vision measurements.
         boolean useMegaTag2 = Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
                 > Constants.kVisionMT2SpeedThreshold;
+
+        // Use MegaTag 1 when disabled. This is important for the start of the
+        // match so the gyro can be corrected by vision before auto starts
+        if (DriverStation.isDisabled()) {
+            useMegaTag2 = false;
+        }
 
         List<LimelightCamera.Update> updates = new ArrayList<>();
         for (LimelightCamera camera : cameras) {
