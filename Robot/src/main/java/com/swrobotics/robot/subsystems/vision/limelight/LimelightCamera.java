@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
@@ -66,10 +67,13 @@ public final class LimelightCamera {
 
         // If too far away, use MegaTag 2 estimate instead. MegaTag 1 estimate
         // is too unstable at far distances
-        if (!useMegaTag2 && est.avgTagDist > config.mt1MaxDistance) {
+        if (!useMegaTag2 && est.avgTagDist > config.mt1MaxDistance && DriverStation.isEnabled()) {
             processEstimate(updatesOut, true);
             return;
         }
+
+        if (DriverStation.isDisabled())
+            useMegaTag2 = false;
 
         prevUpdateTimestamp = est.timestamp;
 

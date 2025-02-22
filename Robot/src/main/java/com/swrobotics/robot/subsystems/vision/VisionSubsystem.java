@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,25 +65,23 @@ public final class VisionSubsystem extends SubsystemBase {
         boolean useMegaTag2 = Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
                 > Constants.kVisionMT2SpeedThreshold;
 
-        // Use MegaTag 1 when disabled. This is important for the start of the
-        // match so the gyro can be corrected by vision before auto starts
-        if (DriverStation.isDisabled()) {
-            useMegaTag2 = false;
-        }
-
         List<LimelightCamera.Update> updates = new ArrayList<>();
         for (LimelightCamera camera : cameras) {
             camera.getNewUpdates(updates, useMegaTag2);
         }
-
-        if (ignoreUpdates)
-            return;
 
         Pose2d[] poses = new Pose2d[updates.size()];
         for (int i = 0; i < poses.length; i++) {
             poses[i] = updates.get(i).pose();
         }
         FieldView.visionEstimates.setPoses(poses);
+
+        Logger.recordOutput("Limelight/Vision Updates", poses);
+        Logger.recordOutput("Limelight/Updates Ignored", ignoreUpdates);
+        Logger.recordOutput("Limelight/Using MegaTag 2", useMegaTag2);
+
+        if (ignoreUpdates)
+            return;
 
         for (LimelightCamera.Update update : updates) {
             drive.addVisionMeasurement(update.pose(), update.timestamp(), update.stdDevs());
