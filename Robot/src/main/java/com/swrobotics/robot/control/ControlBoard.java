@@ -1,5 +1,7 @@
 package com.swrobotics.robot.control;
 
+import com.ctre.phoenix6.swerve.SwerveModule;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.path.PathConstraints;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.input.XboxController;
@@ -8,6 +10,7 @@ import com.swrobotics.lib.net.NTEntry;
 import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
+import com.swrobotics.robot.commands.Autonomous;
 import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
 import com.swrobotics.robot.commands.DriveCommands;
 import com.swrobotics.robot.commands.RumblePatternCommands;
@@ -160,8 +163,20 @@ public final class ControlBoard extends SubsystemBase {
 //        ), Set.of(robot.drive)));
 //        driver.y.onPressed(() -> FieldView.pathfindingGoal.setPose(robot.drive.getEstimatedPose()));
 
+//        operator.start.trigger()
+//                .whileTrue(DriveCommands.feedforwardCharacterization(robot.drive));
+//        operator.start.trigger()
+//                .whileTrue(Autonomous.goSideways5Meters(robot));
         operator.start.trigger()
-                .whileTrue(DriveCommands.feedforwardCharacterization(robot.drive));
+                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
+                                .withVelocityX(3)
+                                .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
+                        robot.drive));
+        operator.back.trigger()
+                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
+                        .withVelocityX(1)
+                        .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
+                        robot.drive));
     }
 
     /**

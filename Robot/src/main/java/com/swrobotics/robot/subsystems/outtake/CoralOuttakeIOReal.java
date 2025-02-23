@@ -45,6 +45,10 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
         MotorTrackerSubsystem.getInstance().addMotor("Outtake", motor);
         MusicSubsystem.getInstance().addInstrument(motor);
 
+        // Better solution to the goofy reverse thing
+        // Fixed the problem when code restarts, rather than power cycle
+        motor.setPosition(0);
+
         positionStatus = motor.getPosition();
         CTREUtil.retryUntilOk(motor, () -> positionStatus.setUpdateFrequency(Constants.kOuttakeRefreshFreq));
 

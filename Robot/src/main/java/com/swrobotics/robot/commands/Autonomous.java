@@ -1,6 +1,7 @@
 package com.swrobotics.robot.commands;
 
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.Waypoint;
 import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
@@ -15,6 +16,12 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import org.littletonrobotics.junction.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public final class Autonomous {
     /*
@@ -31,8 +38,50 @@ public final class Autonomous {
      *
      */
 
+    private record ScoringPosition(int position, int height) {}
+
+    public static Command goSideways5Meters(RobotContainer robot) {
+        return Commands.defer(() -> AutoBuilderExt.pathfindToPose(
+                PathEnvironments.kField,
+                new Pose2d(
+                        robot.drive.getEstimatedPose().getTranslation().plus(new Translation2d(0, -5)),
+                        robot.drive.getEstimatedPose().getRotation()
+                ),
+                getPathConstraints(),
+                0
+        ),
+                Set.of(robot.drive));
+    }
+
+    public static Command everythingRandomly(RobotContainer robot) {
+        List<ScoringPosition> positions = new ArrayList<>();
+        for (int position = 0; position < 12; position++) {
+            for (int height = 2; height <= 4; height++) {
+                positions.add(new ScoringPosition(position, height));
+            }
+        }
+
+        List<ScoringPosition> randomOrder = new ArrayList<>();
+        while (!positions.isEmpty()) {
+            randomOrder.add(positions.remove((int) (Math.random() * positions.size())));
+        }
+
+        List<Command> sequence = new ArrayList<>();
+        for (ScoringPosition position : randomOrder) {
+            sequence.add(scoreAt(robot, position.position, position.height));
+            sequence.add(humanPlayerPickupClosest(robot));
+        }
+        sequence.add(backUp(robot));
+
+        return new SequentialCommandGroup(sequence.toArray(new Command[0]));
+    }
+
     public static Command behindReef1PieceLeft(RobotContainer robot) {
         return Commands.sequence(
+                // Give the elevator a bit to go up before we drive into the reef
+                robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.SCORE_L4),
+                Commands.waitSeconds(1),
+
                 scoreAt(robot, 7, 4),
                 backUp(robot)
         );
@@ -40,6 +89,8 @@ public final class Autonomous {
 
     public static Command behindReef1PieceRight(RobotContainer robot) {
         return Commands.sequence(
+                robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.SCORE_L4),
+                Commands.waitSeconds(1),
                 scoreAt(robot, 6, 4),
                 backUp(robot)
         );
@@ -61,11 +112,11 @@ public final class Autonomous {
     public static Command rightSide4Piece(RobotContainer robot) {
         return Commands.sequence(
                 scoreAt(robot, 4, 4),
-                humanPlayerPickupLeft(robot),
+                humanPlayerPickupRight(robot),
                 scoreAt(robot, 3, 4),
-                humanPlayerPickupLeft(robot),
+                humanPlayerPickupRight(robot),
                 scoreAt(robot, 2, 4),
-                humanPlayerPickupLeft(robot),
+                humanPlayerPickupRight(robot),
                 scoreAt(robot, 1, 4),
                 backUp(robot)
         );
@@ -109,6 +160,10 @@ public final class Autonomous {
                                     < Constants.kAutoScoreAngleTolerance.get();
                             boolean superstructure = robot.superstructure.isInTolerance();
 
+                            Logger.recordOutput("Auto/XY In Tolerance", xy);
+                            Logger.recordOutput("Auto/Angle In Tolerance", angle);
+                            Logger.recordOutput("Auto/Superstructure In Tolerance", superstructure);
+
                             return xy && angle && superstructure;
                         })
                         .withTimeout(Constants.kAutoToleranceTimeout),
@@ -125,6 +180,35 @@ public final class Autonomous {
 
     private static Command humanPlayerPickupRight(RobotContainer robot) {
         return humanPlayerPickup(robot, FieldPositions.getRightCoralStationPickup());
+    }
+
+    private static Command humanPlayerPickupClosest(RobotContainer robot) {
+        PathConstraints constraints = getPathConstraints();
+
+        return Commands.sequence(
+                Commands.print("GOING HP"),
+                AutoBuilderExt.pathfindToClosestPoseFlipped(
+                        PathEnvironments.kFieldWithAutoGamePieces,
+                        List.of(
+                                FieldPositions.getLeftCoralStationPickup(),
+                                FieldPositions.getRightCoralStationPickup()
+                        ),
+                        constraints,
+                        null
+                ).alongWith(Commands.sequence(
+                        Commands.waitSeconds(Constants.kAutoElevatorDownDelay),
+                        robot.coralOuttake.commandSetStateOnce(CoralOuttakeSubsystem.State.INTAKE),
+                        robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER)
+                )),
+
+                Commands.print("WAITING FOR HP"),
+                // No timeout because it's better to wait long then leave without coral
+                Commands.waitUntil(() -> robot.coralOuttake.hasPiece() || RobotBase.isSimulation())
+
+                        // Quick fix for Week 0 since we weren't able to get the robot to drive to the right spot
+                        // FIXME: Actually go to the spot
+                        .raceWith(DriveCommands.driveRobotRelative(robot.drive, () -> new Translation2d(-0.6, 0), () -> 0.0))
+        );
     }
 
     private static Command humanPlayerPickup(RobotContainer robot, Pose2d pickupPose) {

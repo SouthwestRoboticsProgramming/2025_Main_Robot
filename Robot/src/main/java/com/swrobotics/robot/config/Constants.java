@@ -66,16 +66,16 @@ public final class Constants {
     public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Drive/Auto/Turn PID/kP", 9).setPersistent();
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Drive/Auto/Turn PID/kD", 0.5).setPersistent();
 
-    public static final double kAutoMaxDriveSpeed = 2.5;//Units.feetToMeters(18);
+    public static final double kAutoMaxDriveSpeed = 2.5 + 1;//Units.feetToMeters(18);
     public static final double kAutoMaxDriveAccel = 3;//5.5;
-    public static final double kAutoMaxTurnSpeed = 1;
+    public static final double kAutoMaxTurnSpeed = 1 + .5;
     public static final double kAutoMaxTurnAccel = 3;
 
     public static final double kAutoSwitchToSnapDist = 0.2;
     public static final NTEntry<Double> kAutoScoreXYTolerance = new NTDouble("Drive/Auto/Score XY Tolerance (m)", 0.05).setPersistent();
     public static final NTEntry<Double> kAutoScoreAngleTolerance = new NTDouble("Drive/Auto/Score Angle Tolerance (deg)", 2).setPersistent();
-    public static final double kAutoToleranceTimeout = 1.5;
-    public static final double kAutoCoralEjectTime = 0.5;
+    public static final double kAutoToleranceTimeout = 0.8;
+    public static final double kAutoCoralEjectTime = 0.3;
     public static final double kAutoElevatorDownDelay = 0.5;
 
     public static final NTEntry<Double> kSnapOffset = new NTDouble("Drive/Snap/Offset (m)", 0.025).setPersistent();
@@ -124,10 +124,10 @@ public final class Constants {
                     .withDriveMotorGearRatio((50.0/16) * (16.0/28) * (45.0/15))
                     .withSteerMotorGearRatio(150.0 / 7)
                     .withCouplingGearRatio(50.0 / 16)
-                    .withWheelRadius(Meters.of(0.048264 ))
-                    // Gains taken from 254 2024 robot code
+                    .withWheelRadius(Meters.of(0.048218 ))
                     .withSteerMotorGains(new Slot0Configs().withKP(50).withKD(0.01).withKV(0.1))
                     .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(0.012621).withKS(0.22109))
+//                    .withDriveMotorGains(new Slot0Configs().withKP(0.4).withKD(0).withKV(0.012621 * 17.675293 / 13.515625 * 17.675293 / 2.136719 * 19.378906 / 17.676758 * 17.675293 / 21.419922).withKS(0.22109))
                     // TODO: Torque current FOC
                     .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
                     .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
@@ -168,8 +168,8 @@ public final class Constants {
     );
     public static final LimelightCamera.MountingLocation kLimelightBackLocation = new LimelightCamera.MountingLocation(
             // TODO: These are guesses, they should be measured in CAD
-            0, 0, 0.952,
-            180, 5, 0
+            0, 0, 0.972,
+            0, 35, 180
     );
 
     // This will be different for each lens type, cameras with same lens should

@@ -100,6 +100,8 @@ public class RobotContainer {
         autoSelector.addOption("One Right", Autonomous.behindReef1PieceRight(this));
         autoSelector.addOption("Four Left", Autonomous.leftSide4Piece(this));
         autoSelector.addOption("Four Right", Autonomous.rightSide4Piece(this));
+        autoSelector.addOption("Everything Randomly", Autonomous.everythingRandomly(this));
+
         for (AutoEntry auto : autos)
             autoSelector.addOption(auto.name(), auto.cmd());
 

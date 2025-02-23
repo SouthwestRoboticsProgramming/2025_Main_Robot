@@ -169,7 +169,12 @@ public final class SuperstructureSubsystem extends SubsystemBase {
                 < Constants.kElevatorTolerance.get();
 
         boolean pivot = Math.abs(pivotInputs.currentAngleRot - targetState.getPivotAngle())
-                < Constants.kOuttakePivotTolerance.get();
+                < Units.degreesToRotations(Constants.kOuttakePivotTolerance.get());
+
+        Logger.recordOutput("Auto/Elevator In Tolerance", elevator);
+        Logger.recordOutput("Auto/Elevator Error", Math.abs(elevatorInputs.currentHeightPct - targetState.getElevatorHeight()));
+        Logger.recordOutput("Auto/Pivot In Tolerance", pivot);
+        Logger.recordOutput("Auto/Pivot Error", Units.rotationsToDegrees(Math.abs(pivotInputs.currentAngleRot - targetState.getPivotAngle())));
 
         return elevator && pivot;
     }
