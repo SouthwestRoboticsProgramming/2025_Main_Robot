@@ -1,31 +1,40 @@
 package com.swrobotics.robot.subsystems.superstructure;
 
-import com.swrobotics.lib.utils.MathUtil;
+import com.swrobotics.robot.config.Constants;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 public final class ElevatorIOSim implements ElevatorIO {
-    private double currentHeight;
-    private double targetHeight;
+    private final TrapezoidProfile profile;
+
+    private TrapezoidProfile.State currentState;
+    private TrapezoidProfile.State targetState;
 
     public ElevatorIOSim() {
-        currentHeight = 0;
-        targetHeight = 0;
+        profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
+                Constants.kElevatorMotionMagic.getCruiseVelocity() / Constants.kElevatorMaxHeightRotations,
+                Constants.kElevatorMotionMagic.getAcceleration() / Constants.kElevatorMaxHeightRotations
+        ));
+
+        currentState = new TrapezoidProfile.State(0, 0);
+        targetState = new TrapezoidProfile.State(0, 0);
     }
 
     @Override
     public void updateInputs(Inputs inputs) {
-        currentHeight = MathUtil.lerp(currentHeight, targetHeight, 0.2);
-        inputs.currentHeightPct = currentHeight;
+        currentState = profile.calculate(Constants.kPeriodicTime, currentState, targetState);
+        inputs.currentHeightPct = currentState.position;
     }
 
     @Override
     public void setTargetHeight(double heightPct) {
-        targetHeight = heightPct;
+        targetState = new TrapezoidProfile.State(heightPct, 0);
     }
 
     @Override
     public void setNeutral() {
         // Fall down
-        currentHeight = 0;
-        targetHeight = 0;
+        currentState.position = 0;
+        currentState.velocity = 0;
+        targetState = new TrapezoidProfile.State(0, 0);
     }
 }

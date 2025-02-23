@@ -1,27 +1,37 @@
 package com.swrobotics.robot.subsystems.superstructure;
 
-import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.config.Constants;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 public final class OuttakePivotIOSim implements OuttakePivotIO {
-    private double currentAngle;
-    private double targetAngle;
+    private final TrapezoidProfile profile;
+
+    private TrapezoidProfile.State currentState;
+    private TrapezoidProfile.State targetState;
 
     public OuttakePivotIOSim() {
-        currentAngle = Units.degreesToRotations(Constants.kOuttakePivotInAngle.get());
-        targetAngle = currentAngle;
+        profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
+                Constants.kOuttakePivotMotionMagic.getCruiseVelocity(),
+                Constants.kOuttakePivotMotionMagic.getAcceleration()
+        ));
+
+        currentState = new TrapezoidProfile.State(
+                Units.degreesToRotations(Constants.kOuttakePivotInAngle.get()),
+                0
+        );
+        targetState = currentState;
     }
 
     @Override
     public void updateInputs(Inputs inputs) {
-        currentAngle = MathUtil.lerp(currentAngle, targetAngle, 0.1);
-        inputs.currentAngleRot = currentAngle;
+        currentState = profile.calculate(Constants.kPeriodicTime, currentState, targetState);
+        inputs.currentAngleRot = currentState.position;
     }
 
     @Override
     public void setTargetAngle(double targetAngleRot, boolean hasCoral) {
-        targetAngle = targetAngleRot;
+        targetState = new TrapezoidProfile.State(targetAngleRot, 0);
     }
 
     @Override
@@ -32,6 +42,6 @@ public final class OuttakePivotIOSim implements OuttakePivotIO {
     @Override
     public void calibrateEncoder() {
         // no encoder
-        currentAngle = 0;
+        currentState.position = 0.25;
     }
 }
