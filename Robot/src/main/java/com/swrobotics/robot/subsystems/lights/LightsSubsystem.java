@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // TODO: Look into new WPILib LED strip patterns API
 public final class LightsSubsystem extends SubsystemBase {
+    private static final double kBrightness = 0.7;
+
     private final RobotContainer robot;
     private final AddressableLED leds;
     private final AddressableLEDBuffer data;
@@ -179,9 +181,9 @@ public final class LightsSubsystem extends SubsystemBase {
             return new Color8Bit(desiredColor);
         }
 
-        int r = GAMMA_CORRECTION[(int) (desiredColor.red * 255.0)];
-        int g = GAMMA_CORRECTION[(int) (desiredColor.green * 255.0)];
-        int b = GAMMA_CORRECTION[(int) (desiredColor.blue * 255.0)];
+        int r = GAMMA_CORRECTION[(int) (desiredColor.red * kBrightness * 255.0)];
+        int g = GAMMA_CORRECTION[(int) (desiredColor.green * kBrightness * 255.0)];
+        int b = GAMMA_CORRECTION[(int) (desiredColor.blue * kBrightness * 255.0)];
         return new Color8Bit(r, g, b);
     }
 

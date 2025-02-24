@@ -63,8 +63,8 @@ public final class Constants {
     // Auto (TODO: Tune)
     public static final double kAutoDriveKp = 4;
     public static final double kAutoDriveKd = 0;
-    public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Drive/Auto/Turn PID/kP", 9).setPersistent();
-    public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Drive/Auto/Turn PID/kD", 0.5).setPersistent();
+    public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Drive/Auto/Turn PID/kP", 5).setPersistent();
+    public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Drive/Auto/Turn PID/kD", 0).setPersistent();
 
     public static final double kAutoMaxDriveSpeed = 2.5 + 1;//Units.feetToMeters(18);
     public static final double kAutoMaxDriveAccel = 3;//5.5;
@@ -78,15 +78,15 @@ public final class Constants {
     public static final double kAutoCoralEjectTime = 0.3;
     public static final double kAutoElevatorDownDelay = 0.5;
 
-    public static final NTEntry<Double> kSnapOffset = new NTDouble("Drive/Snap/Offset (m)", 0.025).setPersistent();
+    public static final NTEntry<Double> kSnapOffset = new NTDouble("Drive/Snap/Offset (m)", 0.0).setPersistent();
     public static final NTEntry<Double> kSnapMaxSpeed = new NTDouble("Drive/Snap/Max Speed (meters per sec)", 1.5).setPersistent();
     public static final NTEntry<Double> kSnapMaxTurnSpeed = new NTDouble("Drive/Snap/Max Turn Speed (rot per sec)", 1.2).setPersistent();
     public static final NTEntry<Double> kSnapDriveKp = new NTDouble("Drive/Snap/Drive kP", 3).setPersistent();
     public static final NTEntry<Double> kSnapDriveKd = new NTDouble("Drive/Snap/Drive kD", 0).setPersistent();
     public static final NTEntry<Double> kSnapTurnKp = new NTDouble("Drive/Snap/Turn kP", 5).setPersistent();
     public static final NTEntry<Double> kSnapTurnKd = new NTDouble("Drive/Snap/Turn kD", 0).setPersistent();
-    public static final NTEntry<Double> kSnapXYDeadzone = new NTDouble("Drive/Snap/XY Deadzone (m)", 0.02).setPersistent();
-    public static final NTEntry<Double> kSnapThetaDeadzone = new NTDouble("Drive/Snap/Theta Deadzone (deg)", 2).setPersistent();
+    public static final NTEntry<Double> kSnapXYDeadzone = new NTDouble("Drive/Snap/XY Deadzone (m)", 0.005).setPersistent();
+    public static final NTEntry<Double> kSnapThetaDeadzone = new NTDouble("Drive/Snap/Theta Deadzone (deg)", 0.2).setPersistent();
 
     // Drive
     public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
@@ -189,21 +189,22 @@ public final class Constants {
     public static final NTEntry<Double> kElevatorMaxVelocity = new NTDouble("Superstructure/Elevator/Max Velocity", 80).setPersistent();
     public static final NTEntry<Double> kElevatorMaxAccel = new NTDouble("Superstructure/Elevator/Max Acceleration", 500).setPersistent();
 
-    public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Superstructure/Elevator/Tolerance", 0.01).setPersistent();
-    public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.01).setPersistent();
-    public static final NTEntry<Double> kElevatorFrameCollisionHeight = new NTDouble("Superstructure/Elevator/Frame Collision Height", 0.047993).setPersistent();
-    public static final NTEntry<Double> kElevatorStage2CollisionHeight = new NTDouble("Superstructure/Elevator/Stage 2 Collision Height", 0.4).setPersistent(); // FIXME: Tune
-    public static final NTEntry<Double> kElevatorHeightBottom = new NTDouble("Superstructure/Elevator/Bottom Height", 0.002).setPersistent();
-    public static final NTEntry<Double> kElevatorHeightL1 = new NTDouble("Superstructure/Elevator/L1 Height", 0.25).setPersistent();
-    public static final NTEntry<Double> kElevatorHeightL2 = new NTDouble("Superstructure/Elevator/L2 Height", 0.375).setPersistent();
-    public static final NTEntry<Double> kElevatorHeightL3 = new NTDouble("Superstructure/Elevator/L3 Height", 0.55).setPersistent();
+    public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Superstructure/Elevator/Tolerance", 0.04).setPersistent();
+    public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.005).setPersistent();
+    public static final NTEntry<Double> kElevatorDeviationTolerance = new NTDouble("Superstructure/Elevator/Deviation Tolerance", 0.01).setPersistent();
+    public static final NTEntry<Double> kElevatorFrameCollisionHeight = new NTDouble("Superstructure/Elevator/Frame Collision Height", 0.060566).setPersistent();
+    public static final NTEntry<Double> kElevatorStage2CollisionHeight = new NTDouble("Superstructure/Elevator/Stage 2 Collision Height", 0.324990).setPersistent(); // FIXME: Tune
+    public static final NTEntry<Double> kElevatorHeightBottom = new NTDouble("Superstructure/Elevator/Bottom Height", 0.02).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightL1 = new NTDouble("Superstructure/Elevator/L1 Height", 0.01).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightL2 = new NTDouble("Superstructure/Elevator/L2 Height", 0.27).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightL3 = new NTDouble("Superstructure/Elevator/L3 Height", 0.535).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL4 = new NTDouble("Superstructure/Elevator/L4 Height", 1).setPersistent();
 
     // Coral outtake pivot
     // 60:24 CANcoder
     public static final double kOuttakePivotMotorToArmRatio = (60.0 / 27.0) * (58.0 / 18.0) * (60.0 / 8.0);
     public static final double kOuttakePivotCANcoderToArmRatio = 48.0 / 36.0;
-    public static final NTEntry<Double> kOuttakePivotEncoderOffset = new NTDouble("Superstructure/Pivot/Encoder/Offset (rot)", 0).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotEncoderOffset = new NTDouble("Superstructure/Pivot/Encoder/Offset (rot)", 0.415609).setPersistent();
     public static final NTSlot0Configs kOuttakePivotPID =
             new NTSlot0Configs("Superstructure/Pivot/PID", 200, 0, 0.316, 0, 7.021702, 0);
     public static final NTSlot1Configs kOuttakePivotPIDWithCoral =
@@ -211,12 +212,13 @@ public final class Constants {
     public static final NTEntry<Double> kOuttakePivotMaxVelocity = new NTDouble("Superstructure/Pivot/Max Velocity", 1.2).setPersistent();
     public static final NTEntry<Double> kOuttakePivotMaxAccel = new NTDouble("Superstructure/Pivot/Max Acceleration", 0.5).setPersistent();
 
-    public static final NTEntry<Double> kOuttakePivotTolerance = new NTDouble("Superstructure/Pivot/Tolerance (deg)", 3).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotTolerance = new NTDouble("Superstructure/Pivot/Tolerance (deg)", 4).setPersistent();
     public static final NTEntry<Double> kOuttakePivotCollisionTolerance = new NTDouble("Superstructure/Pivot/Collision Tolerance (deg)", 5).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotFrameCollisionAngle = new NTDouble("Superstructure/Pivot/Frame Collision Angle (deg)", 68).setPersistent(); // FIXME: Tune
-    public static final NTEntry<Double> kOuttakePivotStage2CollisionAngle = new NTDouble("Superstructure/Pivot/Stage 2 Collision Angle (deg)", 68.203080).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotInAngle = new NTDouble("Superstructure/Pivot/In Angle (deg)", 90).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotScoreL1Angle = new NTDouble("Superstructure/Pivot/Score L1 Angle (deg)", 70).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotDeviationTolerance = new NTDouble("Superstructure/Pivot/Deviation Tolerance (deg)", 4).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotFrameCollisionAngle = new NTDouble("Superstructure/Pivot/Frame Collision Angle (deg)", 80.683560).setPersistent(); // FIXME: Tune
+    public static final NTEntry<Double> kOuttakePivotStage2CollisionAngle = new NTDouble("Superstructure/Pivot/Stage 2 Collision Angle (deg)", 67.060440).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotInAngle = new NTDouble("Superstructure/Pivot/In Angle (deg)", 88).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotScoreL1Angle = new NTDouble("Superstructure/Pivot/Score L1 Angle (deg)", 85).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL2Angle = new NTDouble("Superstructure/Pivot/Score L2 Angle (deg)", 75).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL3Angle = new NTDouble("Superstructure/Pivot/Score L3 Angle (deg)", 75).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL4Angle = new NTDouble("Superstructure/Pivot/Score L4 Angle (deg)", 60).setPersistent();
@@ -239,9 +241,9 @@ public final class Constants {
     public static final int kOuttakeRefreshFreq = 100; // Hz
     public static final NTEntry<Double> kOuttakeRollerIntakeVoltage = new NTDouble("Outtake/Intake Voltage", 2).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreVoltage = new NTDouble("Outtake/Score Voltage", 3).setPersistent();
-    public static final NTEntry<Double> kOuttakeHoldPositionOffset = new NTDouble("Outtake/Hold Position Offset", 0).setPersistent();
+    public static final NTEntry<Double> kOuttakeHoldPositionOffset = new NTDouble("Outtake/Hold Position Offset", 0.3).setPersistent();
     public static final NTSlot0Configs kOuttakeRollerPID =
-            new NTSlot0Configs("Outtake/PID", 0, 0, 0, 0, 0, 0);
+            new NTSlot0Configs("Outtake/PID", 5, 0, 0, 0, 0, 0);
 
     // Indexer
     public static final NTEntry<Double> kIndexerIntakeVoltage = new NTDouble("Indexer/Intake Voltage", 5).setPersistent();

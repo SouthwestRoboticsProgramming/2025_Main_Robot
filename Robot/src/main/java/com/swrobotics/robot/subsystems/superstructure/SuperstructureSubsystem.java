@@ -110,6 +110,11 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     }
 
     public void setTargetState(State targetState) {
+        if (targetState != this.targetState) {
+            // Re-sync setpoints with actual state
+            elevatorSetpoint = null;
+            pivotSetpoint = null;
+        }
         this.targetState = targetState;
     }
 
@@ -149,16 +154,20 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         double elevatorTarget = targetState.getElevatorHeight();
         double pivotTarget = targetState.getPivotAngle();
 
+        double elevatorMaxDev = Constants.kElevatorDeviationTolerance.get();
         double elevatorAvoid = Constants.kElevatorCollisionTolerance.get();
         double elevatorCollisionFrame = Constants.kElevatorFrameCollisionHeight.get();
         double elevatorCollisionStage2 = Constants.kElevatorStage2CollisionHeight.get();
+        double pivotMaxDev = Units.degreesToRotations(Constants.kOuttakePivotDeviationTolerance.get());
         double pivotAvoid = Units.degreesToRotations(Constants.kOuttakePivotCollisionTolerance.get());
         double pivotCollisionFrame = Units.degreesToRotations(Constants.kOuttakePivotFrameCollisionAngle.get());
         double pivotCollisionStage2 = Units.degreesToRotations(Constants.kOuttakePivotStage2CollisionAngle.get());
 
-        if (elevatorSetpoint == null || pivotSetpoint == null) {
-            // Reset setpoints to sensor values
+        // Reset setpoints to sensor values
+        if (elevatorSetpoint == null || Math.abs(elevatorSetpoint.position - elevatorInputs.currentHeightPct) > elevatorMaxDev) {
             elevatorSetpoint = new TrapezoidProfile.State(elevatorInputs.currentHeightPct, elevatorInputs.currentVelocityPctPerSec);
+        }
+        if (pivotSetpoint == null || Math.abs(pivotSetpoint.position - pivotInputs.currentAngleRot) > pivotMaxDev) {
             pivotSetpoint = new TrapezoidProfile.State(pivotInputs.currentAngleRot, pivotInputs.currentVelocityRotPerSec);
         }
 
@@ -244,6 +253,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         // Update motion profiles
         elevatorSetpoint = elevatorProfile.calculate(Constants.kPeriodicTime, elevatorSetpoint, new TrapezoidProfile.State(elevatorTarget, 0));
         pivotSetpoint = pivotProfile.calculate(Constants.kPeriodicTime, pivotSetpoint, new TrapezoidProfile.State(pivotTarget, 0));
+
+        RobotView.setSuperstructureSetpoint(elevatorSetpoint.position, pivotSetpoint.position);
 
         boolean hasCoral = coralOuttakeSubsystem.hasPiece();
         elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);
