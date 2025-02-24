@@ -10,7 +10,5 @@ public interface ElevatorIO {
 
     void updateInputs(Inputs inputs);
 
-    void setTargetHeight(double heightPct);
-
-    void setNeutral();
+    void setTarget(double heightPct, double ffVelocityPctPerSec);
 }

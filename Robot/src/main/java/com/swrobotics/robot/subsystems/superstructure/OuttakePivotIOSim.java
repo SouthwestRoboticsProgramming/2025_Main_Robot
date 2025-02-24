@@ -5,34 +5,24 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 public final class OuttakePivotIOSim implements OuttakePivotIO {
-    private final TrapezoidProfile profile;
-
-    private TrapezoidProfile.State currentState;
-    private TrapezoidProfile.State targetState;
+    private double prevPosition;
+    private double position;
 
     public OuttakePivotIOSim() {
-        profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
-                Constants.kOuttakePivotMotionMagic.getCruiseVelocity(),
-                Constants.kOuttakePivotMotionMagic.getAcceleration()
-        ));
-
-        currentState = new TrapezoidProfile.State(
-                Units.degreesToRotations(Constants.kOuttakePivotInAngle.get()),
-                0
-        );
-        targetState = currentState;
+        prevPosition = position = 0.25;
     }
 
     @Override
     public void updateInputs(Inputs inputs) {
-        currentState = profile.calculate(Constants.kPeriodicTime, currentState, targetState);
-        inputs.currentAngleRot = currentState.position;
-        inputs.currentVelocityRotPerSec = currentState.velocity;
+        inputs.currentAngleRot = position;
+        inputs.currentVelocityRotPerSec = (position - prevPosition) / Constants.kPeriodicTime;
+
+        prevPosition = position;
     }
 
     @Override
-    public void setTargetAngle(double targetAngleRot, boolean hasCoral) {
-        targetState = new TrapezoidProfile.State(targetAngleRot, 0);
+    public void setTarget(double targetAngleRot, double ffVelocityRotPerSec, boolean hasCoral) {
+        position = targetAngleRot;
     }
 
     @Override
@@ -42,7 +32,6 @@ public final class OuttakePivotIOSim implements OuttakePivotIO {
 
     @Override
     public void calibrateEncoder() {
-        // no encoder
-        currentState.position = 0.25;
+        prevPosition = position = 0.25;
     }
 }

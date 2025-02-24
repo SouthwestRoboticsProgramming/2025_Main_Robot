@@ -3,8 +3,7 @@ package com.swrobotics.robot.subsystems.superstructure;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -12,6 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.swrobotics.lib.ctre.CTREUtil;
 import com.swrobotics.lib.ctre.TalonFXConfigHelper;
 import com.swrobotics.lib.net.NTBoolean;
+import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.IOAllocation;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
@@ -28,8 +28,7 @@ public final class ElevatorIOReal implements ElevatorIO {
     private final StatusSignal<Angle> positionStatus;
     private final StatusSignal<AngularVelocity> velocityStatus;
 
-    private final MotionMagicVoltage positionControl;
-    private final NeutralOut neutralControl;
+    private final PositionVoltage positionControl;
 
     public ElevatorIOReal() {
         motor1 = IOAllocation.CAN.kElevatorMotor1.createTalonFX();
@@ -40,7 +39,6 @@ public final class ElevatorIOReal implements ElevatorIO {
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
         config.addTunable(Constants.kElevatorPID);
-        config.addTunable(Constants.kElevatorMotionMagic);
         config.apply(motor1, motor2);
 
         CTREUtil.retryUntilOk(motor2, () -> motor2.setControl(new Follower(IOAllocation.CAN.kElevatorMotor1.id(), true)));
@@ -54,9 +52,8 @@ public final class ElevatorIOReal implements ElevatorIO {
         positionStatus = motor1.getPosition();
         velocityStatus = motor1.getVelocity();
 
-        positionControl = new MotionMagicVoltage(0)
+        positionControl = new PositionVoltage(0)
                 .withEnableFOC(true);
-        neutralControl = new NeutralOut();
 
         BRAKE_MODE.onChange(() -> {
             config.MotorOutput.NeutralMode = BRAKE_MODE.get()
@@ -77,16 +74,14 @@ public final class ElevatorIOReal implements ElevatorIO {
     }
 
     @Override
-    public void setTargetHeight(double heightPct) {
-        heightPct = Math.min(heightPct, 1.0);
+    public void setTarget(double heightPct, double ffVelocityPctPerSec) {
+        heightPct = MathUtil.clamp(heightPct, 0, 1);
 
         double positionRot = heightPct * Constants.kElevatorMaxHeightRotations;
-        motor1.setControl(positionControl.withPosition(positionRot));
-//        setNeutral();
-    }
+        double velocityRot = ffVelocityPctPerSec * Constants.kElevatorMaxHeightRotations;
 
-    @Override
-    public void setNeutral() {
-        motor1.setControl(neutralControl);
+        motor1.setControl(positionControl
+                .withPosition(positionRot)
+                .withVelocity(velocityRot));
     }
 }

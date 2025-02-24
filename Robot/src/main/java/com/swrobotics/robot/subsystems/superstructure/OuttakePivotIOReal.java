@@ -4,7 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -30,8 +30,8 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
     private final StatusSignal<AngularVelocity> motorVelocityStatus;
     private final StatusSignal<Angle> canCoderPositionStatus;
 
-    private final MotionMagicVoltage positionControl;
-    private final MotionMagicVoltage positionControlWithCoral;
+    private final PositionVoltage positionControl;
+    private final PositionVoltage positionControlWithCoral;
 
     public OuttakePivotIOReal() {
         motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
@@ -44,11 +44,10 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         motorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         motorConfig.addTunable(Constants.kOuttakePivotPID);
         motorConfig.addTunable(Constants.kOuttakePivotPIDWithCoral);
-        motorConfig.addTunable(Constants.kOuttakePivotMotionMagic);
         motorConfig.apply(motor);
 
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
-        canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; // FIXME
+        canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         CTREUtil.retryUntilOk(canCoder, () -> canCoder.getConfigurator().apply(canCoderConfig));
 
         MotorTrackerSubsystem.getInstance().addMotor("Outtake Pivot", motor);
@@ -58,9 +57,10 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         motorVelocityStatus = motor.getVelocity();
         canCoderPositionStatus = canCoder.getAbsolutePosition(true);
 
-        positionControl = new MotionMagicVoltage(0)
+        positionControl = new PositionVoltage(0)
+                .withSlot(0)
                 .withEnableFOC(true);
-        positionControlWithCoral = new MotionMagicVoltage(0)
+        positionControlWithCoral = new PositionVoltage(0)
                 .withSlot(1)
                 .withEnableFOC(true);
 
@@ -76,12 +76,14 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
     }
 
     @Override
-    public void setTargetAngle(double targetAngleRot, boolean hasCoral) {
-        MotionMagicVoltage control = hasCoral
+    public void setTarget(double targetAngleRot, double ffVelocityRotPerSec, boolean hasCoral) {
+        PositionVoltage control = hasCoral
                 ? positionControl
                 : positionControlWithCoral;
 
-        motor.setControl(control.withPosition(targetAngleRot));
+        motor.setControl(control
+                .withPosition(targetAngleRot)
+                .withVelocity(ffVelocityRotPerSec));
     }
 
     private StatusCode trySyncWithEncoder() {

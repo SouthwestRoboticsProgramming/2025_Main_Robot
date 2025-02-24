@@ -186,8 +186,8 @@ public final class Constants {
     public static final double kElevatorMaxHeightRotations = 100;
     public static final NTSlot0Configs kElevatorPID =
             new NTSlot0Configs("Superstructure/Elevator/PID", 0.3, 0, 0.286, 0, 0.12, 0);
-    public static final NTMotionMagicConfigs kElevatorMotionMagic =
-            new NTMotionMagicConfigs("Superstructure/Elevator/Motion Magic", 80, 500, 0);
+    public static final NTEntry<Double> kElevatorMaxVelocity = new NTDouble("Superstructure/Elevator/Max Velocity", 80).setPersistent();
+    public static final NTEntry<Double> kElevatorMaxAccel = new NTDouble("Superstructure/Elevator/Max Acceleration", 500).setPersistent();
 
     public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Superstructure/Elevator/Tolerance", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.01).setPersistent();
@@ -208,8 +208,8 @@ public final class Constants {
             new NTSlot0Configs("Superstructure/Pivot/PID", 200, 0, 0.316, 0, 7.021702, 0);
     public static final NTSlot1Configs kOuttakePivotPIDWithCoral =
             new NTSlot1Configs("Superstructure/Pivot/PID With Coral", 200, 0, 0.424, 0.1, 7.356069, 0);
-    public static final NTMotionMagicConfigs kOuttakePivotMotionMagic =
-            new NTMotionMagicConfigs("Superstructure/Pivot/Motion Magic", 1.2, 0.5, 0);
+    public static final NTEntry<Double> kOuttakePivotMaxVelocity = new NTDouble("Superstructure/Pivot/Max Velocity", 1.2).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotMaxAccel = new NTDouble("Superstructure/Pivot/Max Acceleration", 0.5).setPersistent();
 
     public static final NTEntry<Double> kOuttakePivotTolerance = new NTDouble("Superstructure/Pivot/Tolerance (deg)", 3).setPersistent();
     public static final NTEntry<Double> kOuttakePivotCollisionTolerance = new NTDouble("Superstructure/Pivot/Collision Tolerance (deg)", 5).setPersistent();

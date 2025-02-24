@@ -63,6 +63,11 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private final Timer pivotSyncTimer;
     private State targetState;
 
+    private TrapezoidProfile elevatorProfile;
+    private TrapezoidProfile pivotProfile;
+    private TrapezoidProfile.State elevatorSetpoint;
+    private TrapezoidProfile.State pivotSetpoint;
+
     public SuperstructureSubsystem(CoralOuttakeSubsystem coralOuttakeSubsystem) {
         if (RobotBase.isReal()) {
             elevatorIO = new ElevatorIOReal();
@@ -79,6 +84,29 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         pivotSyncTimer = new Timer();
         pivotSyncTimer.start();
         targetState = State.RECEIVE_CORAL_FROM_INDEXER;
+
+        updateElevatorProfile();
+        updatePivotProfile();
+        Constants.kElevatorMaxVelocity.onChange(this::updateElevatorProfile);
+        Constants.kElevatorMaxAccel.onChange(this::updateElevatorProfile);
+        Constants.kOuttakePivotMaxVelocity.onChange(this::updatePivotProfile);
+        Constants.kOuttakePivotMaxAccel.onChange(this::updatePivotProfile);
+
+        elevatorSetpoint = pivotSetpoint = null;
+    }
+
+    private void updateElevatorProfile() {
+        elevatorProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
+                Constants.kElevatorMaxVelocity.get() / Constants.kElevatorMaxHeightRotations,
+                Constants.kElevatorMaxAccel.get() / Constants.kElevatorMaxHeightRotations
+        ));
+    }
+
+    private void updatePivotProfile() {
+        pivotProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
+                Constants.kOuttakePivotMaxVelocity.get(),
+                Constants.kOuttakePivotMaxAccel.get()
+        ));
     }
 
     public void setTargetState(State targetState) {
@@ -128,22 +156,17 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         double pivotCollisionFrame = Units.degreesToRotations(Constants.kOuttakePivotFrameCollisionAngle.get());
         double pivotCollisionStage2 = Units.degreesToRotations(Constants.kOuttakePivotStage2CollisionAngle.get());
 
-        TrapezoidProfile elevatorProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
-                Constants.kElevatorMotionMagic.getCruiseVelocity() / Constants.kElevatorMaxHeightRotations,
-                Constants.kElevatorMotionMagic.getAcceleration() / Constants.kElevatorMaxHeightRotations
-        ));
-        TrapezoidProfile pivotProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
-                Constants.kOuttakePivotMotionMagic.getCruiseVelocity(),
-                Constants.kOuttakePivotMotionMagic.getAcceleration()
-        ));
+        if (elevatorSetpoint == null || pivotSetpoint == null) {
+            // Reset setpoints to sensor values
+            elevatorSetpoint = new TrapezoidProfile.State(elevatorInputs.currentHeightPct, elevatorInputs.currentVelocityPctPerSec);
+            pivotSetpoint = new TrapezoidProfile.State(pivotInputs.currentAngleRot, pivotInputs.currentVelocityRotPerSec);
+        }
 
         // Cases:
         // - current and target below -> both to target
         // - current below, target above -> pivot out, delay before moving elevator up
         // - current above, target below -> pivot at collision + avoidance, if pivot is out elevator to target
         // - current and target above -> if pivot is out both to target, keep pivot out
-
-        // FIXME: Run motion profiles on RIO!
 
         // Collision with frame crossbar
         if (elevatorCurrent < elevatorCollisionFrame) {
@@ -152,12 +175,12 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
                 elevatorProfile.calculate(
                         0,
-                        new TrapezoidProfile.State(elevatorCurrent, elevatorInputs.currentVelocityPctPerSec),
+                        elevatorSetpoint,
                         new TrapezoidProfile.State(elevatorTarget, 0)
                 );
                 pivotProfile.calculate(
                         0,
-                        new TrapezoidProfile.State(pivotCurrent, pivotInputs.currentVelocityRotPerSec),
+                        pivotSetpoint,
                         new TrapezoidProfile.State(pivotTarget, 0)
                 );
 
@@ -186,12 +209,12 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
                 elevatorProfile.calculate(
                         0,
-                        new TrapezoidProfile.State(elevatorCurrent, elevatorInputs.currentVelocityPctPerSec),
+                        elevatorSetpoint,
                         new TrapezoidProfile.State(elevatorTarget, 0)
                 );
                 pivotProfile.calculate(
                         0,
-                        new TrapezoidProfile.State(pivotCurrent, pivotInputs.currentVelocityRotPerSec),
+                        pivotSetpoint,
                         new TrapezoidProfile.State(pivotTarget, 0)
                 );
 
@@ -218,15 +241,13 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
         RobotView.setTargetSuperstructureState(elevatorTarget, pivotTarget);
 
-        boolean hasCoral = coralOuttakeSubsystem.hasPiece();
+        // Update motion profiles
+        elevatorSetpoint = elevatorProfile.calculate(Constants.kPeriodicTime, elevatorSetpoint, new TrapezoidProfile.State(elevatorTarget, 0));
+        pivotSetpoint = pivotProfile.calculate(Constants.kPeriodicTime, pivotSetpoint, new TrapezoidProfile.State(pivotTarget, 0));
 
-        if (elevatorTarget == 0.0 && Math.abs(elevatorInputs.currentHeightPct) < Constants.kElevatorTolerance.get()) {
-            // Conserve battery power when we can
-            elevatorIO.setNeutral();
-        } else {
-            elevatorIO.setTargetHeight(elevatorTarget);
-        }
-        pivotIO.setTargetAngle(pivotTarget, hasCoral);
+        boolean hasCoral = coralOuttakeSubsystem.hasPiece();
+        elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);
+        pivotIO.setTarget(pivotSetpoint.position, pivotSetpoint.velocity, hasCoral);
     }
 
     public boolean isInTolerance() {
