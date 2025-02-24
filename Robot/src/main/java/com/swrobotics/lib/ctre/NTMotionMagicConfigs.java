@@ -34,4 +34,16 @@ public final class NTMotionMagicConfigs implements TunableConfig {
             applyFn.run();
         });
     }
+
+    public double getCruiseVelocity() {
+        return cruiseVelocity.get();
+    }
+
+    public double getAcceleration() {
+        return acceleration.get();
+    }
+
+    public double getJerk() {
+        return jerk.get();
+    }
 }

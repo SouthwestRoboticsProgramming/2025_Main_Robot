@@ -1,32 +1,36 @@
 package com.swrobotics.robot.control;
 
+import com.ctre.phoenix6.swerve.SwerveModule;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.path.PathConstraints;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.input.XboxController;
 import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.lib.net.NTEntry;
+import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
+import com.swrobotics.robot.commands.Autonomous;
 import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
 import com.swrobotics.robot.commands.DriveCommands;
-import com.swrobotics.robot.commands.DriveKVCharacterizationCommand;
 import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
+import com.swrobotics.robot.config.PathEnvironments;
 import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
-import com.swrobotics.robot.subsystems.outtake.CoralHandlingSubsystem;
+import com.swrobotics.robot.subsystems.outtake.CoralOuttakeSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-import java.util.Collections;
+import java.util.Set;
 
 public final class ControlBoard extends SubsystemBase {
     /*
@@ -137,15 +141,15 @@ public final class ControlBoard extends SubsystemBase {
         driver.rightTrigger.triggerOutside(0.25)
                 .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
                 
-        robot.coralHandler.setDefaultCommand(
-                robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
+        robot.coralOuttake.setDefaultCommand(
+                robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.INTAKE));
         new Trigger(() -> operator.leftTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.INTAKE));
+                .whileTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.INTAKE));
         new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.SCORE));
-//        operator.leftBumper.trigger()
-//                .onTrue(robot.coralHandler.commandSetState(CoralHandlingSubsystem.State.REVERSE)
-//                        .withTimeout(0.05));
+                .whileTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE));
+       operator.leftBumper.trigger()
+               .onTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.REVERSE)
+                       .withTimeout(0.15));
 
         // Everything past here is for testing and should eventually be removed
 
@@ -155,11 +159,32 @@ public final class ControlBoard extends SubsystemBase {
 
 //        driver.b.onPressed(RumblePatternCommands.endgameAlert(driver, 0.75));
 
-//        driver.x.onPressed(Commands.defer(robot.pathfindingTest::getFollowCommand, Collections.emptySet()));
+//        driver.x.onPressed(Commands.defer(() -> AutoBuilderExt.pathfindToPose(
+//                PathEnvironments.kFieldWithAutoGamePieces,
+//                FieldView.pathfindingGoal.getPose(),
+//                new PathConstraints(
+//                        Constants.kAutoMaxDriveSpeed,
+//                        Constants.kAutoMaxDriveAccel,
+//                        Units.rotationsToRadians(Constants.kAutoMaxTurnSpeed),
+//                        Units.rotationsToRadians(Constants.kAutoMaxTurnAccel)
+//                )
+//        ), Set.of(robot.drive)));
 //        driver.y.onPressed(() -> FieldView.pathfindingGoal.setPose(robot.drive.getEstimatedPose()));
 
+//        operator.start.trigger()
+//                .whileTrue(DriveCommands.feedforwardCharacterization(robot.drive));
+//        operator.start.trigger()
+//                .whileTrue(Autonomous.goSideways5Meters(robot));
         operator.start.trigger()
-                .whileTrue(new DriveKVCharacterizationCommand(robot.drive));
+                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
+                                .withVelocityX(3)
+                                .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
+                        robot.drive));
+        operator.back.trigger()
+                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
+                        .withVelocityX(1)
+                        .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
+                        robot.drive));
     }
 
     /**

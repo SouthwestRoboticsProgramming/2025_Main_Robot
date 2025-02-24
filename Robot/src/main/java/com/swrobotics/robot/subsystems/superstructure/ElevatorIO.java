@@ -5,13 +5,12 @@ import com.swrobotics.robot.logging.AutoLoggedInputs;
 public interface ElevatorIO {
     final class Inputs extends AutoLoggedInputs {
         public double currentHeightPct;
+        public double currentVelocityPctPerSec;
     }
 
     void updateInputs(Inputs inputs);
 
-    void setTargetHeight(double heightPct);
-
-    void setNeutral();
+    void setTarget(double heightPct, double ffVelocityPctPerSec);
 
     void setClimbMode(boolean activelyClimbing);
 }

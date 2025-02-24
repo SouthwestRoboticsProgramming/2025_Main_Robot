@@ -6,7 +6,11 @@ import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.vision.limelight.LimelightCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +18,8 @@ import java.util.List;
 public final class VisionSubsystem extends SubsystemBase {
     private final SwerveDriveSubsystem drive;
     private final List<LimelightCamera> cameras;
+
+    private boolean ignoreUpdates;
 
     public VisionSubsystem(SwerveDriveSubsystem drive) {
         this.drive = drive;
@@ -26,9 +32,20 @@ public final class VisionSubsystem extends SubsystemBase {
                 new LimelightCamera(
                         "limelight-ftright",
                         Constants.kLimelightFrontRightLocation,
+                        Constants.kLimelightConfig),
+                new LimelightCamera(
+                        "limelight-back",
+                        Constants.kLimelightBackLocation,
                         Constants.kLimelightConfig)
                 // Add more cameras here...
         );
+
+        ignoreUpdates = false;
+        setDefaultCommand(Commands.run(() -> ignoreUpdates = false, this));
+    }
+
+    public Command commandIgnoreUpdates() {
+        return Commands.run(() -> ignoreUpdates = true, this);
     }
 
     @Override
@@ -58,6 +75,13 @@ public final class VisionSubsystem extends SubsystemBase {
             poses[i] = updates.get(i).pose();
         }
         FieldView.visionEstimates.setPoses(poses);
+
+        Logger.recordOutput("Limelight/Vision Updates", poses);
+        Logger.recordOutput("Limelight/Updates Ignored", ignoreUpdates);
+        Logger.recordOutput("Limelight/Using MegaTag 2", useMegaTag2);
+
+        if (ignoreUpdates)
+            return;
 
         for (LimelightCamera.Update update : updates) {
             drive.addVisionMeasurement(update.pose(), update.timestamp(), update.stdDevs());

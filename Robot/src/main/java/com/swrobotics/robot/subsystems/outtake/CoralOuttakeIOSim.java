@@ -13,4 +13,8 @@ public class CoralOuttakeIOSim implements CoralOuttakeIO {
     @Override
     public void setHoldPosition(double position) {
     }
+
+    @Override
+    public void setBeamBreakIgnored(boolean ignored) {
+    }
 }

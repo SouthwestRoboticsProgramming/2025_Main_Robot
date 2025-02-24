@@ -15,4 +15,6 @@ public interface CoralOuttakeIO {
     void setVoltage(double voltage);
 
     void setHoldPosition(double position);
+
+    void setBeamBreakIgnored(boolean ignored);
 }

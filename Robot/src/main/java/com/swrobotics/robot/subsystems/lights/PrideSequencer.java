@@ -73,11 +73,17 @@ public final class PrideSequencer {
             }
         }
 
-        return new Flag(stripes.toArray(new Stripe[0]), patternWeight);
+        // Reverse the stripe order so the flags show the right way up
+        Stripe[] array = new Stripe[stripes.size()];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = stripes.get(array.length - i - 1);
+        }
+
+        return new Flag(array, patternWeight);
     }
 
     // Number of times to repeat the flag pattern along the strip
-    private static final int REPEAT = 1;
+    private static final int REPEAT = 2;
     // Time in seconds to scroll through the full pattern
     private static final float SCROLL = 4f;
     // Time in seconds that each flag is shown for

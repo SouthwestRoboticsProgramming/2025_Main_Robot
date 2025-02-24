@@ -1,9 +1,10 @@
 package com.swrobotics.robot.subsystems.superstructure;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -19,16 +20,18 @@ import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 
 public final class OuttakePivotIOReal implements OuttakePivotIO {
     private final TalonFX motor;
     private final CANcoder canCoder;
 
     private final StatusSignal<Angle> motorPositionStatus;
+    private final StatusSignal<AngularVelocity> motorVelocityStatus;
     private final StatusSignal<Angle> canCoderPositionStatus;
 
-    private final MotionMagicVoltage positionControl;
-    private final MotionMagicVoltage positionControlWithCoral;
+    private final PositionVoltage positionControl;
+    private final PositionVoltage positionControlWithCoral;
 
     public OuttakePivotIOReal() {
         motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
@@ -41,22 +44,23 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         motorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         motorConfig.addTunable(Constants.kOuttakePivotPID);
         motorConfig.addTunable(Constants.kOuttakePivotPIDWithCoral);
-        motorConfig.addTunable(Constants.kOuttakePivotMotionMagic);
         motorConfig.apply(motor);
 
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
-        canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; // FIXME
+        canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
         CTREUtil.retryUntilOk(canCoder, () -> canCoder.getConfigurator().apply(canCoderConfig));
 
         MotorTrackerSubsystem.getInstance().addMotor("Outtake Pivot", motor);
         MusicSubsystem.getInstance().addInstrument(motor);
 
         motorPositionStatus = motor.getPosition();
+        motorVelocityStatus = motor.getVelocity();
         canCoderPositionStatus = canCoder.getAbsolutePosition(true);
 
-        positionControl = new MotionMagicVoltage(0)
+        positionControl = new PositionVoltage(0)
+                .withSlot(0)
                 .withEnableFOC(true);
-        positionControlWithCoral = new MotionMagicVoltage(0)
+        positionControlWithCoral = new PositionVoltage(0)
                 .withSlot(1)
                 .withEnableFOC(true);
 
@@ -66,17 +70,20 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
     @Override
     public void updateInputs(Inputs inputs) {
-        motorPositionStatus.refresh();
+        BaseStatusSignal.refreshAll(motorPositionStatus, motorVelocityStatus);
         inputs.currentAngleRot = motorPositionStatus.getValueAsDouble();
+        inputs.currentVelocityRotPerSec = motorVelocityStatus.getValueAsDouble();
     }
 
     @Override
-    public void setTargetAngle(double targetAngleRot, boolean hasCoral) {
-        MotionMagicVoltage control = hasCoral
+    public void setTarget(double targetAngleRot, double ffVelocityRotPerSec, boolean hasCoral) {
+        PositionVoltage control = hasCoral
                 ? positionControl
                 : positionControlWithCoral;
 
-        motor.setControl(control.withPosition(targetAngleRot));
+        motor.setControl(control
+                .withPosition(targetAngleRot)
+                .withVelocity(ffVelocityRotPerSec));
     }
 
     private StatusCode trySyncWithEncoder() {
