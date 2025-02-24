@@ -128,31 +128,28 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         double pivotCollisionFrame = Units.degreesToRotations(Constants.kOuttakePivotFrameCollisionAngle.get());
         double pivotCollisionStage2 = Units.degreesToRotations(Constants.kOuttakePivotStage2CollisionAngle.get());
 
+        TrapezoidProfile elevatorProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
+                Constants.kElevatorMotionMagic.getCruiseVelocity() / Constants.kElevatorMaxHeightRotations,
+                Constants.kElevatorMotionMagic.getAcceleration() / Constants.kElevatorMaxHeightRotations
+        ));
+        TrapezoidProfile pivotProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
+                Constants.kOuttakePivotMotionMagic.getCruiseVelocity(),
+                Constants.kOuttakePivotMotionMagic.getAcceleration()
+        ));
+
         // Cases:
         // - current and target below -> both to target
         // - current below, target above -> pivot out, delay before moving elevator up
         // - current above, target below -> pivot at collision + avoidance, if pivot is out elevator to target
         // - current and target above -> if pivot is out both to target, keep pivot out
 
-        if (elevatorCurrent < elevatorCollisionFrame) {
-            if (elevatorTarget < elevatorCollisionFrame) {
-                // No change
-            } else {
-                // pivot out, delay before moving elevator up
+        // FIXME: Run motion profiles on RIO!
 
+        // Collision with frame crossbar
+        if (elevatorCurrent < elevatorCollisionFrame) {
+            if (elevatorTarget > elevatorCollisionFrame) {
                 pivotTarget = Math.min(pivotTarget, pivotCollisionFrame - pivotAvoid);
 
-                TrapezoidProfile elevatorProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
-                        Constants.kElevatorMotionMagic.getCruiseVelocity() / Constants.kElevatorMaxHeightRotations,
-                        Constants.kElevatorMotionMagic.getAcceleration() / Constants.kElevatorMaxHeightRotations
-                ));
-                TrapezoidProfile pivotProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
-                        Constants.kOuttakePivotMotionMagic.getCruiseVelocity(),
-                        Constants.kOuttakePivotMotionMagic.getAcceleration()
-                ));
-
-                // TODO: Motion profiling should run on RIO so we can directly access the profiles
-                //  and so we don't rely on the noisy velocity measurements from the motors
                 elevatorProfile.calculate(
                         0,
                         new TrapezoidProfile.State(elevatorCurrent, elevatorInputs.currentVelocityPctPerSec),
@@ -166,7 +163,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
                 if (pivotCurrent > pivotCollisionFrame) {
                     double pivotMoveTime = pivotProfile.timeLeftUntil(pivotCollisionFrame - pivotAvoid);
-                    double elevatorMoveTime = elevatorProfile.timeLeftUntil(elevatorCollisionFrame);
+                    double elevatorMoveTime = elevatorProfile.timeLeftUntil(elevatorCollisionFrame - elevatorAvoid);
                     if (elevatorMoveTime < pivotMoveTime) {
                         // Wait for pivot to move some
                         elevatorTarget = elevatorCurrent;
@@ -182,36 +179,42 @@ public final class SuperstructureSubsystem extends SubsystemBase {
             }
         }
 
-//        double elevatorTol = Constants.kElevatorCollisionTolerance.get();
-//        double elevatorCollisionHeight = Constants.kElevatorFrameCollisionHeight.get();
-//        double pivotTol = Units.degreesToRotations(Constants.kOuttakePivotCollisionTolerance.get());
-//        double pivotCollisionAngle = Units.degreesToRotations(Constants.kOuttakePivotFrameCollisionAngle.get());
-//
-//        // When pivot is too far in:
-//        //   if pivot and target are below bar, no change
-//        //   if pivot above bar, target below bar: elevator not move
-//        //   if target above bar, pivot below bar: target is max collision height
-//        //   if both above bar: elevator not move
-//
-//        // If pivot target is too far in:
-//        //   if elevator current and target below bar, go to target
-//        //   if elevator above, target below: get out of way (case should be impossible)
-//        //   if elevator below, target above: get out of way
-//        //   if elevator above, target above: get out of way (case should be impossible)
-//
-//        if (pivotTarget > pivotCollisionAngle - pivotTol) {
-//            if (elevatorCurrent > elevatorCollisionHeight - elevatorTol || elevatorTarget > elevatorCollisionHeight - elevatorTol) {
-//                pivotTarget = pivotCollisionAngle - pivotTol;
-//            }
-//        }
-//
-//        if (pivotCurrent > pivotCollisionAngle) {
-//            if (elevatorCurrent > elevatorCollisionHeight) {
-//                elevatorTarget = elevatorCurrent; // Don't move until the pivot gets out
-//            } else if (elevatorTarget > elevatorCollisionHeight - elevatorTol) {
-//                elevatorTarget = elevatorCollisionHeight - elevatorTol;
-//            }
-//        }
+        // Collision with stage 2 crossbar
+        if (elevatorCurrent < elevatorCollisionStage2) {
+            if (elevatorTarget > elevatorCollisionStage2) {
+                pivotTarget = Math.min(pivotTarget, pivotCollisionStage2 - pivotAvoid);
+
+                elevatorProfile.calculate(
+                        0,
+                        new TrapezoidProfile.State(elevatorCurrent, elevatorInputs.currentVelocityPctPerSec),
+                        new TrapezoidProfile.State(elevatorTarget, 0)
+                );
+                pivotProfile.calculate(
+                        0,
+                        new TrapezoidProfile.State(pivotCurrent, pivotInputs.currentVelocityRotPerSec),
+                        new TrapezoidProfile.State(pivotTarget, 0)
+                );
+
+                if (pivotCurrent > pivotCollisionStage2) {
+                    double pivotMoveTime = pivotProfile.timeLeftUntil(pivotCollisionStage2 - pivotAvoid);
+                    double elevatorMoveTime = elevatorProfile.timeLeftUntil(elevatorCollisionStage2 - elevatorAvoid);
+                    if (elevatorMoveTime < pivotMoveTime) {
+                        // Elevator is already moving so we don't want to wait
+                        // in place, so continue up until the collision point.
+                        // Shouldn't cause slowdown because pivot should be out
+                        // by the time the elevator gets near stage 2 collision
+                        elevatorTarget = elevatorCollisionStage2 - elevatorAvoid;
+                    }
+                }
+            }
+        } else {
+            pivotTarget = Math.min(pivotTarget, pivotCollisionStage2 - pivotAvoid);
+
+            if (pivotCurrent > pivotCollisionStage2) {
+                // Hold elevator still until pivot gets out of collision area
+                elevatorTarget = elevatorCurrent;
+            }
+        }
 
         RobotView.setTargetSuperstructureState(elevatorTarget, pivotTarget);
 
