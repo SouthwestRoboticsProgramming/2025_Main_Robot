@@ -27,6 +27,7 @@ public final class OuttakePivotIOSim implements OuttakePivotIO {
     public void updateInputs(Inputs inputs) {
         currentState = profile.calculate(Constants.kPeriodicTime, currentState, targetState);
         inputs.currentAngleRot = currentState.position;
+        inputs.currentVelocityRotPerSec = currentState.velocity;
     }
 
     @Override

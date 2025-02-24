@@ -6,6 +6,7 @@ public interface OuttakePivotIO {
     class Inputs extends AutoLoggedInputs {
         // Rotations, from horizontal
         public double currentAngleRot;
+        public double currentVelocityRotPerSec;
     }
 
     void updateInputs(Inputs inputs);

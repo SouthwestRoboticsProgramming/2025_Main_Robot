@@ -1,5 +1,6 @@
 package com.swrobotics.robot.subsystems.superstructure;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -19,12 +20,14 @@ import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 
 public final class OuttakePivotIOReal implements OuttakePivotIO {
     private final TalonFX motor;
     private final CANcoder canCoder;
 
     private final StatusSignal<Angle> motorPositionStatus;
+    private final StatusSignal<AngularVelocity> motorVelocityStatus;
     private final StatusSignal<Angle> canCoderPositionStatus;
 
     private final MotionMagicVoltage positionControl;
@@ -52,6 +55,7 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
         MusicSubsystem.getInstance().addInstrument(motor);
 
         motorPositionStatus = motor.getPosition();
+        motorVelocityStatus = motor.getVelocity();
         canCoderPositionStatus = canCoder.getAbsolutePosition(true);
 
         positionControl = new MotionMagicVoltage(0)
@@ -66,8 +70,9 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
 
     @Override
     public void updateInputs(Inputs inputs) {
-        motorPositionStatus.refresh();
+        BaseStatusSignal.refreshAll(motorPositionStatus, motorVelocityStatus);
         inputs.currentAngleRot = motorPositionStatus.getValueAsDouble();
+        inputs.currentVelocityRotPerSec = motorVelocityStatus.getValueAsDouble();
     }
 
     @Override

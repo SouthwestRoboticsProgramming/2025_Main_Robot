@@ -5,6 +5,7 @@ import com.swrobotics.robot.logging.AutoLoggedInputs;
 public interface ElevatorIO {
     final class Inputs extends AutoLoggedInputs {
         public double currentHeightPct;
+        public double currentVelocityPctPerSec;
     }
 
     void updateInputs(Inputs inputs);

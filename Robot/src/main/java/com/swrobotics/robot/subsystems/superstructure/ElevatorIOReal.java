@@ -1,5 +1,6 @@
 package com.swrobotics.robot.subsystems.superstructure;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -17,6 +18,7 @@ import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 
 public final class ElevatorIOReal implements ElevatorIO {
     private static final NTBoolean BRAKE_MODE = new NTBoolean("Superstructure/Elevator/Brake Mode", true);
@@ -24,6 +26,7 @@ public final class ElevatorIOReal implements ElevatorIO {
     private final TalonFX motor1, motor2;
 
     private final StatusSignal<Angle> positionStatus;
+    private final StatusSignal<AngularVelocity> velocityStatus;
 
     private final MotionMagicVoltage positionControl;
     private final NeutralOut neutralControl;
@@ -49,6 +52,7 @@ public final class ElevatorIOReal implements ElevatorIO {
 
         motor1.setPosition(0); // Start fully down
         positionStatus = motor1.getPosition();
+        velocityStatus = motor1.getVelocity();
 
         positionControl = new MotionMagicVoltage(0)
                 .withEnableFOC(true);
@@ -64,9 +68,12 @@ public final class ElevatorIOReal implements ElevatorIO {
 
     @Override
     public void updateInputs(Inputs inputs) {
-        positionStatus.refresh();
+        BaseStatusSignal.refreshAll(positionStatus, velocityStatus);
         double position = positionStatus.getValue().in(Units.Rotations);
+        double velocity = velocityStatus.getValue().in(Units.RotationsPerSecond);
+
         inputs.currentHeightPct = position / Constants.kElevatorMaxHeightRotations;
+        inputs.currentVelocityPctPerSec = velocity / Constants.kElevatorMaxHeightRotations;
     }
 
     @Override

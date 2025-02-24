@@ -23,6 +23,7 @@ public final class ElevatorIOSim implements ElevatorIO {
     public void updateInputs(Inputs inputs) {
         currentState = profile.calculate(Constants.kPeriodicTime, currentState, targetState);
         inputs.currentHeightPct = currentState.position;
+        inputs.currentVelocityPctPerSec = currentState.velocity;
     }
 
     @Override
