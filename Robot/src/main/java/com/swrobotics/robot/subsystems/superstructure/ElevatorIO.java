@@ -12,5 +12,6 @@ public interface ElevatorIO {
 
     void setTarget(double heightPct, double ffVelocityPctPerSec);
 
-    void setClimbMode(boolean activelyClimbing);
+    // Positive up, negative down
+    void setVoltage(double volts);
 }

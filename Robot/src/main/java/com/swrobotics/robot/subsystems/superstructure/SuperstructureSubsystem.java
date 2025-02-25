@@ -140,9 +140,6 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         Logger.processInputs("Elevator", elevatorInputs);
         Logger.processInputs("Outtake Pivot", pivotInputs);
 
-        // Set elevator climb mode
-        elevatorIO.setClimbMode(targetState == State.CLIMB);
-
         if (pivotSyncTimer.advanceIfElapsed(1)) {
             pivotIO.syncWithEncoder();
         }
@@ -268,8 +265,17 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
         RobotView.setSuperstructureSetpoint(elevatorSetpoint.position, pivotSetpoint.position);
 
+        if (targetState == State.CLIMB) {
+            double hold = -Constants.kElevatorClimbHoldVolts.get();
+            double pull = -Constants.kElevatorClimbPullVolts.get();
+            double height = Constants.kElevatorHeightClimbEnd.get();
+
+            elevatorIO.setVoltage(elevatorInputs.currentHeightPct > height ? pull : hold);
+        } else {
+            elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);
+        }
+
         boolean hasCoral = coralOuttakeSubsystem.hasPiece();
-        elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);
         pivotIO.setTarget(pivotSetpoint.position, pivotSetpoint.velocity, hasCoral);
     }
 

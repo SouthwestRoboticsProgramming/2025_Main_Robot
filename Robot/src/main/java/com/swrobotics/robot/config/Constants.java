@@ -186,9 +186,10 @@ public final class Constants {
     public static final double kElevatorMaxHeightRotations = 100;
     public static final NTSlot0Configs kElevatorPID =
             new NTSlot0Configs("Superstructure/Elevator/PID", 0.3, 0, 0.286, 0, 0.12, 0);
-    public static final NTEntry<Double> kElevatorClimbKg = new NTDouble("Superstructure/Elevator/Climb kG", 0).setPersistent();
     public static final NTEntry<Double> kElevatorMaxVelocity = new NTDouble("Superstructure/Elevator/Max Velocity", 80).setPersistent();
     public static final NTEntry<Double> kElevatorMaxAccel = new NTDouble("Superstructure/Elevator/Max Acceleration", 500).setPersistent();
+    public static final NTEntry<Double> kElevatorClimbHoldVolts = new NTDouble("Superstructure/Elevator/Climb Hold Voltage", 1).setPersistent();
+    public static final NTEntry<Double> kElevatorClimbPullVolts = new NTDouble("Superstructure/Elevator/Climb Pull Voltage", 2).setPersistent();
 
     public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Superstructure/Elevator/Tolerance", 0.04).setPersistent();
     public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.005).setPersistent();
