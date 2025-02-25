@@ -190,9 +190,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
                 if (pivotSetpoint.position > pivotCollisionFrame) {
                     double pivotMoveTime = pivotProfile.timeLeftUntil(pivotCollisionFrame);
                     double elevatorMoveTime = elevatorProfile.timeLeftUntil(elevatorCollisionFrame);
-                    System.out.printf("Pivot move time: %.3f  Elevator move time: %.3f\n", pivotMoveTime, elevatorMoveTime);
                     if (elevatorMoveTime < pivotMoveTime) {
-                        System.out.println("Waiting...");
                         // Wait for pivot to move some
                         elevatorTarget = elevatorSetpoint.position;
                     }
