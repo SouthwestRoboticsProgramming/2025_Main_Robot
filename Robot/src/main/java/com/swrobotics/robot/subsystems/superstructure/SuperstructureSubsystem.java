@@ -6,6 +6,7 @@ import com.swrobotics.robot.logging.RobotView;
 import com.swrobotics.robot.subsystems.outtake.CoralOuttakeSubsystem;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -251,8 +252,10 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         RobotView.setTargetSuperstructureState(elevatorTarget, pivotTarget);
 
         // Update motion profiles
-        elevatorSetpoint = elevatorProfile.calculate(Constants.kPeriodicTime, elevatorSetpoint, new TrapezoidProfile.State(elevatorTarget, 0));
-        pivotSetpoint = pivotProfile.calculate(Constants.kPeriodicTime, pivotSetpoint, new TrapezoidProfile.State(pivotTarget, 0));
+        if (DriverStation.isEnabled()) {
+            elevatorSetpoint = elevatorProfile.calculate(Constants.kPeriodicTime, elevatorSetpoint, new TrapezoidProfile.State(elevatorTarget, 0));
+            pivotSetpoint = pivotProfile.calculate(Constants.kPeriodicTime, pivotSetpoint, new TrapezoidProfile.State(pivotTarget, 0));
+        }
 
         RobotView.setSuperstructureSetpoint(elevatorSetpoint.position, pivotSetpoint.position);
 
