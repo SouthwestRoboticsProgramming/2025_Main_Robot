@@ -8,6 +8,8 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
 import com.swrobotics.lib.ctre.NTMotionMagicConfigs;
 import com.swrobotics.lib.ctre.NTSlot0Configs;
 import com.swrobotics.lib.ctre.NTSlot1Configs;
@@ -18,8 +20,10 @@ import com.swrobotics.robot.subsystems.swerve.SwerveModuleInfo;
 import com.swrobotics.robot.subsystems.vision.limelight.LimelightCamera;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -144,6 +148,23 @@ public final class Constants {
                     .withKS(0.22510);
         }
     }
+
+    public static final RobotConfig kPathPlannerRobotConfig = new RobotConfig(
+            Constants.kRobotMass,
+            Constants.kRobotMOI,
+            new ModuleConfig(
+                    Units.inchesToMeters(Constants.kModuleConstantsFactory.WheelRadius),
+                    Constants.kDriveMaxAchievableSpeed,
+                    Constants.kDriveWheelCOF,
+                    DCMotor.getKrakenX60Foc(1).withReduction(Constants.kModuleConstantsFactory.DriveMotorGearRatio),
+                    Constants.kDriveStatorCurrentLimit,
+                    1
+            ),
+            kSwerveModuleInfos[0].position(),
+            kSwerveModuleInfos[1].position(),
+            kSwerveModuleInfos[2].position(),
+            kSwerveModuleInfos[3].position()
+    );
 
     // Pathfinding
     public static final String kPathfindingJson = "reefscape_pathfinding.json";

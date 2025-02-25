@@ -41,28 +41,6 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
             io = new SimSwerveIO();
         inputs = new SwerveIO.Inputs();
 
-        final int driveMotorsPerModule = 1;
-
-        ModuleConfig ppModuleConfig = new ModuleConfig(
-                Units.inchesToMeters(Constants.kModuleConstantsFactory.WheelRadius),
-                Constants.kDriveMaxAchievableSpeed,
-                Constants.kDriveWheelCOF,
-                DCMotor.getKrakenX60Foc(driveMotorsPerModule)
-                        .withReduction(Constants.kModuleConstantsFactory.DriveMotorGearRatio),
-                Constants.kDriveStatorCurrentLimit,
-                driveMotorsPerModule);
-
-        Translation2d[] positions = new Translation2d[Constants.kSwerveModuleInfos.length];
-        for (int i = 0; i < positions.length; i++) {
-            positions[i] = Constants.kSwerveModuleInfos[i].position();
-        }
-
-        RobotConfig ppRobotConfig = new RobotConfig(
-                Constants.kRobotMass,
-                Constants.kRobotMOI,
-                ppModuleConfig,
-                positions);
-
         AutoBuilderExt.configure(
                 this::getEstimatedPose,
                 this::resetPose,
@@ -78,7 +56,7 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
                         new PIDConstants(Constants.kAutoDriveKp, Constants.kAutoDriveKd),
                         new PIDConstants(Constants.kAutoTurnKp.get(), Constants.kAutoTurnKd.get())
                 ),
-                ppRobotConfig,
+                Constants.kPathPlannerRobotConfig,
                 () -> FieldInfo.getAlliance() == DriverStation.Alliance.Red,
                 new SyncPathfinder(),
                 this

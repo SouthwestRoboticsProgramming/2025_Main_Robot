@@ -63,6 +63,11 @@ public final class FieldPositions {
             kReefPositions.add(new Pose2d(center.plus(branchOffset2.rotateBy(rotation)), rotation));
             kReefAlgaePositions.add(new Pose2d(center.plus(algaeOffset.rotateBy(rotation)), rotation));
         }
+
+        int i = 0;
+        for (Pose2d reefPos : kReefPositions) {
+            System.out.println("Reef position " + (i++) + ": " + reefPos.getTranslation());
+        }
     }
 
     static {
