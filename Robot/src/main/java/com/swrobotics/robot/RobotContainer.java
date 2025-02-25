@@ -2,12 +2,12 @@ package com.swrobotics.robot;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import com.pathplanner.lib.path.PathConstraints;
 import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
+import com.swrobotics.robot.commands.Autonomous;
 import com.swrobotics.robot.commands.RobotCommands;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
@@ -15,7 +15,7 @@ import com.swrobotics.robot.config.PathEnvironments;
 import com.swrobotics.robot.logging.RobotView;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
-import com.swrobotics.robot.subsystems.PathfindingTest;
+import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -31,6 +31,7 @@ import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.logging.Logging;
 import com.swrobotics.robot.subsystems.lights.LightsSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
+import com.swrobotics.robot.subsystems.outtake.CoralOuttakeSubsystem;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -58,6 +59,8 @@ public class RobotContainer {
     public final SwerveDriveSubsystem drive;
     public final VisionSubsystem vision;
     public final SuperstructureSubsystem superstructure;
+    public final AlgaeIntakeSubsystem algaeIntake;
+    public final CoralOuttakeSubsystem coralOuttake;
 
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
@@ -76,7 +79,9 @@ public class RobotContainer {
 
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
-        superstructure = new SuperstructureSubsystem();
+        algaeIntake = new AlgaeIntakeSubsystem();
+        coralOuttake = new CoralOuttakeSubsystem();
+        superstructure = new SuperstructureSubsystem(coralOuttake);
 
         lights = new LightsSubsystem(this);
 
@@ -91,7 +96,12 @@ public class RobotContainer {
         autos.sort(Comparator.comparing(AutoEntry::name, String.CASE_INSENSITIVE_ORDER));
         autoSelector = new LoggedDashboardChooser<>("Auto Selector");
         autoSelector.addDefaultOption("None", Commands.none());
-        autoSelector.addOption("Test", testAutoCommand());
+        autoSelector.addOption("One Left", Autonomous.behindReef1PieceLeft(this));
+        autoSelector.addOption("One Right", Autonomous.behindReef1PieceRight(this));
+        autoSelector.addOption("Four Left", Autonomous.leftSide4Piece(this));
+        autoSelector.addOption("Four Right", Autonomous.rightSide4Piece(this));
+        autoSelector.addOption("Everything Randomly", Autonomous.everythingRandomly(this));
+
         for (AutoEntry auto : autos)
             autoSelector.addOption(auto.name(), auto.cmd());
 

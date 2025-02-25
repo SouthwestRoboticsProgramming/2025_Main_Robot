@@ -50,7 +50,7 @@ deploy {
 
                  // Pathfinding binary artifact
                  pathfindingLibDeploy(getArtifactTypeClass('FileArtifact')) {
-                     dependsOn('buildPathfindingRoborioRelease')
+                    //  dependsOn('buildPathfindingRoborioRelease')
                      file = project.file('target/arm-unknown-linux-gnueabi/release/libpathfinding_jni.so')
                      filename = 'libpathfinding_jni.so'
                  }
@@ -114,6 +114,8 @@ dependencies {
     nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
+
+    implementation 'gov.nist.math:jama:1.0.3'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

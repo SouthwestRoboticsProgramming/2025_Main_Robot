@@ -24,7 +24,7 @@ public final class Logging {
     public static void initialize(SimMode simMode) {
         if (RobotBase.isReal()) {
             // TODO: Figure out writing to USB
-//            Logger.addDataReceiver(new WPILOGWriter());
+            Logger.addDataReceiver(new WPILOGWriter());
             Logger.addDataReceiver(new NT4Publisher());
         } else if (simMode == SimMode.SIMULATE) {
             Logger.addDataReceiver(new NT4Publisher());

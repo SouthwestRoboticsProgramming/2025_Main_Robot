@@ -16,6 +16,8 @@ public final class FieldPositions {
         RIGHT
     }
 
+    public static final double kStartingLineX = 1.775 + Units.inchesToMeters(231.66);
+
     private static final double kReefCenterX = 4.4895;
     private static final double kReefCenterY = Constants.kField.getHeight() / 2;
     private static final double kReefApothem = 4.4895 - 3.658;
@@ -27,18 +29,33 @@ public final class FieldPositions {
     private static final Rotation2d kRedLeftCoralStationFacing = Rotation2d.fromDegrees(90 + kCoralStationAngle);
     private static final Rotation2d kRedRightCoralStationFacing = kRedLeftCoralStationFacing.unaryMinus();
 
-    private static final List<Pose2d> kReefPositions; // Aligned with branch
-    private static final List<Pose2d> kReefAlgaePositions; // Centered on face
-    static {
-        Translation2d center = new Translation2d(kReefCenterX, kReefCenterY);
+    private static Pose2d kLeftCoralStationPickup;
+    private static Pose2d kRightCoralStationPickup;
 
-        double offsetX = -kReefApothem - Constants.kRobotLength / 2;
+    private static final List<Pose2d> kReefPositions = new ArrayList<>(); // Aligned with branch
+    private static final List<Pose2d> kReefAlgaePositions = new ArrayList<>(); // Centered on face
+    private static void initPositions() {
+        double offset = Constants.kSnapOffset.get();
+
+        Translation2d leftCoralStationCenter = new Translation2d(1.775 / 2, 8.052 - 1.289 / 2);
+        Translation2d leftCoralStationPos = leftCoralStationCenter.plus(new Translation2d(0, -Constants.kRobotLength / 2 + offset)
+                .rotateBy(Rotation2d.fromDegrees(kCoralStationAngle)));
+        kLeftCoralStationPickup = new Pose2d(leftCoralStationPos, kBlueLeftCoralStationFacing);
+
+        Translation2d rightCoralStationCenter = new Translation2d(1.775 / 2, 1.289 / 2);
+        Translation2d rightCoralStationPos = rightCoralStationCenter.plus(new Translation2d(0, Constants.kRobotLength / 2 + offset)
+                .rotateBy(Rotation2d.fromDegrees(-kCoralStationAngle)));
+        kRightCoralStationPickup = new Pose2d(rightCoralStationPos, kBlueRightCoralStationFacing);
+
+        Translation2d center = new Translation2d(kReefCenterX, kReefCenterY);
+        kReefPositions.clear();
+        kReefAlgaePositions.clear();
+
+        double offsetX = -kReefApothem - Constants.kRobotLength / 2 - offset;
         Translation2d branchOffset1 = new Translation2d(offsetX, kReefBranchSpacing / 2);
         Translation2d branchOffset2 = new Translation2d(offsetX, -kReefBranchSpacing / 2);
         Translation2d algaeOffset = new Translation2d(offsetX, 0);
 
-        kReefPositions = new ArrayList<>();
-        kReefAlgaePositions = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             Rotation2d rotation = Rotation2d.fromDegrees(i * 60);
 
@@ -46,6 +63,11 @@ public final class FieldPositions {
             kReefPositions.add(new Pose2d(center.plus(branchOffset2.rotateBy(rotation)), rotation));
             kReefAlgaePositions.add(new Pose2d(center.plus(algaeOffset.rotateBy(rotation)), rotation));
         }
+    }
+
+    static {
+        initPositions();
+        Constants.kSnapOffset.onChange(FieldPositions::initPositions);
     }
 
     // Branches are numbered in the same order as Figure 5-8 in the game manual
@@ -108,5 +130,13 @@ public final class FieldPositions {
             }
         }
         return chosen;
+    }
+
+    public static Pose2d getLeftCoralStationPickup() {
+        return kLeftCoralStationPickup;
+    }
+
+    public static Pose2d getRightCoralStationPickup() {
+        return kRightCoralStationPickup;
     }
 }

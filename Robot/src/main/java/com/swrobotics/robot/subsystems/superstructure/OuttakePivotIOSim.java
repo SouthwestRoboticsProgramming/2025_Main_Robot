@@ -1,32 +1,37 @@
 package com.swrobotics.robot.subsystems.superstructure;
 
-import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.config.Constants;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 public final class OuttakePivotIOSim implements OuttakePivotIO {
-    private double currentAngle;
-    private double targetAngle;
+    private double prevPosition;
+    private double position;
 
     public OuttakePivotIOSim() {
-        currentAngle = Units.degreesToRotations(Constants.kOuttakePivotInAngle.get());
-        targetAngle = currentAngle;
+        prevPosition = position = 0.25;
     }
 
     @Override
     public void updateInputs(Inputs inputs) {
-        currentAngle = MathUtil.lerp(currentAngle, targetAngle, 0.1);
-        inputs.currentAngleRot = currentAngle;
+        inputs.currentAngleRot = position;
+        inputs.currentVelocityRotPerSec = (position - prevPosition) / Constants.kPeriodicTime;
+
+        prevPosition = position;
     }
 
     @Override
-    public void setTargetAngle(double targetAngleRot) {
-        targetAngle = targetAngleRot;
+    public void setTarget(double targetAngleRot, double ffVelocityRotPerSec, boolean hasCoral) {
+        position = targetAngleRot;
+    }
+
+    @Override
+    public void syncWithEncoder() {
+        // no
     }
 
     @Override
     public void calibrateEncoder() {
-        // no encoder
-        currentAngle = 0;
+        prevPosition = position = 0.25;
     }
 }

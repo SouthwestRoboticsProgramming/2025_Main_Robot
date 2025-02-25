@@ -17,7 +17,7 @@ public final class TalonFXConfigHelper extends TalonFXConfiguration {
         this.Audio.AllowMusicDurDisable = true;
     }
 
-    public TalonFXConfigHelper withTunable(TunableConfig tunable) {
+    public TalonFXConfigHelper addTunable(TunableConfig tunable) {
         tunable.setAndBind(this, () -> {
             for (TalonFX motor : motors) {
                 CTREUtil.retryUntilOk(motor, () -> motor.getConfigurator().apply(this));
@@ -29,6 +29,12 @@ public final class TalonFXConfigHelper extends TalonFXConfiguration {
     public void apply(TalonFX... motors) {
         for (TalonFX fx : motors) {
             this.motors.add(fx);
+            CTREUtil.retryUntilOk(fx, () -> fx.getConfigurator().apply(this));
+        }
+    }
+
+    public void reapply() {
+        for (TalonFX fx : motors) {
             CTREUtil.retryUntilOk(fx, () -> fx.getConfigurator().apply(this));
         }
     }

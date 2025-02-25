@@ -41,21 +41,24 @@ public final class Robot extends LoggedRobot {
         }
 
         // Start autonomous command
-        Command auto = robotContainer.getAutonomousCommand();
-        double delay = robotContainer.getAutoDelay();
-        if (delay > 0) {
-            autonomousCommand = Commands.sequence(
-                    Commands.waitSeconds(delay),
-                    // Use a proxy here so that running the same auto twice
-                    // does not crash the robot code. Directly adding it to the
-                    // sequence would mark the auto command as composed,
-                    // causing the second time to throw an exception
-                    auto.asProxy()
-            );
-        } else {
-            autonomousCommand = auto;
-        }
+        autonomousCommand = robotContainer.getAutonomousCommand();
         autonomousCommand.schedule();
+
+//        Command auto = robotContainer.getAutonomousCommand();
+//        double delay = robotContainer.getAutoDelay();
+//        if (delay > 0) {
+//            autonomousCommand = Commands.sequence(
+//                    Commands.waitSeconds(delay),
+//                    // Use a proxy here so that running the same auto twice
+//                    // does not crash the robot code. Directly adding it to the
+//                    // sequence would mark the auto command as composed,
+//                    // causing the second time to throw an exception
+//                    auto.asProxy()
+//            );
+//        } else {
+//            autonomousCommand = auto;
+//        }
+//        autonomousCommand.schedule();
     }
 
     @Override

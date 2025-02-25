@@ -4,7 +4,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.swrobotics.lib.net.NTDouble;
 import com.swrobotics.lib.net.NTEntry;
 
-public class NTSlot0Configs implements TunableConfig {
+public final class NTSlot0Configs implements TunableConfig {
     // Feedback
     public final NTEntry<Double> kP, kD;
     // Feedforward
