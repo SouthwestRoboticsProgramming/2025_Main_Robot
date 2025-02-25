@@ -127,50 +127,43 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         return Commands.runOnce(() -> setTargetState(targetState), this);
     }
 
-    @Override
-    public void periodic() {
-        elevatorIO.updateInputs(elevatorInputs);
-        pivotIO.updateInputs(pivotInputs);
-        Logger.processInputs("Elevator", elevatorInputs);
-        Logger.processInputs("Outtake Pivot", pivotInputs);
-
-        if (pivotSyncTimer.advanceIfElapsed(1)) {
-            pivotIO.syncWithEncoder();
-        }
-
-        if (CALIBRATE_PIVOT.get()) {
-            CALIBRATE_PIVOT.set(false);
-            pivotIO.calibrateEncoder();
-        }
-
-        if (SYNC_PIVOT.get()) {
-            SYNC_PIVOT.set(false);
-            pivotIO.syncWithEncoder();
-        }
-
-        RobotView.setSuperstructureState(elevatorInputs.currentHeightPct, pivotInputs.currentAngleRot);
-
+    private void handleFeedbackSensors() {
         double elevatorCurrent = elevatorInputs.currentHeightPct;
         double pivotCurrent = pivotInputs.currentAngleRot;
-        double elevatorTarget = targetState.getElevatorHeight();
-        double pivotTarget = targetState.getPivotAngle();
 
+        if (pivotSyncTimer.advanceIfElapsed(1) && pivotInputs.absoluteAngleOK || SYNC_PIVOT.get()) {
+            SYNC_PIVOT.set(false);
+
+            pivotCurrent = pivotInputs.absoluteAngleRot;
+            pivotIO.setCurrentPosition(pivotCurrent);
+
+            // Reset setpoint to sensor position
+            pivotSetpoint = null;
+        }
+
+        // Reset setpoints to sensor values
         double elevatorMaxDev = Constants.kElevatorDeviationTolerance.get();
+        double pivotMaxDev = Units.degreesToRotations(Constants.kOuttakePivotDeviationTolerance.get());
+        if (elevatorSetpoint == null || Math.abs(elevatorSetpoint.position - elevatorCurrent) > elevatorMaxDev) {
+            elevatorSetpoint = new TrapezoidProfile.State(elevatorCurrent, elevatorInputs.currentVelocityPctPerSec);
+        }
+        if (pivotSetpoint == null || Math.abs(pivotSetpoint.position - pivotCurrent) > pivotMaxDev) {
+            pivotSetpoint = new TrapezoidProfile.State(pivotCurrent, pivotInputs.currentVelocityRotPerSec);
+        }
+
+        RobotView.setSuperstructureState(elevatorCurrent, pivotCurrent);
+    }
+
+    private void updateTrajectory() {
         double elevatorAvoid = Constants.kElevatorCollisionTolerance.get();
         double elevatorCollisionFrame = Constants.kElevatorFrameCollisionHeight.get();
         double elevatorCollisionStage2 = Constants.kElevatorStage2CollisionHeight.get();
-        double pivotMaxDev = Units.degreesToRotations(Constants.kOuttakePivotDeviationTolerance.get());
         double pivotAvoid = Units.degreesToRotations(Constants.kOuttakePivotCollisionTolerance.get());
         double pivotCollisionFrame = Units.degreesToRotations(Constants.kOuttakePivotFrameCollisionAngle.get());
         double pivotCollisionStage2 = Units.degreesToRotations(Constants.kOuttakePivotStage2CollisionAngle.get());
 
-        // Reset setpoints to sensor values
-        if (elevatorSetpoint == null || Math.abs(elevatorSetpoint.position - elevatorInputs.currentHeightPct) > elevatorMaxDev) {
-            elevatorSetpoint = new TrapezoidProfile.State(elevatorInputs.currentHeightPct, elevatorInputs.currentVelocityPctPerSec);
-        }
-        if (pivotSetpoint == null || Math.abs(pivotSetpoint.position - pivotInputs.currentAngleRot) > pivotMaxDev) {
-            pivotSetpoint = new TrapezoidProfile.State(pivotInputs.currentAngleRot, pivotInputs.currentVelocityRotPerSec);
-        }
+        double elevatorTarget = targetState.getElevatorHeight();
+        double pivotTarget = targetState.getPivotAngle();
 
         // Cases:
         // - current and target below -> both to target
@@ -179,7 +172,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         // - current and target above -> if pivot is out both to target, keep pivot out
 
         // Collision with frame crossbar
-        if (elevatorCurrent < elevatorCollisionFrame) {
+        if (elevatorSetpoint.position < elevatorCollisionFrame) {
             if (elevatorTarget > elevatorCollisionFrame) {
                 pivotTarget = Math.min(pivotTarget, pivotCollisionFrame - pivotAvoid);
 
@@ -194,26 +187,26 @@ public final class SuperstructureSubsystem extends SubsystemBase {
                         new TrapezoidProfile.State(pivotTarget, 0)
                 );
 
-                if (pivotCurrent > pivotCollisionFrame) {
+                if (pivotSetpoint.position > pivotCollisionFrame) {
                     double pivotMoveTime = pivotProfile.timeLeftUntil(pivotCollisionFrame - pivotAvoid);
                     double elevatorMoveTime = elevatorProfile.timeLeftUntil(elevatorCollisionFrame - elevatorAvoid);
                     if (elevatorMoveTime < pivotMoveTime) {
                         // Wait for pivot to move some
-                        elevatorTarget = elevatorCurrent;
+                        elevatorTarget = elevatorSetpoint.position;
                     }
                 }
             }
         } else {
             pivotTarget = Math.min(pivotTarget, pivotCollisionFrame - pivotAvoid);
 
-            if (pivotCurrent > pivotCollisionFrame) {
+            if (pivotSetpoint.position > pivotCollisionFrame) {
                 // Hold elevator still until pivot gets out of collision area
-                elevatorTarget = elevatorCurrent;
+                elevatorTarget = elevatorSetpoint.position;
             }
         }
 
         // Collision with stage 2 crossbar
-        if (elevatorCurrent < elevatorCollisionStage2) {
+        if (elevatorSetpoint.position < elevatorCollisionStage2) {
             if (elevatorTarget > elevatorCollisionStage2) {
                 pivotTarget = Math.min(pivotTarget, pivotCollisionStage2 - pivotAvoid);
 
@@ -228,7 +221,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
                         new TrapezoidProfile.State(pivotTarget, 0)
                 );
 
-                if (pivotCurrent > pivotCollisionStage2) {
+                if (pivotSetpoint.position > pivotCollisionStage2) {
                     double pivotMoveTime = pivotProfile.timeLeftUntil(pivotCollisionStage2 - pivotAvoid);
                     double elevatorMoveTime = elevatorProfile.timeLeftUntil(elevatorCollisionStage2 - elevatorAvoid);
                     if (elevatorMoveTime < pivotMoveTime) {
@@ -243,9 +236,9 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         } else {
             pivotTarget = Math.min(pivotTarget, pivotCollisionStage2 - pivotAvoid);
 
-            if (pivotCurrent > pivotCollisionStage2) {
+            if (pivotSetpoint.position > pivotCollisionStage2) {
                 // Hold elevator still until pivot gets out of collision area
-                elevatorTarget = elevatorCurrent;
+                elevatorTarget = elevatorSetpoint.position;
             }
         }
 
@@ -258,6 +251,22 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         }
 
         RobotView.setSuperstructureSetpoint(elevatorSetpoint.position, pivotSetpoint.position);
+    }
+
+    @Override
+    public void periodic() {
+        elevatorIO.updateInputs(elevatorInputs);
+        pivotIO.updateInputs(pivotInputs);
+        Logger.processInputs("Elevator", elevatorInputs);
+        Logger.processInputs("Outtake Pivot", pivotInputs);
+
+        if (CALIBRATE_PIVOT.get()) {
+            CALIBRATE_PIVOT.set(false);
+            pivotIO.calibrateEncoder();
+        }
+
+        handleFeedbackSensors();
+        updateTrajectory();
 
         boolean hasCoral = coralOuttakeSubsystem.hasPiece();
         elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);
