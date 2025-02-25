@@ -188,9 +188,11 @@ public final class SuperstructureSubsystem extends SubsystemBase {
                 );
 
                 if (pivotSetpoint.position > pivotCollisionFrame) {
-                    double pivotMoveTime = pivotProfile.timeLeftUntil(pivotCollisionFrame - pivotAvoid);
-                    double elevatorMoveTime = elevatorProfile.timeLeftUntil(elevatorCollisionFrame - elevatorAvoid);
+                    double pivotMoveTime = pivotProfile.timeLeftUntil(pivotCollisionFrame);
+                    double elevatorMoveTime = elevatorProfile.timeLeftUntil(elevatorCollisionFrame);
+                    System.out.printf("Pivot move time: %.3f  Elevator move time: %.3f\n", pivotMoveTime, elevatorMoveTime);
                     if (elevatorMoveTime < pivotMoveTime) {
+                        System.out.println("Waiting...");
                         // Wait for pivot to move some
                         elevatorTarget = elevatorSetpoint.position;
                     }
@@ -222,8 +224,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
                 );
 
                 if (pivotSetpoint.position > pivotCollisionStage2) {
-                    double pivotMoveTime = pivotProfile.timeLeftUntil(pivotCollisionStage2 - pivotAvoid);
-                    double elevatorMoveTime = elevatorProfile.timeLeftUntil(elevatorCollisionStage2 - elevatorAvoid);
+                    double pivotMoveTime = pivotProfile.timeLeftUntil(pivotCollisionStage2);
+                    double elevatorMoveTime = elevatorProfile.timeLeftUntil(elevatorCollisionStage2);
                     if (elevatorMoveTime < pivotMoveTime) {
                         // Elevator is already moving so we don't want to wait
                         // in place, so continue up until the collision point.
