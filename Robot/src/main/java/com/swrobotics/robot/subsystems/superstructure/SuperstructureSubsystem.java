@@ -279,7 +279,12 @@ public final class SuperstructureSubsystem extends SubsystemBase {
             double pull = -Constants.kElevatorClimbPullVolts.get();
             double height = Constants.kElevatorHeightClimbEnd.get();
 
-            elevatorIO.setVoltage(elevatorInputs.currentHeightPct > height ? pull : hold);
+            double volts = hold;
+            if (elevatorInputs.currentHeightPct > height) {
+                volts += pull;
+            }
+
+            elevatorIO.setVoltage(volts);
         } else {
             elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);
         }
