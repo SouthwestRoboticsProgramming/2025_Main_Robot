@@ -2,7 +2,9 @@ package com.swrobotics.robot;
 
 import com.swrobotics.lib.net.NTEntry;
 import com.swrobotics.robot.logging.Logging;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -40,25 +42,36 @@ public final class Robot extends LoggedRobot {
             System.out.println("Canceled the current auto command");
         }
 
-        // Start autonomous command
         autonomousCommand = robotContainer.getAutonomousCommand();
-        autonomousCommand.schedule();
 
-//        Command auto = robotContainer.getAutonomousCommand();
-//        double delay = robotContainer.getAutoDelay();
-//        if (delay > 0) {
-//            autonomousCommand = Commands.sequence(
-//                    Commands.waitSeconds(delay),
-//                    // Use a proxy here so that running the same auto twice
-//                    // does not crash the robot code. Directly adding it to the
-//                    // sequence would mark the auto command as composed,
-//                    // causing the second time to throw an exception
-//                    auto.asProxy()
-//            );
-//        } else {
-//            autonomousCommand = auto;
-//        }
-//        autonomousCommand.schedule();
+        // Prevent crash if the same auto is run twice
+        CommandScheduler.getInstance().removeComposedCommand(autonomousCommand);
+
+        // Add delay if needed
+        double delay = robotContainer.getAutoDelay();
+        if (delay > 0) {
+            autonomousCommand = Commands.sequence(
+                    Commands.waitSeconds(delay),
+                    autonomousCommand
+            );
+        }
+
+        // For timing tests in simulator
+        if (RobotBase.isSimulation()) {
+            autonomousCommand = autonomousCommand
+                    .withTimeout(15);
+        }
+
+        // Measure elapsed time
+        double startTimestamp = Timer.getTimestamp();
+        autonomousCommand = autonomousCommand
+                .finallyDo(() -> {
+                    double endTimestamp = Timer.getTimestamp();
+                    System.out.println("Auto command took " + (endTimestamp - startTimestamp) + " seconds");
+                });
+
+        // Start autonomous command
+        autonomousCommand.schedule();
     }
 
     @Override

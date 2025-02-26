@@ -136,46 +136,112 @@ public final class Autonomous {
         }
     }
 
-    private static final double kScoreTime = 0.4;
+    private static final double kAlignTimeout = 0.5;
+    private static final double kScoreTimeout = 0.5;
 
-    private static Command doScore(RobotContainer robot, PathPlannerPath toScoringPosition) {
+    private static Command doScore(RobotContainer robot, PathPlannerPath toScoringPosition, Pose2d scoringPosition) {
+        double pathTime = toScoringPosition.getIdealTrajectory(Constants.kPathPlannerRobotConfig)
+                .orElseThrow()
+                .getTotalTimeSeconds();
+
         return Commands.sequence(
-                // TODO: Snap after following path
-                AutoBuilder.followPath(toScoringPosition)
-                        .deadlineFor(Commands.sequence(
-                                Commands.waitUntil(robot.coralOuttake::hasPiece),
+                Commands.parallel(
+                        Commands.sequence(
+                                AutoBuilder.followPath(toScoringPosition),
+                                DriveCommands.snapToPose(robot.drive, () -> Constants.kField.flipPoseForAlliance(scoringPosition))
+                        ),
+                        Commands.sequence(
+                                RobotBase.isReal()
+                                        ? Commands.waitUntil(robot.coralOuttake::hasPiece)
+                                        : Commands.waitSeconds(0.2),
                                 robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4)
-                                        .until(robot.superstructure::isInTolerance)
-                        )),
-                robot.coralOuttake.score(kScoreTime)
+                        )
+                ).until(() -> {
+                    Pose2d pose = robot.drive.getEstimatedPose();
+
+                    Pose2d allianceTarget = Constants.kField.flipPoseForAlliance(scoringPosition);
+                    boolean xy = pose.getTranslation().getDistance(allianceTarget.getTranslation())
+                            < Constants.kAutoScoreXYTolerance.get();
+                    boolean angle = MathUtil.absDiffRad(pose.getRotation().getDegrees(), allianceTarget.getRotation().getDegrees())
+                            < Constants.kAutoScoreAngleTolerance.get();
+                    boolean superstructure = robot.superstructure.isInTolerance();
+
+                    Logger.recordOutput("Auto/XY In Tolerance", xy);
+                    Logger.recordOutput("Auto/Angle In Tolerance", angle);
+                    Logger.recordOutput("Auto/Superstructure In Tolerance", superstructure);
+
+                    return xy && angle && superstructure;
+                }).withTimeout(pathTime + kAlignTimeout),
+
+                robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE)
+                        .until(() -> !robot.coralOuttake.hasPiece())
+                        .withTimeout(kScoreTimeout)
         );
     }
-    
 
-    public static Command leftSide4PieceV2(RobotContainer robot) {
-        Pose2d hp = new Pose2d(new Translation2d(1.561, 7.315), Rotation2d.fromDegrees(-54.013));
-        Pose2d score1 = FieldPositions.getBlueReefScoringTarget(8);
-        Pose2d score2 = FieldPositions.getBlueReefScoringTarget(11);
-        Pose2d score3 = FieldPositions.getBlueReefScoringTarget(10);
-        Pose2d score4 = FieldPositions.getBlueReefScoringTarget(9);
+    private static final double kElevatorDownDelay = 0.5;
+    private static final double kHumanPlayerWaitTimeout = 0.5;
+
+    private static Command doHumanPlayerPickup(RobotContainer robot, PathPlannerPath toCoralStation) {
+        return Commands.sequence(
+                Commands.parallel(
+                        AutoBuilder.followPath(toCoralStation),
+                        Commands.sequence(
+                                Commands.waitSeconds(kElevatorDownDelay),
+                                robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER)
+                        )
+                ),
+                Commands.waitUntil(robot.coralOuttake::hasPiece)
+                        .withTimeout(kHumanPlayerWaitTimeout)
+        );
+    }
+
+    private static double pathTime(PathPlannerPath path) {
+        return path.getIdealTrajectory(Constants.kPathPlannerRobotConfig)
+                .orElseThrow()
+                .getTotalTimeSeconds();
+    }
+
+    public static Command fourPieceV2(RobotContainer robot, boolean rightSide) {
+        Pose2d hp = rightSide
+                ? new Pose2d(new Translation2d(1.561, Constants.kField.getHeight() - 7.315), Rotation2d.fromDegrees(54.013))
+                : new Pose2d(new Translation2d(1.561, 7.315), Rotation2d.fromDegrees(-54.013));
+        Pose2d score1 = FieldPositions.getBlueReefScoringTarget(rightSide ? 5 : 8);
+        Pose2d score2 = FieldPositions.getBlueReefScoringTarget(rightSide ? 2 : 11);
+        Pose2d score3 = FieldPositions.getBlueReefScoringTarget(rightSide ? 3 : 10);
+        Pose2d score4 = FieldPositions.getBlueReefScoringTarget(rightSide ? 4 : 9);
         Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, score1.getY()), Rotation2d.k180deg);
 
+        // Rotation targets are to prevent rotation when touching the reef
         PathConstraints constraints = getPathConstraints();
         PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, constraints).build();
         PathPlannerPath score1ToHP = new SegmentBuilder(score1, hp, constraints)
-                .addRotationTarget(new RotationTarget(0.25, score1.getRotation()))
+                .addRotationTarget(new RotationTarget(0.2, score1.getRotation()))
                 .build();
         PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, constraints).build();
         PathPlannerPath score2ToHP = new SegmentBuilder(score2, hp, constraints).build();
         PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, constraints).build();
-        PathPlannerPath score3ToHp = new SegmentBuilder(score3, hp, constraints).build();
+        PathPlannerPath score3ToHP = new SegmentBuilder(score3, hp, constraints).build();
         PathPlannerPath hpToScore4 = new SegmentBuilder(hp, score4, constraints)
-                .addRotationTarget(new RotationTarget(0.80, score4.getRotation()))
+                .addRotationTarget(new RotationTarget(0.8, score4.getRotation()))
                 .build();
 
-        return Commands.sequence(
-
+        Command sequence = Commands.sequence(
+                doScore(robot, startToScore1, score1),
+                doHumanPlayerPickup(robot, score1ToHP),
+                doScore(robot, hpToScore2, score2),
+                doHumanPlayerPickup(robot, score2ToHP),
+                doScore(robot, hpToScore3, score3),
+                doHumanPlayerPickup(robot, score3ToHP),
+                doScore(robot, hpToScore4, score4)
         );
+
+        if (RobotBase.isSimulation()) {
+            sequence = sequence.beforeStarting(Commands.runOnce(
+                    () -> robot.drive.resetPose(Constants.kField.flipPoseForAlliance(start))));
+        }
+
+        return sequence;
     }
 
     public static Command leftSide4Piece(RobotContainer robot) {

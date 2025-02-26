@@ -20,7 +20,6 @@ import com.swrobotics.robot.subsystems.swerve.SwerveModuleInfo;
 import com.swrobotics.robot.subsystems.vision.limelight.LimelightCamera;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -45,8 +44,8 @@ public final class Constants {
     public static final double kBumperThickness = Units.inchesToMeters(3); // FIXME
     public static final double kRobotLength = kFrameLength + kBumperThickness * 2;
     public static final double kRobotWidth = kFrameWidth + kBumperThickness * 2;
-    public static final double kRobotRadius = Math.hypot(kRobotLength /2, kRobotWidth /2);
-    public static final double kRobotMass = Units.lbsToKilograms(122 + 14 + 14);
+    public static final double kRobotRadius = Math.hypot(kRobotLength / 2, kRobotWidth / 2);
+    public static final double kRobotMass = Units.lbsToKilograms(135);
     // Approximation of robot as uniform cuboid
     // See https://sleipnirgroup.github.io/Choreo/usage/estimating-moi/
     // FIXME: Measure in CAD
@@ -70,10 +69,10 @@ public final class Constants {
     public static final NTEntry<Double> kAutoTurnKp = new NTDouble("Drive/Auto/Turn PID/kP", 5).setPersistent();
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Drive/Auto/Turn PID/kD", 0).setPersistent();
 
-    public static final double kAutoMaxDriveSpeed = 2.5 + 1;//Units.feetToMeters(18);
-    public static final double kAutoMaxDriveAccel = 3;//5.5;
-    public static final double kAutoMaxTurnSpeed = 1 + .5;
-    public static final double kAutoMaxTurnAccel = 3;
+    public static final double kAutoMaxDriveSpeed = 4;//Units.feetToMeters(18);
+    public static final double kAutoMaxDriveAccel = 4;//5.5;
+    public static final double kAutoMaxTurnSpeed = 1.5;
+    public static final double kAutoMaxTurnAccel = 2;
 
     public static final double kAutoSwitchToSnapDist = 0.2;
     public static final NTEntry<Double> kAutoScoreXYTolerance = new NTDouble("Drive/Auto/Score XY Tolerance (m)", 0.05).setPersistent();
@@ -152,7 +151,7 @@ public final class Constants {
             Constants.kRobotMass,
             Constants.kRobotMOI,
             new ModuleConfig(
-                    Units.inchesToMeters(Constants.kModuleConstantsFactory.WheelRadius),
+                    Constants.kModuleConstantsFactory.WheelRadius,
                     Constants.kDriveMaxAchievableSpeed,
                     Constants.kDriveWheelCOF,
                     DCMotor.getKrakenX60Foc(1).withReduction(Constants.kModuleConstantsFactory.DriveMotorGearRatio),
