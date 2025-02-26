@@ -1,8 +1,6 @@
 package com.swrobotics.robot.subsystems.superstructure;
 
 import com.swrobotics.robot.config.Constants;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 
 public final class OuttakePivotIOSim implements OuttakePivotIO {
     private double prevPosition;
@@ -16,6 +14,8 @@ public final class OuttakePivotIOSim implements OuttakePivotIO {
     public void updateInputs(Inputs inputs) {
         inputs.currentAngleRot = position;
         inputs.currentVelocityRotPerSec = (position - prevPosition) / Constants.kPeriodicTime;
+        inputs.absoluteAngleRot = position;
+        inputs.absoluteAngleOK = true;
 
         prevPosition = position;
     }
@@ -26,8 +26,8 @@ public final class OuttakePivotIOSim implements OuttakePivotIO {
     }
 
     @Override
-    public void syncWithEncoder() {
-        // no
+    public void setCurrentPosition(double currentAngleRot) {
+        position = currentAngleRot;
     }
 
     @Override

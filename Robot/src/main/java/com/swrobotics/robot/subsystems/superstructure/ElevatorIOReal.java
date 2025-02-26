@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -29,6 +30,7 @@ public final class ElevatorIOReal implements ElevatorIO {
     private final StatusSignal<AngularVelocity> velocityStatus;
 
     private final PositionVoltage positionControl;
+    private final VoltageOut voltageControl;
 
     public ElevatorIOReal() {
         motor1 = IOAllocation.CAN.kElevatorMotor1.createTalonFX();
@@ -53,6 +55,8 @@ public final class ElevatorIOReal implements ElevatorIO {
         velocityStatus = motor1.getVelocity();
 
         positionControl = new PositionVoltage(0)
+                .withEnableFOC(true);
+        voltageControl = new VoltageOut(0)
                 .withEnableFOC(true);
 
         BRAKE_MODE.onChange(() -> {
@@ -83,5 +87,10 @@ public final class ElevatorIOReal implements ElevatorIO {
         motor1.setControl(positionControl
                 .withPosition(positionRot)
                 .withVelocity(velocityRot));
+    }
+
+    @Override
+    public void setVoltage(double volts) {
+        motor1.setControl(voltageControl.withOutput(volts));
     }
 }

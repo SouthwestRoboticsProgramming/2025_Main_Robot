@@ -26,7 +26,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -53,6 +55,9 @@ public final class ControlBoard extends SubsystemBase {
      * B: L3
      * Y: L4
      * X: L1
+     * 
+     * Up: Prep climb
+     * Down: Climb
      * 
      * Right trigger: Score coral
      * 
@@ -123,8 +128,29 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L2));
         operator.b.trigger()
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L3));
-        operator.y.trigger()
-                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
+//        operator.y.trigger()
+//                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
+
+        double[] startTimestamp = {0};
+        operator.y.trigger().whileTrue(
+                new FunctionalCommand(
+                        () -> startTimestamp[0] = Timer.getTimestamp(),
+                        () -> robot.superstructure.setTargetState(SuperstructureSubsystem.State.SCORE_L4),
+                        (cancelled) -> {
+                            if (!cancelled) {
+                                double endTimestamp = Timer.getTimestamp();
+                                System.out.println("Travel time: " + (endTimestamp - startTimestamp[0]));
+                            }
+                        },
+                        robot.superstructure::isInTolerance,
+                        robot.superstructure
+                ).andThen(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4))
+        );
+
+        operator.dpad.up.trigger()
+                .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
+        operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
+                .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
 
         robot.algaeIntake.setDefaultCommand(
                 robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
