@@ -128,7 +128,6 @@ public final class Constants {
                     .withSteerMotorGains(new Slot0Configs().withKP(50).withKD(0.01).withKV(0.1))
                     .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(0.012621).withKS(0.22109))
 //                    .withDriveMotorGains(new Slot0Configs().withKP(0.4).withKD(0).withKV(0.012621 * 17.675293 / 13.515625 * 17.675293 / 2.136719 * 19.378906 / 17.676758 * 17.675293 / 21.419922).withKS(0.22109))
-                    // TODO: Torque current FOC
                     .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
                     .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage)
                     .withSlipCurrent(Amps.of(80))
@@ -184,6 +183,7 @@ public final class Constants {
 
     // Elevator
     public static final double kElevatorMaxHeightRotations = 100;
+    
     public static final NTSlot0Configs kElevatorPID =
             new NTSlot0Configs("Superstructure/Elevator/PID", 0.3, 0, 0.286, 0, 0.12, 0);
     public static final NTEntry<Double> kElevatorMaxVelocity = new NTDouble("Superstructure/Elevator/Max Velocity", 80).setPersistent();
@@ -195,7 +195,7 @@ public final class Constants {
     public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.005).setPersistent();
     public static final NTEntry<Double> kElevatorDeviationTolerance = new NTDouble("Superstructure/Elevator/Deviation Tolerance", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorFrameCollisionHeight = new NTDouble("Superstructure/Elevator/Frame Collision Height", 0.060566).setPersistent();
-    public static final NTEntry<Double> kElevatorStage2CollisionHeight = new NTDouble("Superstructure/Elevator/Stage 2 Collision Height", 0.324990).setPersistent(); // FIXME: Tune
+    public static final NTEntry<Double> kElevatorStage2CollisionHeight = new NTDouble("Superstructure/Elevator/Stage 2 Collision Height", 0.324990).setPersistent();
     public static final NTEntry<Double> kElevatorHeightBottom = new NTDouble("Superstructure/Elevator/Bottom Height", 0.02).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL1 = new NTDouble("Superstructure/Elevator/L1 Height", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL2 = new NTDouble("Superstructure/Elevator/L2 Height", 0.27).setPersistent();
@@ -219,7 +219,7 @@ public final class Constants {
     public static final NTEntry<Double> kOuttakePivotTolerance = new NTDouble("Superstructure/Pivot/Tolerance (deg)", 4).setPersistent();
     public static final NTEntry<Double> kOuttakePivotCollisionTolerance = new NTDouble("Superstructure/Pivot/Collision Tolerance (deg)", 5).setPersistent();
     public static final NTEntry<Double> kOuttakePivotDeviationTolerance = new NTDouble("Superstructure/Pivot/Deviation Tolerance (deg)", 4).setPersistent();
-    public static final NTEntry<Double> kOuttakePivotFrameCollisionAngle = new NTDouble("Superstructure/Pivot/Frame Collision Angle (deg)", 80.683560).setPersistent(); // FIXME: Tune
+    public static final NTEntry<Double> kOuttakePivotFrameCollisionAngle = new NTDouble("Superstructure/Pivot/Frame Collision Angle (deg)", 80.683560).setPersistent();
     public static final NTEntry<Double> kOuttakePivotStage2CollisionAngle = new NTDouble("Superstructure/Pivot/Stage 2 Collision Angle (deg)", 67.060440).setPersistent();
     public static final NTEntry<Double> kOuttakePivotInAngle = new NTDouble("Superstructure/Pivot/In Angle (deg)", 88).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL1Angle = new NTDouble("Superstructure/Pivot/Score L1 Angle (deg)", 85).setPersistent();

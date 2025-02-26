@@ -33,6 +33,8 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
     private final PositionVoltage positionControl;
     private final PositionVoltage positionControlWithCoral;
 
+    private double motorPositionOffset;
+
     public OuttakePivotIOReal() {
         motor = IOAllocation.CAN.kOuttakePivotMotor.createTalonFX();
         canCoder = IOAllocation.CAN.kOuttakePivotEncoder.createCANcoder();
@@ -64,15 +66,30 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
                 .withSlot(1)
                 .withEnableFOC(true);
 
+        CTREUtil.retryUntilOk(motor, () -> motor.setPosition(0, 1));
+        motorPositionOffset = 0;
+
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
-        CTREUtil.retryUntilOk(motor, this::trySyncWithEncoder);
+        setCurrentPosition(calcAbsolutePosition(canCoderPositionStatus.getValueAsDouble()));
+    }
+
+    private double calcAbsolutePosition(double canCoderPos) {
+        double centerOfRange = 0;
+        return MathUtil.wrap(
+                (canCoderPos + Constants.kOuttakePivotEncoderOffset.get())
+                        / Constants.kOuttakePivotCANcoderToArmRatio,
+                centerOfRange - 0.5/Constants.kOuttakePivotCANcoderToArmRatio,
+                centerOfRange + 0.5/Constants.kOuttakePivotCANcoderToArmRatio
+        );
     }
 
     @Override
     public void updateInputs(Inputs inputs) {
-        BaseStatusSignal.refreshAll(motorPositionStatus, motorVelocityStatus);
-        inputs.currentAngleRot = motorPositionStatus.getValueAsDouble();
+        BaseStatusSignal.refreshAll(motorPositionStatus, motorVelocityStatus, canCoderPositionStatus);
+        inputs.currentAngleRot = motorPositionStatus.getValueAsDouble() + motorPositionOffset;
         inputs.currentVelocityRotPerSec = motorVelocityStatus.getValueAsDouble();
+        inputs.absoluteAngleRot = calcAbsolutePosition(canCoderPositionStatus.getValueAsDouble());
+        inputs.absoluteAngleOK = canCoderPositionStatus.getStatus().isOK();
     }
 
     @Override
@@ -82,26 +99,13 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
                 : positionControlWithCoral;
 
         motor.setControl(control
-                .withPosition(targetAngleRot)
+                .withPosition(targetAngleRot - motorPositionOffset)
                 .withVelocity(ffVelocityRotPerSec));
     }
 
-    private StatusCode trySyncWithEncoder() {
-        double centerOfRange = 0;
-        double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);
-        double armPos = MathUtil.wrap(
-                (canCoderPos + Constants.kOuttakePivotEncoderOffset.get())
-                        / Constants.kOuttakePivotCANcoderToArmRatio,
-                centerOfRange - 0.5/Constants.kOuttakePivotCANcoderToArmRatio,
-                centerOfRange + 0.5/Constants.kOuttakePivotCANcoderToArmRatio
-        );
-        return motor.setPosition(armPos);
-    }
-
     @Override
-    public void syncWithEncoder() {
-        canCoderPositionStatus.refresh();
-        trySyncWithEncoder();
+    public void setCurrentPosition(double currentAngleRot) {
+        motorPositionOffset = currentAngleRot - motorPositionStatus.getValueAsDouble();
     }
 
     @Override
