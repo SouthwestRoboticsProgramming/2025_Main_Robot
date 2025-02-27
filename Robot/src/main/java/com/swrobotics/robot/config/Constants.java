@@ -70,8 +70,8 @@ public final class Constants {
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Drive/Auto/Turn PID/kD", 0).setPersistent();
 
     public static final double kAutoMaxDriveSpeed = 4;//Units.feetToMeters(18);
-    public static final double kAutoMaxDriveAccel = 4;//5.5;
-    public static final double kAutoMaxTurnSpeed = 1.5;
+    public static final double kAutoMaxDriveAccel = 5;
+    public static final double kAutoMaxTurnSpeed = 1.25;
     public static final double kAutoMaxTurnAccel = 2;
 
     public static final double kAutoSwitchToSnapDist = 0.2;

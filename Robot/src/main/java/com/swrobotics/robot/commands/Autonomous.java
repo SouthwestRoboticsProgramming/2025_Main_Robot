@@ -1,5 +1,6 @@
 package com.swrobotics.robot.commands;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.*;
 import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
@@ -105,10 +106,14 @@ public final class Autonomous {
         private final IdealStartingState startingState;
         private final GoalEndState goalEndState;
 
-        public SegmentBuilder(Pose2d start, Pose2d end, PathConstraints constraints) {
+        public SegmentBuilder(Pose2d start, Pose2d end, double curveStart, double curveEnd, PathConstraints constraints) {
+            Translation2d startPos = start.getTranslation();
+            Translation2d endPos = end.getTranslation();
+            Translation2d third = endPos.minus(startPos).div(3);
+
             waypoints = List.of(
-                    new Waypoint(null, start.getTranslation(), end.getTranslation()),
-                    new Waypoint(start.getTranslation(), end.getTranslation(), null)
+                    new Waypoint(null, startPos, startPos.plus(third.rotateBy(Rotation2d.fromDegrees(curveStart)))),
+                    new Waypoint(endPos.minus(third.rotateBy(Rotation2d.fromDegrees(curveEnd))), endPos, null)
             );
             rotationTargets = new ArrayList<>();
             globalConstraints = constraints;
@@ -136,8 +141,8 @@ public final class Autonomous {
         }
     }
 
-    private static final double kAlignTimeout = 0.5;
-    private static final double kScoreTimeout = 0.5;
+    private static final double kAlignTimeout = 0.2;
+    private static final double kScoreTimeout = 0.4;
 
     private static Command doScore(RobotContainer robot, PathPlannerPath toScoringPosition, Pose2d scoringPosition) {
         double pathTime = toScoringPosition.getIdealTrajectory(Constants.kPathPlannerRobotConfig)
@@ -173,14 +178,19 @@ public final class Autonomous {
                     return xy && angle && superstructure;
                 }).withTimeout(pathTime + kAlignTimeout),
 
-                robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE)
-                        .until(() -> !robot.coralOuttake.hasPiece())
-                        .withTimeout(kScoreTimeout)
+                Commands.race(
+                        // Continue snapping in case it got timed out above
+                        DriveCommands.snapToPose(robot.drive, () -> Constants.kField.flipPoseForAlliance(scoringPosition)),
+
+                        robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE)
+                                .until(() -> !robot.coralOuttake.hasPiece() && RobotBase.isReal())
+                                .withTimeout(kScoreTimeout)
+                )
         );
     }
 
     private static final double kElevatorDownDelay = 0.5;
-    private static final double kHumanPlayerWaitTimeout = 0.5;
+    private static final double kHumanPlayerWaitTimeout = 0.0;
 
     private static Command doHumanPlayerPickup(RobotContainer robot, PathPlannerPath toCoralStation) {
         return Commands.sequence(
@@ -196,12 +206,6 @@ public final class Autonomous {
         );
     }
 
-    private static double pathTime(PathPlannerPath path) {
-        return path.getIdealTrajectory(Constants.kPathPlannerRobotConfig)
-                .orElseThrow()
-                .getTotalTimeSeconds();
-    }
-
     public static Command fourPieceV2(RobotContainer robot, boolean rightSide) {
         Pose2d hp = rightSide
                 ? new Pose2d(new Translation2d(1.561, Constants.kField.getHeight() - 7.315), Rotation2d.fromDegrees(54.013))
@@ -214,15 +218,15 @@ public final class Autonomous {
 
         // Rotation targets are to prevent rotation when touching the reef
         PathConstraints constraints = getPathConstraints();
-        PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, constraints).build();
-        PathPlannerPath score1ToHP = new SegmentBuilder(score1, hp, constraints)
+        PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, 0, 0, constraints).build();
+        PathPlannerPath score1ToHP = new SegmentBuilder(score1, hp, rightSide ? 30 : -30, 0, constraints)
                 .addRotationTarget(new RotationTarget(0.2, score1.getRotation()))
                 .build();
-        PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, constraints).build();
-        PathPlannerPath score2ToHP = new SegmentBuilder(score2, hp, constraints).build();
-        PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, constraints).build();
-        PathPlannerPath score3ToHP = new SegmentBuilder(score3, hp, constraints).build();
-        PathPlannerPath hpToScore4 = new SegmentBuilder(hp, score4, constraints)
+        PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, 0, 0, constraints).build();
+        PathPlannerPath score2ToHP = new SegmentBuilder(score2, hp, 0, 0, constraints).build();
+        PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, 0, 0, constraints).build();
+        PathPlannerPath score3ToHP = new SegmentBuilder(score3, hp, 0, 0, constraints).build();
+        PathPlannerPath hpToScore4 = new SegmentBuilder(hp, score4, 0, rightSide ? 30 : -30, constraints)
                 .addRotationTarget(new RotationTarget(0.8, score4.getRotation()))
                 .build();
 
@@ -233,7 +237,8 @@ public final class Autonomous {
                 doHumanPlayerPickup(robot, score2ToHP),
                 doScore(robot, hpToScore3, score3),
                 doHumanPlayerPickup(robot, score3ToHP),
-                doScore(robot, hpToScore4, score4)
+                doScore(robot, hpToScore4, score4),
+                backUp(robot)
         );
 
         if (RobotBase.isSimulation()) {

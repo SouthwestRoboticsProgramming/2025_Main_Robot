@@ -74,7 +74,8 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
             }
         });
         PathPlannerLogging.setLogTargetPoseCallback((target) -> {
-            FieldView.pathPlannerSetpoint.setPose(target);
+            if (target != null)
+                FieldView.pathPlannerSetpoint.setPose(target);
             Logger.recordOutput("PathPlanner/Target Pose", target);
         });
     }

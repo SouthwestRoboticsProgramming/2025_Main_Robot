@@ -2,6 +2,7 @@ package com.swrobotics.robot;
 
 import com.swrobotics.lib.net.NTEntry;
 import com.swrobotics.robot.logging.Logging;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
@@ -10,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * The main robot class.
@@ -56,6 +58,14 @@ public final class Robot extends LoggedRobot {
             );
         }
 
+        // Log whether auto was cancelled
+        autonomousCommand = autonomousCommand
+                .finallyDo((cancelled) -> {
+                    Logger.recordOutput("Auto/Command Cancelled", cancelled);
+                    if (cancelled)
+                        DriverStation.reportWarning("Auto command ended early", false);
+                });
+
         // For timing tests in simulator
         if (RobotBase.isSimulation()) {
             autonomousCommand = autonomousCommand
@@ -67,6 +77,8 @@ public final class Robot extends LoggedRobot {
         autonomousCommand = autonomousCommand
                 .finallyDo(() -> {
                     double endTimestamp = Timer.getTimestamp();
+
+                    Logger.recordOutput("Auto/Command Time", endTimestamp - startTimestamp);
                     System.out.println("Auto command took " + (endTimestamp - startTimestamp) + " seconds");
                 });
 
