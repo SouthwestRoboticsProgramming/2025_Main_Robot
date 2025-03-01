@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class CoralOuttakeIOReal implements CoralOuttakeIO {
     private final TalonFX motor;
     private final DigitalInput beamBreak;
@@ -28,6 +30,7 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
     private volatile boolean ignoreBeamBreak;
     private volatile boolean hasPiece;
     private volatile double positionAtPieceDetect;
+    private final AtomicInteger successfulDaqs, failedDaqs;
 
     private final VoltageOut voltageControl;
     private final PositionVoltage positionVoltage;
@@ -59,6 +62,8 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
 
         ignoreBeamBreak = false;
 
+        successfulDaqs = new AtomicInteger(0);
+        failedDaqs = new AtomicInteger(0);
         new Thread(this::runFastThread).start();
     }
 
@@ -68,6 +73,11 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
         while (true) {
             Timer.delay(1.0 / Constants.kOuttakeRefreshFreq);
             positionStatus.refresh();
+
+            if (positionStatus.getStatus().isOK())
+                successfulDaqs.incrementAndGet();
+            else
+                failedDaqs.incrementAndGet();
 
             boolean hadPiece = hasPiece;
             boolean hasPiece = !ignoreBeamBreak && !beamBreak.get();
@@ -83,6 +93,8 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
         inputs.voltage = 0;
         inputs.positionAtPieceDetect = positionAtPieceDetect;
         inputs.hasPiece = hasPiece;
+        inputs.successfulDaqs = successfulDaqs.get();
+        inputs.failedDaqs = failedDaqs.get();
     }
 
     @Override

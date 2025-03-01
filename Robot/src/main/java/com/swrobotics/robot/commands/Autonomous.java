@@ -190,7 +190,7 @@ public final class Autonomous {
     }
 
     private static final double kElevatorDownDelay = 0.5;
-    private static final double kHumanPlayerWaitTimeout = 0.0;
+    private static final double kHumanPlayerWaitTimeout = 1;
 
     private static Command doHumanPlayerPickup(RobotContainer robot, PathPlannerPath toCoralStation) {
         return Commands.sequence(
@@ -198,7 +198,8 @@ public final class Autonomous {
                         AutoBuilder.followPath(toCoralStation),
                         Commands.sequence(
                                 Commands.waitSeconds(kElevatorDownDelay),
-                                robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER)
+                                robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER),
+                                robot.coralOuttake.commandSetStateOnce(CoralOuttakeSubsystem.State.INTAKE)
                         )
                 ),
                 Commands.waitUntil(robot.coralOuttake::hasPiece)
@@ -208,8 +209,9 @@ public final class Autonomous {
 
     public static Command fourPieceV2(RobotContainer robot, boolean rightSide) {
         Pose2d hp = rightSide
-                ? new Pose2d(new Translation2d(1.561, Constants.kField.getHeight() - 7.315), Rotation2d.fromDegrees(54.013))
-                : new Pose2d(new Translation2d(1.561, 7.315), Rotation2d.fromDegrees(-54.013));
+                ? new Pose2d(new Translation2d(1.371, Constants.kField.getHeight() - 7.289), Rotation2d.fromDegrees(54.013))
+                : new Pose2d(new Translation2d(1.371, 7.289), Rotation2d.fromDegrees(-54.013));
+
         Pose2d score1 = FieldPositions.getBlueReefScoringTarget(rightSide ? 5 : 8);
         Pose2d score2 = FieldPositions.getBlueReefScoringTarget(rightSide ? 2 : 11);
         Pose2d score3 = FieldPositions.getBlueReefScoringTarget(rightSide ? 3 : 10);
@@ -231,6 +233,8 @@ public final class Autonomous {
                 .build();
 
         Command sequence = Commands.sequence(
+                robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.SCORE_L4),
+                Commands.waitSeconds(0.5),
                 doScore(robot, startToScore1, score1),
                 doHumanPlayerPickup(robot, score1ToHP),
                 doScore(robot, hpToScore2, score2),

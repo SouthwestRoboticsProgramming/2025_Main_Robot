@@ -8,6 +8,9 @@ public interface CoralOuttakeIO {
 
         public boolean hasPiece;
         public double positionAtPieceDetect;
+
+        public int successfulDaqs;
+        public int failedDaqs;
     }
 
     void updateInputs(Inputs inputs);
