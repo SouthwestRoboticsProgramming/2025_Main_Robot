@@ -100,25 +100,25 @@ public final class Autonomous {
     }
 
     private static final class SegmentBuilder {
-        private final List<Waypoint> waypoints;
+//        private final List<Waypoint> waypoints;
+        private final Pose2d start;
+        private final Pose2d end;
         private final List<RotationTarget> rotationTargets;
         private final PathConstraints globalConstraints;
         private final IdealStartingState startingState;
         private final GoalEndState goalEndState;
+        private double curveStart;
+        private double curveEnd;
 
-        public SegmentBuilder(Pose2d start, Pose2d end, double curveStart, double curveEnd, PathConstraints constraints) {
-            Translation2d startPos = start.getTranslation();
-            Translation2d endPos = end.getTranslation();
-            Translation2d third = endPos.minus(startPos).div(3);
-
-            waypoints = List.of(
-                    new Waypoint(null, startPos, startPos.plus(third.rotateBy(Rotation2d.fromDegrees(curveStart)))),
-                    new Waypoint(endPos.minus(third.rotateBy(Rotation2d.fromDegrees(curveEnd))), endPos, null)
-            );
+        public SegmentBuilder(Pose2d start, Pose2d end, PathConstraints constraints) {
+            this.start = start;
+            this.end = end;
             rotationTargets = new ArrayList<>();
             globalConstraints = constraints;
             startingState = new IdealStartingState(0, start.getRotation());
             goalEndState = new GoalEndState(0, end.getRotation());
+            curveStart = 0;
+            curveEnd = 0;
         }
 
         public SegmentBuilder addRotationTarget(RotationTarget rotationTarget) {
@@ -126,9 +126,26 @@ public final class Autonomous {
             return this;
         }
 
+        public SegmentBuilder withCurveStart(double curveStart) {
+            this.curveStart = curveStart;
+            return this;
+        }
+
+        public SegmentBuilder withCurveEnd(double curveEnd) {
+            this.curveEnd = curveEnd;
+            return this;
+        }
+
         public PathPlannerPath build() {
+            Translation2d startPos = start.getTranslation();
+            Translation2d endPos = end.getTranslation();
+            Translation2d third = endPos.minus(startPos).div(3);
+
             return new PathPlannerPath(
-                    waypoints,
+                    List.of(
+                            new Waypoint(null, startPos, startPos.plus(third.rotateBy(Rotation2d.fromDegrees(curveStart)))),
+                            new Waypoint(endPos.minus(third.rotateBy(Rotation2d.fromDegrees(curveEnd))), endPos, null)
+                    ),
                     rotationTargets,
                     Collections.emptyList(),
                     Collections.emptyList(),
@@ -220,15 +237,17 @@ public final class Autonomous {
 
         // Rotation targets are to prevent rotation when touching the reef
         PathConstraints constraints = getPathConstraints();
-        PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, 0, 0, constraints).build();
-        PathPlannerPath score1ToHP = new SegmentBuilder(score1, hp, rightSide ? 30 : -30, 0, constraints)
+        PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, constraints).build();
+        PathPlannerPath score1ToHP = new SegmentBuilder(score1, hp, constraints)
+                .withCurveStart(rightSide ? 30 : -30)
                 .addRotationTarget(new RotationTarget(0.2, score1.getRotation()))
                 .build();
-        PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, 0, 0, constraints).build();
-        PathPlannerPath score2ToHP = new SegmentBuilder(score2, hp, 0, 0, constraints).build();
-        PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, 0, 0, constraints).build();
-        PathPlannerPath score3ToHP = new SegmentBuilder(score3, hp, 0, 0, constraints).build();
-        PathPlannerPath hpToScore4 = new SegmentBuilder(hp, score4, 0, rightSide ? 30 : -30, constraints)
+        PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, constraints).build();
+        PathPlannerPath score2ToHP = new SegmentBuilder(score2, hp, constraints).build();
+        PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, constraints).build();
+        PathPlannerPath score3ToHP = new SegmentBuilder(score3, hp, constraints).build();
+        PathPlannerPath hpToScore4 = new SegmentBuilder(hp, score4, constraints)
+                .withCurveEnd(rightSide ? 30 : -30)
                 .addRotationTarget(new RotationTarget(0.8, score4.getRotation()))
                 .build();
 
