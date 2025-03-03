@@ -2,23 +2,19 @@ package com.swrobotics.robot.control;
 
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.path.PathConstraints;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.input.XboxController;
 import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.lib.net.NTEntry;
-import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
-import com.swrobotics.robot.commands.Autonomous;
+import com.swrobotics.robot.RobotPhysics;
 import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
 import com.swrobotics.robot.commands.DriveCommands;
 import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
-import com.swrobotics.robot.config.PathEnvironments;
-import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
 import com.swrobotics.robot.subsystems.outtake.CoralOuttakeSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
@@ -31,8 +27,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
-import java.util.Set;
 
 public final class ControlBoard extends SubsystemBase {
     /*
@@ -71,7 +65,8 @@ public final class ControlBoard extends SubsystemBase {
     public final XboxController driver;
     public final XboxController operator;
 
-    private final DriveAccelFilter driveFilter;
+    private final DriveAccelFilter driveControlFilter;
+    private final DriveAccelFilter2d driveTippingFilter;
 
     public ControlBoard(RobotContainer robot) {
         this.robot = robot;
@@ -80,7 +75,13 @@ public final class ControlBoard extends SubsystemBase {
         driver = new XboxController(Constants.kDriverControllerPort, Constants.kDeadband);
         operator = new XboxController(Constants.kOperatorControllerPort, Constants.kDeadband);
 
-        driveFilter = new DriveAccelFilter(Constants.kDriveControlMaxAccel);
+        driveControlFilter = new DriveAccelFilter(Constants.kDriveControlMaxAccel);
+        driveTippingFilter = new DriveAccelFilter2d(
+                (dir) -> RobotPhysics.getMaxAccelerationWithoutTipping(
+                        robot.drive.fieldToRobotRelative(dir),
+                        robot.superstructure.getCurrentElevatorHeight()
+                ) - Constants.kDriveTippingAccelTolerance
+        );
 
         configureControls();
     }
@@ -193,22 +194,19 @@ public final class ControlBoard extends SubsystemBase {
 //                .whileTrue(DriveCommands.feedforwardCharacterization(robot.drive));
 //        operator.start.trigger()
 //                .whileTrue(Autonomous.goSideways5Meters(robot));
-        operator.start.trigger()
-                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
-                                .withVelocityX(3)
-                                .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
-                        robot.drive));
-        operator.back.trigger()
-                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
-                        .withVelocityX(1)
-                        .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
-                        robot.drive));
+//        operator.start.trigger()
+//                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
+//                                .withVelocityX(3)
+//                                .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
+//                        robot.drive));
+//        operator.back.trigger()
+//                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
+//                        .withVelocityX(1)
+//                        .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
+//                        robot.drive));
     }
 
-    /**
-     * @return translation input for the drive base, in meters/sec
-     */
-    private Translation2d getDriveTranslation() {
+    private Translation2d getDesiredDriveTranslation() {
         double maxSpeed = Constants.kDriveMaxAchievableSpeed;
 
         Translation2d leftStick = driver.getLeftStick();
@@ -225,12 +223,18 @@ public final class ControlBoard extends SubsystemBase {
             return new Translation2d(0, 0);
 
         double targetSpeed = powerMag * maxSpeed;
-        double filteredSpeed = driveFilter.calculate(targetSpeed);
-
+        double filteredSpeed = driveControlFilter.calculate(targetSpeed);
         return new Translation2d(-leftStick.getY(), -leftStick.getX())
                 .div(rawMag) // Normalize translation
                 .times(filteredSpeed) // Apply new speed
                 .rotateBy(FieldInfo.getAllianceForwardAngle()); // Account for driver's perspective
+    }
+
+    /**
+     * @return translation input for the drive base, in meters/sec
+     */
+    private Translation2d getDriveTranslation() {
+        return driveTippingFilter.calculate(getDesiredDriveTranslation());
     }
 
     /**

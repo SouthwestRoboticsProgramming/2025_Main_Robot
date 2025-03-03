@@ -127,6 +127,10 @@ public final class SwerveDriveSubsystem extends SubsystemBase {
         return avgVelocity;
     }
 
+    public Translation2d fieldToRobotRelative(Translation2d fieldRel) {
+        return fieldRel.rotateBy(inputs.estPose.getRotation().unaryMinus());
+    }
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);

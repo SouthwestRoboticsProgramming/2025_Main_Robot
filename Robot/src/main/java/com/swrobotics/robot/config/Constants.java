@@ -50,6 +50,8 @@ public final class Constants {
     // See https://sleipnirgroup.github.io/Choreo/usage/estimating-moi/
     // FIXME: Measure in CAD
     public static final double kRobotMOI = 1.0/12.0 * kRobotMass * (kFrameLength*kFrameLength + kFrameWidth*kFrameWidth);
+    public static final double kCOGHeightWithElevatorDown = Units.inchesToMeters(10); // TODO: Measure
+    public static final double kCOGHeightWithElevatorUp = Units.inchesToMeters(23.126);
 
     // Controls
     public static final int kDriverControllerPort = 0;
@@ -94,6 +96,9 @@ public final class Constants {
     // Drive
     public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
 
+    // Subtracted from calculated max acceleration to get tipping acceleration limit
+    public static final double kDriveTippingAccelTolerance = 1; // m/s^2
+
     public static final double kOdometryUpdateFreq = 200; // Hz
     public static final Matrix<N3, N1> kOdometryStdDevs = VecBuilder.fill(0.005, 0.005, 0.001);
 
@@ -103,8 +108,8 @@ public final class Constants {
 
     public static final double kDriveWheelCOF = 1.2; // TODO: Measure?
 
-    public static final double kDriveWheelSpacingX = 55.3 / 100; // m
-    public static final double kDriveWheelSpacingY = 63.0 / 100; // m
+    public static final double kDriveWheelSpacingX = 63.0 / 100; // m
+    public static final double kDriveWheelSpacingY = 55.3 / 100; // m
     public static final double kDriveRadius = Math.hypot(kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2);
 
     public static final NTEntry<Double> kFrontLeftOffset = new NTDouble("Drive/Modules/Front Left Offset (rot)", -0.335693).setPersistent();

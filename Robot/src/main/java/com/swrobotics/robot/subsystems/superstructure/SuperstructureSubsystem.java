@@ -307,4 +307,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
         return elevator && pivot;
     }
+
+    public double getCurrentElevatorHeight() {
+        return elevatorInputs.currentHeightPct;
+    }
 }
