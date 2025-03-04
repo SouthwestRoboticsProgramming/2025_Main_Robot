@@ -49,6 +49,7 @@ public final class ControlBoard extends SubsystemBase {
      * A: Snap to reef point
      * 
      * Left trigger: Intake algae
+     * Right trigger: Score algae
      * 
      * Operator:
      * A: L2
@@ -60,6 +61,7 @@ public final class ControlBoard extends SubsystemBase {
      * Down: Climb
      * 
      * Right trigger: Score coral
+     * Left bumper: Reverse coral
      * 
      * Inverted: 3
      * Not inverted: 2
