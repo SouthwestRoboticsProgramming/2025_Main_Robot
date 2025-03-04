@@ -160,6 +160,7 @@ public final class Autonomous {
 
     private static final double kAlignTimeout = 0.2;
     private static final double kScoreTimeout = 0.4;
+    private static final double kElevatorUpEarlyTime = 0.4;
 
     private static Command doScore(RobotContainer robot, PathPlannerPath toScoringPosition, Pose2d scoringPosition) {
         double pathTime = toScoringPosition.getIdealTrajectory(Constants.kPathPlannerRobotConfig)
@@ -173,9 +174,17 @@ public final class Autonomous {
                                 DriveCommands.snapToPose(robot.drive, () -> Constants.kField.flipPoseForAlliance(scoringPosition))
                         ),
                         Commands.sequence(
-                                RobotBase.isReal()
-                                        ? Commands.waitUntil(robot.coralOuttake::hasPiece)
-                                        : Commands.waitSeconds(0.2),
+                                Commands.parallel(
+                                        RobotBase.isReal()
+                                            ? Commands.waitUntil(robot.coralOuttake::hasPiece)
+                                            : Commands.waitSeconds(0.2),
+
+                                        // Bring elevator up as late as possible
+                                        Commands.defer(() -> Commands.waitSeconds(
+                                                pathTime - kElevatorUpEarlyTime - robot.superstructure.calculateIndexerToL4TravelTime()
+                                        ), Collections.emptySet())
+                                ),
+
                                 robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4)
                         )
                 ).until(() -> {

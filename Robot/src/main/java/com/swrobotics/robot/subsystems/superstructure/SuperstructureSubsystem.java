@@ -293,6 +293,26 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         pivotIO.setTarget(pivotSetpoint.position, pivotSetpoint.velocity, hasCoral);
     }
 
+    // For auto
+    public double calculateIndexerToL4TravelTime() {
+        TrapezoidProfile.State elevatorInitialState = new TrapezoidProfile.State(State.RECEIVE_CORAL_FROM_INDEXER.getElevatorHeight(), 0);
+        TrapezoidProfile.State elevatorFinalState = new TrapezoidProfile.State(State.SCORE_L4.getElevatorHeight(), 0);
+        elevatorProfile.calculate(0, elevatorInitialState, elevatorFinalState);
+
+        TrapezoidProfile.State pivotInitialState = new TrapezoidProfile.State(State.RECEIVE_CORAL_FROM_INDEXER.getPivotAngle(), 0);
+        TrapezoidProfile.State pivotFinalState = new TrapezoidProfile.State(State.SCORE_L4.getPivotAngle(), 0);
+        pivotProfile.calculate(0, pivotInitialState, pivotFinalState);
+
+        double fullElevatorMovementTime = elevatorProfile.totalTime();
+        double timeUntilElevatorCollision = elevatorProfile.timeLeftUntil(Constants.kElevatorFrameCollisionHeight.get());
+        double timeUntilPivotOutOfCollision = pivotProfile.timeLeftUntil(Units.degreesToRotations(Constants.kOuttakePivotFrameCollisionAngle.get()));
+
+        double waitTime = Math.max(0, timeUntilPivotOutOfCollision - timeUntilElevatorCollision);
+
+        System.out.println("Theoretical travel time is " + (waitTime + fullElevatorMovementTime));
+        return waitTime + fullElevatorMovementTime;
+    }
+
     public boolean isInTolerance() {
         boolean elevator = Math.abs(elevatorInputs.currentHeightPct - targetState.getElevatorHeight())
                 < Constants.kElevatorTolerance.get();
