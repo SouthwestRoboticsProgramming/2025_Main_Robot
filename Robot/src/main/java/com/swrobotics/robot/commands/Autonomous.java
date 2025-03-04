@@ -170,7 +170,7 @@ public final class Autonomous {
                 Commands.parallel(
                         Commands.sequence(
                                 AutoBuilder.followPath(toScoringPosition),
-                                DriveCommands.snapToPose(robot.drive, () -> Constants.kField.flipPoseForAlliance(scoringPosition))
+                                DriveCommands.snapToPose(robot.drive, robot.lights, () -> Constants.kField.flipPoseForAlliance(scoringPosition))
                         ),
                         Commands.sequence(
                                 RobotBase.isReal()
@@ -197,7 +197,7 @@ public final class Autonomous {
 
                 Commands.race(
                         // Continue snapping in case it got timed out above
-                        DriveCommands.snapToPose(robot.drive, () -> Constants.kField.flipPoseForAlliance(scoringPosition)),
+                        DriveCommands.snapToPose(robot.drive, robot.lights, () -> Constants.kField.flipPoseForAlliance(scoringPosition)),
 
                         robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE)
                                 .until(() -> !robot.coralOuttake.hasPiece() && RobotBase.isReal())
@@ -325,7 +325,7 @@ public final class Autonomous {
 
                         Commands.print("SNAPPY"),
 
-                DriveCommands.snapToPose(robot.drive, () -> FieldPositions.getAllianceReefScoringTarget(position))
+                DriveCommands.snapToPose(robot.drive, robot.lights, () -> FieldPositions.getAllianceReefScoringTarget(position))
                         .until(() -> {
                             Pose2d pose = robot.drive.getEstimatedPose();
 

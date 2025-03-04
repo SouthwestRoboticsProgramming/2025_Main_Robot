@@ -70,4 +70,16 @@ public final class LightCommands {
     public static Command setColorForTime(LightsSubsystem lights, Color color, double seconds) {
         return Commands.run(() -> lights.setCommandRequest(color)).withTimeout(seconds);
     }
+
+    public static Command showColor(LightsSubsystem lights, Color color) {
+        return Commands.run(() -> lights.setCommandRequest(color));
+    }
+
+    public static Command showSnappingToAngle(LightsSubsystem lights) {
+        return showColor(lights, Color.kDarkCyan);
+    }
+
+    public static Command showSnappingToPose(LightsSubsystem lights) {
+        return showColor(lights, Color.kCyan);
+    }
 }

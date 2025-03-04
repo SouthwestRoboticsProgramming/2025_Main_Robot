@@ -112,6 +112,7 @@ public final class ControlBoard extends SubsystemBase {
         driver.b.trigger()
                 .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(
                         robot.drive,
+                        robot.lights,
                         this::getDriveTranslation,
                         () -> FieldPositions.getClosestCoralStationAngle(robot.drive.getEstimatedPose())
                 ));
@@ -119,6 +120,7 @@ public final class ControlBoard extends SubsystemBase {
         driver.a.trigger()
                 .whileTrue(DriveCommands.snapToPose(
                         robot.drive,
+                        robot.lights,
                         () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
 
