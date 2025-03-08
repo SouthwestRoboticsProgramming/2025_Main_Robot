@@ -1,7 +1,6 @@
 package com.swrobotics.robot.subsystems.outtake;
 
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -18,10 +17,11 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CoralOuttakeIOReal implements CoralOuttakeIO {
+public class OuttakeIOReal implements OuttakeIO {
     private final TalonFX motor;
     private final DigitalInput beamBreak;
 
@@ -35,7 +35,7 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
     private final VoltageOut voltageControl;
     private final PositionVoltage positionVoltage;
 
-    public CoralOuttakeIOReal() {
+    public OuttakeIOReal() {
         motor = IOAllocation.CAN.kOuttakeMotor.createTalonFX();
         beamBreak = new DigitalInput(IOAllocation.RIO.kDIO_OuttakeBeamBreak);
 
@@ -99,11 +99,14 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
 
     @Override
     public void setVoltage(double voltage) {
+        Logger.recordOutput("Outtake/State", "Voltage");
+        Logger.recordOutput("Outtake/Voltage Out", voltage);
         motor.setControl(voltageControl.withOutput(voltage));
     }
 
     @Override
     public void setHoldPosition(double position) {
+        Logger.recordOutput("Outtake/State", "Hold");
         motor.setControl(positionVoltage.withPosition(position));
     }
 

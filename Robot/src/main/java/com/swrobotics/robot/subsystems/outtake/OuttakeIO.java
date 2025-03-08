@@ -2,7 +2,7 @@ package com.swrobotics.robot.subsystems.outtake;
 
 import com.swrobotics.robot.logging.AutoLoggedInputs;
 
-public interface CoralOuttakeIO {
+public interface OuttakeIO {
     class Inputs extends AutoLoggedInputs {
         public double voltage;
 
