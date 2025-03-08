@@ -223,6 +223,9 @@ public final class Constants {
     public static final NTEntry<Double> kElevatorHeightL4 = new NTDouble("Superstructure/Elevator/L4 Height", 1).setPersistent();
     public static final NTEntry<Double> kElevatorHeightClimbPrep = new NTDouble("Superstructure/Elevator/Climb Prep Height", 0.75).setPersistent();
     public static final NTEntry<Double> kElevatorHeightClimbEnd = new NTDouble("Superstructure/Elevator/Climb End Height", 0.5).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightLowAlgae = new NTDouble("Superstructure/Elevator/Low Algae Height", 0.5).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightHighAlgae = new NTDouble("Superstructure/Elevator/High Algae Height", 0.75).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightNet = new NTDouble("Superstructure/Elevator/Net Height", 1).setPersistent();
 
     // Coral outtake pivot
     // 60:24 CANcoder
@@ -247,6 +250,9 @@ public final class Constants {
     public static final NTEntry<Double> kOuttakePivotScoreL3Angle = new NTDouble("Superstructure/Pivot/Score L3 Angle (deg)", 75).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL4Angle = new NTDouble("Superstructure/Pivot/Score L4 Angle (deg)", 60).setPersistent();
     public static final NTEntry<Double> kOuttakePivotClimbAngle = new NTDouble("Superstructure/Pivot/Climb Angle (deg)", 90).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotLowAlgaeAngle = new NTDouble("Superstructure/Pivot/Low Algae Angle (deg)", 75).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotHighAlgaeAngle = new NTDouble("Superstructure/Pivot/High Algae Angle (deg)", 75).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotNetAngle = new NTDouble("Superstructure/Pivot/Net Angle (deg)", 75).setPersistent();
 
     // Algae floor intake
     public static final double kAlgaePivotMotorToArmRatio = (36.0 / 16.0) * (56.0 / 24.0) * 25;

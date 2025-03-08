@@ -151,10 +151,10 @@ public final class ControlBoard extends SubsystemBase {
                 ).andThen(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4))
         );
 
-        operator.dpad.up.trigger()
-                .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
-        operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
-                .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
+        // operator.dpad.up.trigger()
+        //         .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
+        // operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
+        //         .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
 
         robot.algaeIntake.setDefaultCommand(
                 robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));

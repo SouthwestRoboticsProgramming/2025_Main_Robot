@@ -16,6 +16,7 @@ import com.swrobotics.robot.logging.RobotView;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
+import com.swrobotics.robot.subsystems.indexer.IndexerSubsystem;
 import com.swrobotics.robot.subsystems.vision.VisionSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -65,6 +66,8 @@ public class RobotContainer {
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
 
+    public final IndexerSubsystem indexer;
+
     public final ControlBoard controlboard;
 
     private Command musicCommand;
@@ -84,6 +87,7 @@ public class RobotContainer {
         superstructure = new SuperstructureSubsystem(coralOuttake);
 
         lights = new LightsSubsystem(this);
+        indexer = new IndexerSubsystem();
 
         // ControlBoard must be initialized last
         controlboard = new ControlBoard(this);

@@ -27,7 +27,10 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         SCORE_L3(Constants.kElevatorHeightL3, Constants.kOuttakePivotScoreL3Angle),
         SCORE_L4(Constants.kElevatorHeightL4, Constants.kOuttakePivotScoreL4Angle),
         PREP_CLIMB(Constants.kElevatorHeightClimbPrep, Constants.kOuttakePivotClimbAngle),
-        CLIMB(Constants.kElevatorHeightClimbEnd, Constants.kOuttakePivotClimbAngle);
+        CLIMB(Constants.kElevatorHeightClimbEnd, Constants.kOuttakePivotClimbAngle),
+        PICKUP_LOW_ALGAE(Constants.kElevatorHeightLowAlgae, Constants.kOuttakePivotLowAlgaeAngle),
+        PICKUP_HIGH_ALGAE(Constants.kElevatorHeightHighAlgae, Constants.kOuttakePivotHighAlgaeAngle),
+        SCORE_NET(Constants.kElevatorHeightNet, Constants.kOuttakePivotNetAngle);
 
         public static State forScoring(int level) {
             return switch (level) {
