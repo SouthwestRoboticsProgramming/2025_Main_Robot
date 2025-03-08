@@ -4,6 +4,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.lib.utils.PolynomialRegression;
 import com.swrobotics.robot.config.Constants;
+import com.swrobotics.robot.subsystems.lights.LightsSubsystem;
 import com.swrobotics.robot.subsystems.swerve.SwerveDriveSubsystem;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -54,6 +55,7 @@ public final class DriveCommands {
 
     public static Command driveFieldRelativeSnapToAngle(
             SwerveDriveSubsystem drive,
+            LightsSubsystem lights,
             Supplier<Translation2d> translationSupplier,
             Supplier<Rotation2d> targetRotationSupplier) {
         PIDController turnPid = new PIDController(0, 0, 0);
@@ -79,10 +81,11 @@ public final class DriveCommands {
                     .withVelocityX(tx.getX())
                     .withVelocityY(tx.getY())
                     .withRotationalRate(rotOutput));
-        }, drive);
+        }, drive)
+                .raceWith(LightCommands.showSnappingToAngle(lights));
     }
 
-    public static Command snapToPose(SwerveDriveSubsystem drive, Supplier<Pose2d> targetPoseSupplier) {
+    public static Command snapToPose(SwerveDriveSubsystem drive, LightsSubsystem lights, Supplier<Pose2d> targetPoseSupplier) {
         PIDController driveXPid = new PIDController(0, 0, 0);
         PIDController driveYPid = new PIDController(0, 0, 0);
         PIDController turnPid = new PIDController(0, 0, 0);
@@ -132,14 +135,16 @@ public final class DriveCommands {
                     .withVelocityX(xOutput)
                     .withVelocityY(yOutput)
                     .withRotationalRate(rotOutput));
-        }, drive);
+        }, drive)
+                .raceWith(LightCommands.showSnappingToPose(lights));
     }
 
     public static Command snapToPoseUntilInTolerance(
             SwerveDriveSubsystem drive,
+            LightsSubsystem lights,
             Supplier<Pose2d> poseSupplier,
             Supplier<Double> toleranceSupplier) {
-        return snapToPose(drive, poseSupplier)
+        return snapToPose(drive, lights, poseSupplier)
                 .until(() -> drive.isCloseTo(
                         poseSupplier.get().getTranslation(),
                         toleranceSupplier.get()

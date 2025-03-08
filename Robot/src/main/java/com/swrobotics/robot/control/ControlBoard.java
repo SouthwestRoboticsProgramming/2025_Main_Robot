@@ -16,7 +16,7 @@ import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
 import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
-import com.swrobotics.robot.subsystems.outtake.CoralOuttakeSubsystem;
+import com.swrobotics.robot.subsystems.outtake.OuttakeSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -43,6 +43,7 @@ public final class ControlBoard extends SubsystemBase {
      * A: Snap to reef point
      * 
      * Left trigger: Intake algae
+     * Right trigger: Score algae
      * 
      * Operator:
      * A: L2
@@ -54,6 +55,7 @@ public final class ControlBoard extends SubsystemBase {
      * Down: Climb
      * 
      * Right trigger: Score coral
+     * Left bumper: Reverse coral
      * 
      * Inverted: 3
      * Not inverted: 2
@@ -111,6 +113,7 @@ public final class ControlBoard extends SubsystemBase {
         driver.b.trigger()
                 .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(
                         robot.drive,
+                        robot.lights,
                         this::getDriveTranslation,
                         () -> FieldPositions.getClosestCoralStationAngle(robot.drive.getEstimatedPose())
                 ));
@@ -118,6 +121,7 @@ public final class ControlBoard extends SubsystemBase {
         driver.a.trigger()
                 .whileTrue(DriveCommands.snapToPose(
                         robot.drive,
+                        robot.lights,
                         () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
 
@@ -148,10 +152,22 @@ public final class ControlBoard extends SubsystemBase {
                 ).andThen(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4))
         );
 
+        Trigger pickupLowAlgae = operator.dpad.down.trigger();
+        Trigger pickupHighAlgae = operator.dpad.up.trigger();
+        Trigger pickupAlgae = pickupLowAlgae.or(pickupHighAlgae);
+
+        operator.dpad.down.trigger()
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_LOW_ALGAE));
+        operator.dpad.left.trigger()
+                .or(operator.dpad.right.trigger())
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_HIGH_ALGAE));
         operator.dpad.up.trigger()
-                .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
-        operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
-                .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_NET));
+
+        // operator.dpad.up.trigger()
+        //         .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
+        // operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
+        //         .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
 
         robot.algaeIntake.setDefaultCommand(
                 robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
@@ -159,16 +175,20 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
         driver.rightTrigger.triggerOutside(0.25)
                 .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
-                
-        robot.coralOuttake.setDefaultCommand(
-                robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.INTAKE));
-        new Trigger(() -> operator.leftTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.INTAKE));
+
+        robot.outtake.setDefaultCommand(Commands.run(() -> {
+            if (pickupAlgae.getAsBoolean()) {
+                robot.outtake.setTargetState(OuttakeSubsystem.State.INTAKE_ALGAE);
+            } else {
+                robot.outtake.setTargetState(OuttakeSubsystem.State.INTAKE_CORAL);
+            }
+        }, robot.outtake));
         new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE));
-       operator.leftBumper.trigger()
-               .onTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.REVERSE)
+                .whileTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE));
+        operator.leftBumper.trigger()
+               .onTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.REVERSE)
                        .withTimeout(0.15));
+
 
         // Everything past here is for testing and should eventually be removed
 
