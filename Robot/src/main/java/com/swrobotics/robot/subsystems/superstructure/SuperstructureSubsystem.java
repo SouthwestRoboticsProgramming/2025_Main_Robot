@@ -141,8 +141,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         double elevatorCurrent = elevatorInputs.currentHeightPct;
         double pivotCurrent = pivotInputs.currentAngleRot;
 
-        boolean up = Math.abs(pivotCurrent - 0.25) < (5.0 / 360.0);
-        if (pivotSyncTimer.advanceIfElapsed(1) && !up && pivotInputs.absoluteAngleOK || SYNC_PIVOT.get()) {
+//        boolean up = Math.abs(pivotCurrent - 0.25) < (5.0 / 360.0);
+        if (pivotSyncTimer.advanceIfElapsed(1) && pivotInputs.absoluteAngleOK || SYNC_PIVOT.get()) {
             SYNC_PIVOT.set(false);
 
             pivotCurrent = pivotInputs.absoluteAngleRot;

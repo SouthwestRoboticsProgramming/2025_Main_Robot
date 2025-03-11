@@ -99,7 +99,6 @@ public final class Autonomous {
     }
 
     private static final class SegmentBuilder {
-//        private final List<Waypoint> waypoints;
         private final Pose2d start;
         private final Pose2d end;
         private final List<RotationTarget> rotationTargets;

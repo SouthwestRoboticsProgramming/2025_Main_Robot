@@ -156,13 +156,10 @@ public final class ControlBoard extends SubsystemBase {
         Trigger pickupHighAlgae = operator.dpad.up.trigger();
         Trigger pickupAlgae = pickupLowAlgae.or(pickupHighAlgae);
 
-        operator.dpad.down.trigger()
+        pickupLowAlgae
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_LOW_ALGAE));
-        operator.dpad.left.trigger()
-                .or(operator.dpad.right.trigger())
+        pickupHighAlgae
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_HIGH_ALGAE));
-        operator.dpad.up.trigger()
-                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_NET));
 
         // operator.dpad.up.trigger()
         //         .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
