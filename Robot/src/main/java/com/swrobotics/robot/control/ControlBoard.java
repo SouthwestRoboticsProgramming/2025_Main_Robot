@@ -2,25 +2,21 @@ package com.swrobotics.robot.control;
 
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.path.PathConstraints;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.input.XboxController;
 import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.lib.net.NTEntry;
-import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
-import com.swrobotics.robot.commands.Autonomous;
+import com.swrobotics.robot.RobotPhysics;
 import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
 import com.swrobotics.robot.commands.DriveCommands;
 import com.swrobotics.robot.commands.RumblePatternCommands;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
-import com.swrobotics.robot.config.PathEnvironments;
-import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
-import com.swrobotics.robot.subsystems.outtake.CoralOuttakeSubsystem;
+import com.swrobotics.robot.subsystems.outtake.OuttakeSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -31,8 +27,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
-import java.util.Set;
 
 public final class ControlBoard extends SubsystemBase {
     /*
@@ -49,6 +43,7 @@ public final class ControlBoard extends SubsystemBase {
      * A: Snap to reef point
      * 
      * Left trigger: Intake algae
+     * Right trigger: Score algae
      * 
      * Operator:
      * A: L2
@@ -60,6 +55,7 @@ public final class ControlBoard extends SubsystemBase {
      * Down: Climb
      * 
      * Right trigger: Score coral
+     * Left bumper: Reverse coral
      * 
      * Inverted: 3
      * Not inverted: 2
@@ -71,7 +67,8 @@ public final class ControlBoard extends SubsystemBase {
     public final XboxController driver;
     public final XboxController operator;
 
-    private final DriveAccelFilter driveFilter;
+    private final DriveAccelFilter driveControlFilter;
+    private final DriveAccelFilter2d driveTippingFilter;
 
     public ControlBoard(RobotContainer robot) {
         this.robot = robot;
@@ -80,7 +77,13 @@ public final class ControlBoard extends SubsystemBase {
         driver = new XboxController(Constants.kDriverControllerPort, Constants.kDeadband);
         operator = new XboxController(Constants.kOperatorControllerPort, Constants.kDeadband);
 
-        driveFilter = new DriveAccelFilter(Constants.kDriveControlMaxAccel);
+        driveControlFilter = new DriveAccelFilter(Constants.kDriveControlMaxAccel);
+        driveTippingFilter = new DriveAccelFilter2d(
+                (dir) -> RobotPhysics.getMaxAccelerationWithoutTipping(
+                        robot.drive.fieldToRobotRelative(dir),
+                        robot.superstructure.getCurrentElevatorHeight()
+                ) - Constants.kDriveTippingAccelTolerance
+        );
 
         configureControls();
     }
@@ -110,6 +113,7 @@ public final class ControlBoard extends SubsystemBase {
         driver.b.trigger()
                 .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(
                         robot.drive,
+                        robot.lights,
                         this::getDriveTranslation,
                         () -> FieldPositions.getClosestCoralStationAngle(robot.drive.getEstimatedPose())
                 ));
@@ -117,6 +121,7 @@ public final class ControlBoard extends SubsystemBase {
         driver.a.trigger()
                 .whileTrue(DriveCommands.snapToPose(
                         robot.drive,
+                        robot.lights,
                         () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
 
@@ -147,10 +152,19 @@ public final class ControlBoard extends SubsystemBase {
                 ).andThen(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4))
         );
 
-        operator.dpad.up.trigger()
-                .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
-        operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
-                .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
+        Trigger pickupLowAlgae = operator.dpad.down.trigger();
+        Trigger pickupHighAlgae = operator.dpad.up.trigger();
+        Trigger pickupAlgae = pickupLowAlgae.or(pickupHighAlgae);
+
+        pickupLowAlgae
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_LOW_ALGAE));
+        pickupHighAlgae
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_HIGH_ALGAE));
+
+        // operator.dpad.up.trigger()
+        //         .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
+        // operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
+        //         .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
 
         robot.algaeIntake.setDefaultCommand(
                 robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
@@ -158,16 +172,20 @@ public final class ControlBoard extends SubsystemBase {
                 .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
         driver.rightTrigger.triggerOutside(0.25)
                 .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
-                
-        robot.coralOuttake.setDefaultCommand(
-                robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.INTAKE));
-        new Trigger(() -> operator.leftTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.INTAKE));
+
+        robot.outtake.setDefaultCommand(Commands.run(() -> {
+            if (pickupAlgae.getAsBoolean()) {
+                robot.outtake.setTargetState(OuttakeSubsystem.State.INTAKE_ALGAE);
+            } else {
+                robot.outtake.setTargetState(OuttakeSubsystem.State.INTAKE_CORAL);
+            }
+        }, robot.outtake));
         new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE));
-       operator.leftBumper.trigger()
-               .onTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.REVERSE)
+                .whileTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE));
+        operator.leftBumper.trigger()
+               .onTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.REVERSE)
                        .withTimeout(0.15));
+
 
         // Everything past here is for testing and should eventually be removed
 
@@ -193,22 +211,19 @@ public final class ControlBoard extends SubsystemBase {
 //                .whileTrue(DriveCommands.feedforwardCharacterization(robot.drive));
 //        operator.start.trigger()
 //                .whileTrue(Autonomous.goSideways5Meters(robot));
-        operator.start.trigger()
-                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
-                                .withVelocityX(3)
-                                .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
-                        robot.drive));
-        operator.back.trigger()
-                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
-                        .withVelocityX(1)
-                        .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
-                        robot.drive));
+//        operator.start.trigger()
+//                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
+//                                .withVelocityX(3)
+//                                .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
+//                        robot.drive));
+//        operator.back.trigger()
+//                .whileTrue(Commands.run(() -> robot.drive.setControl(new SwerveRequest.RobotCentric()
+//                        .withVelocityX(1)
+//                        .withDriveRequestType(SwerveModule.DriveRequestType.Velocity)),
+//                        robot.drive));
     }
 
-    /**
-     * @return translation input for the drive base, in meters/sec
-     */
-    private Translation2d getDriveTranslation() {
+    private Translation2d getDesiredDriveTranslation() {
         double maxSpeed = Constants.kDriveMaxAchievableSpeed;
 
         Translation2d leftStick = driver.getLeftStick();
@@ -225,12 +240,18 @@ public final class ControlBoard extends SubsystemBase {
             return new Translation2d(0, 0);
 
         double targetSpeed = powerMag * maxSpeed;
-        double filteredSpeed = driveFilter.calculate(targetSpeed);
-
+        double filteredSpeed = driveControlFilter.calculate(targetSpeed);
         return new Translation2d(-leftStick.getY(), -leftStick.getX())
                 .div(rawMag) // Normalize translation
                 .times(filteredSpeed) // Apply new speed
                 .rotateBy(FieldInfo.getAllianceForwardAngle()); // Account for driver's perspective
+    }
+
+    /**
+     * @return translation input for the drive base, in meters/sec
+     */
+    private Translation2d getDriveTranslation() {
+        return driveTippingFilter.calculate(getDesiredDriveTranslation());
     }
 
     /**

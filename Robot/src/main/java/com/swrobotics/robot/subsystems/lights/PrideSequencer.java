@@ -32,6 +32,7 @@ public final class PrideSequencer {
             createFlag("3da542,a7d379,ffffff,a9a9a9,000000", 2), // Aromantic
             createFlag("078d70,26ceaa,98e8c1,ffffff,7bade2,5049cc,3d1a78", 2), // Gay
             createFlag("fa4288,ffffff,71197f,000000,071195", 2), // Genderfluid
+            createFlag("e38d00,e7c601,ffffff,5faad7,1f3554", 2), // Aroace
 
             createFlag("000000,bcc6c7,ffffff,a6fa6e,ffffff,bcc6c7,000000"), // Agender
             createFlag("d42c00,fd9855,ffffff,d161a2,a20161"), // Lesbian

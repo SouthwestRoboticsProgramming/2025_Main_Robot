@@ -50,6 +50,8 @@ public final class Constants {
     // See https://sleipnirgroup.github.io/Choreo/usage/estimating-moi/
     // FIXME: Measure in CAD
     public static final double kRobotMOI = 1.0/12.0 * kRobotMass * (kFrameLength*kFrameLength + kFrameWidth*kFrameWidth);
+    public static final double kCOGHeightWithElevatorDown = Units.inchesToMeters(10); // TODO: Measure
+    public static final double kCOGHeightWithElevatorUp = Units.inchesToMeters(23.126);
 
     // Controls
     public static final int kDriverControllerPort = 0;
@@ -94,6 +96,9 @@ public final class Constants {
     // Drive
     public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
 
+    // Subtracted from calculated max acceleration to get tipping acceleration limit
+    public static final double kDriveTippingAccelTolerance = 1; // m/s^2
+
     public static final double kOdometryUpdateFreq = 200; // Hz
     public static final Matrix<N3, N1> kOdometryStdDevs = VecBuilder.fill(0.005, 0.005, 0.001);
 
@@ -103,8 +108,8 @@ public final class Constants {
 
     public static final double kDriveWheelCOF = 1.2; // TODO: Measure?
 
-    public static final double kDriveWheelSpacingX = 55.3 / 100; // m
-    public static final double kDriveWheelSpacingY = 63.0 / 100; // m
+    public static final double kDriveWheelSpacingX = 63.0 / 100; // m
+    public static final double kDriveWheelSpacingY = 55.3 / 100; // m
     public static final double kDriveRadius = Math.hypot(kDriveWheelSpacingX / 2, kDriveWheelSpacingY / 2);
 
     public static final NTEntry<Double> kFrontLeftOffset = new NTDouble("Drive/Modules/Front Left Offset (rot)", -0.335693).setPersistent();
@@ -223,10 +228,13 @@ public final class Constants {
     public static final NTEntry<Double> kElevatorHeightL4 = new NTDouble("Superstructure/Elevator/L4 Height", 1).setPersistent();
     public static final NTEntry<Double> kElevatorHeightClimbPrep = new NTDouble("Superstructure/Elevator/Climb Prep Height", 0.75).setPersistent();
     public static final NTEntry<Double> kElevatorHeightClimbEnd = new NTDouble("Superstructure/Elevator/Climb End Height", 0.5).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightLowAlgae = new NTDouble("Superstructure/Elevator/Low Algae Height", 0.5).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightHighAlgae = new NTDouble("Superstructure/Elevator/High Algae Height", 0.75).setPersistent();
+    public static final NTEntry<Double> kElevatorHeightNet = new NTDouble("Superstructure/Elevator/Net Height", 1).setPersistent();
 
     // Coral outtake pivot
     // 60:24 CANcoder
-    public static final double kOuttakePivotMotorToArmRatio = (60.0 / 27.0) * (58.0 / 18.0) * (60.0 / 8.0);
+    public static final double kOuttakePivotMotorToArmRatio = (60.0 / 28.0) * (58.0 / 18.0) * (60.0 / 8.0);
     public static final double kOuttakePivotCANcoderToArmRatio = 48.0 / 36.0;
     public static final NTEntry<Double> kOuttakePivotEncoderOffset = new NTDouble("Superstructure/Pivot/Encoder/Offset (rot)", 0.415609).setPersistent();
     public static final NTSlot0Configs kOuttakePivotPID =
@@ -247,6 +255,9 @@ public final class Constants {
     public static final NTEntry<Double> kOuttakePivotScoreL3Angle = new NTDouble("Superstructure/Pivot/Score L3 Angle (deg)", 75).setPersistent();
     public static final NTEntry<Double> kOuttakePivotScoreL4Angle = new NTDouble("Superstructure/Pivot/Score L4 Angle (deg)", 60).setPersistent();
     public static final NTEntry<Double> kOuttakePivotClimbAngle = new NTDouble("Superstructure/Pivot/Climb Angle (deg)", 90).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotLowAlgaeAngle = new NTDouble("Superstructure/Pivot/Low Algae Angle (deg)", 75).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotHighAlgaeAngle = new NTDouble("Superstructure/Pivot/High Algae Angle (deg)", 75).setPersistent();
+    public static final NTEntry<Double> kOuttakePivotNetAngle = new NTDouble("Superstructure/Pivot/Net Angle (deg)", 75).setPersistent();
 
     // Algae floor intake
     public static final double kAlgaePivotMotorToArmRatio = (36.0 / 16.0) * (56.0 / 24.0) * 25;
@@ -264,8 +275,11 @@ public final class Constants {
     
     // Coral outtake
     public static final int kOuttakeRefreshFreq = 100; // Hz
-    public static final NTEntry<Double> kOuttakeRollerIntakeVoltage = new NTDouble("Outtake/Intake Voltage", 2).setPersistent();
-    public static final NTEntry<Double> kOuttakeRollerScoreVoltage = new NTDouble("Outtake/Score Voltage", 3).setPersistent();
+    public static final NTEntry<Double> kOuttakeRollerIntakeCoralVoltage = new NTDouble("Outtake/Intake Coral Voltage", 2).setPersistent();
+    public static final NTEntry<Double> kOuttakeRollerScoreCoralVoltage = new NTDouble("Outtake/Score Coral Voltage", 3).setPersistent();
+    public static final NTEntry<Double> kOuttakeRollerIntakeAlgaeVoltage = new NTDouble("Outtake/Intake Algae Voltage", 1).setPersistent();
+    public static final NTEntry<Double> kOuttakeRollerScoreAlgaeVoltage = new NTDouble("Outtake/Score Algae Voltage", 1).setPersistent();
+    public static final NTEntry<Double> kOuttakeRollerHoldAlgaeVoltage = new NTDouble("Outtake/Hold Algae Voltage", 0).setPersistent();
     public static final NTEntry<Double> kOuttakeHoldPositionOffset = new NTDouble("Outtake/Hold Position Offset", 0.3).setPersistent();
     public static final NTSlot0Configs kOuttakeRollerPID =
             new NTSlot0Configs("Outtake/PID", 5, 0, 0, 0, 0, 0);

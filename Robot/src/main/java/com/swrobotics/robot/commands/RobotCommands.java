@@ -43,6 +43,7 @@ public final class RobotCommands {
 
                 DriveCommands.snapToPoseUntilInTolerance(
                         robot.drive,
+                        robot.lights,
                         () -> FieldPositions.getAllianceReefScoringTarget(branch),
                         () -> snapTolerance
                 ),

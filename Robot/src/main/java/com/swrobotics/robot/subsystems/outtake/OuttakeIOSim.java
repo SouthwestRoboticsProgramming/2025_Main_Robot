@@ -1,6 +1,6 @@
 package com.swrobotics.robot.subsystems.outtake;
 
-public class CoralOuttakeIOSim implements CoralOuttakeIO {
+public class OuttakeIOSim implements OuttakeIO {
     @Override
     public void updateInputs(Inputs inputs) {
         inputs.hasPiece = false;
