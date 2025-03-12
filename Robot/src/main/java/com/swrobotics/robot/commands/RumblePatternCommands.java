@@ -28,11 +28,11 @@ public final class RumblePatternCommands {
     public static Command endgameAlertFinalCountdown(XboxController controller, double power) {
         // Pulse once per second
         return Commands.sequence(
-            rumbleForTimeCommand(controller, RumbleType.kBothRumble, power, 0.125),
-            new WaitCommand(0.875)
+            rumbleForTimeCommand(controller, RumbleType.kBothRumble, power, .5),
+            new WaitCommand(.5)
         ).repeatedly()
-        .withTimeout(3.125)
-        .andThen(rumbleForTimeCommand(controller, RumbleType.kBothRumble, power, 1.875));
+        .withTimeout(3.5)
+        .andThen(rumbleForTimeCommand(controller, RumbleType.kBothRumble, power, 1.5));
     }
 
     /**
