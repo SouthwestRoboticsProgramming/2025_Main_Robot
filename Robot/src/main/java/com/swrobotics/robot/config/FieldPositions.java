@@ -137,6 +137,19 @@ public final class FieldPositions {
         return chosen;
     }
 
+    public static Rotation2d getAllianceProcessorAngle() {
+        return FieldInfo.getAllianceForwardAngle().plus(Rotation2d.kCW_90deg);
+    }
+
+    public static double getAllianceProcessorY() {
+        double away = Constants.kRobotLength / 2 + Constants.kSnapProcessorSpace.get();
+        if (FieldInfo.getAlliance() == DriverStation.Alliance.Blue) {
+            return away;
+        } else {
+            return Constants.kField.getHeight() - away;
+        }
+    }
+
     public static Pose2d getLeftCoralStationPickup() {
         return kLeftCoralStationPickup;
     }

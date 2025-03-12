@@ -125,6 +125,17 @@ public final class ControlBoard extends SubsystemBase {
                         () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
 
+        driver.y.trigger()
+                .whileTrue(
+                        DriveCommands.driveFieldRelativeSnapToAngleAndY(
+                                robot.drive,
+                                robot.lights,
+                                () -> getDriveTranslation().getX(),
+                                FieldPositions::getAllianceProcessorAngle,
+                                FieldPositions::getAllianceProcessorY
+                        )
+                );
+
         robot.superstructure.setDefaultCommand(
                 robot.superstructure.commandSetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER));
         operator.x.trigger()

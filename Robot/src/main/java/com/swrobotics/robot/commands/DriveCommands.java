@@ -85,6 +85,59 @@ public final class DriveCommands {
                 .raceWith(LightCommands.showSnappingToAngle(lights));
     }
 
+    public static Command driveFieldRelativeSnapToAngleAndY(
+            SwerveDriveSubsystem drive,
+            LightsSubsystem lights,
+            Supplier<Double> driveXSupplier,
+            Supplier<Rotation2d> targetAngleSupplier,
+            Supplier<Double> targetYSupplier) {
+        PIDController driveYPid = new PIDController(0, 0, 0);
+        PIDController turnPid = new PIDController(0, 0, 0);
+        turnPid.enableContinuousInput(-Math.PI, Math.PI);
+
+        return Commands.startRun(() -> {
+                    // Update PIDs in case we tuned them since last time
+                    driveYPid.setPID(Constants.kSnapDriveKp.get(), 0, Constants.kSnapDriveKd.get());
+                    turnPid.setPID(Constants.kSnapTurnKp.get(), 0, Constants.kSnapTurnKd.get());
+
+                    driveYPid.reset();
+                    turnPid.reset();
+                }, () -> {
+                    Pose2d currentPose = drive.getEstimatedPose();
+                    Rotation2d targetAngle = targetAngleSupplier.get();
+                    double targetY = targetYSupplier.get();
+
+                    double yError = Math.abs(currentPose.getY() - targetY);
+                    double thetaError = MathUtil.absDiffRad(currentPose.getRotation().getRadians(), targetAngle.getRadians());
+
+                    double yOutput = 0;
+                    if (yError > Constants.kSnapXYDeadzone.get()) {
+                        yOutput = driveYPid.calculate(currentPose.getY(), targetY);
+                    }
+                    double rotOutput = 0;
+                    if (thetaError > Math.toRadians(Constants.kSnapThetaDeadzone.get())) {
+                        rotOutput = turnPid.calculate(
+                                MathUtil.wrap(currentPose.getRotation().getRadians(), -Math.PI, Math.PI),
+                                MathUtil.wrap(targetAngle.getRadians(), -Math.PI, Math.PI)
+                        );
+                    }
+
+                    double maxDriveSpeed = Constants.kSnapMaxSpeed.get();
+                    if (Math.abs(yOutput) > maxDriveSpeed) {
+                        yOutput = Math.copySign(maxDriveSpeed, yOutput);
+                    }
+
+                    double maxTurnSpeed = Units.rotationsToRadians(Constants.kSnapMaxTurnSpeed.get());
+                    rotOutput = MathUtil.clamp(rotOutput, -maxTurnSpeed, maxTurnSpeed);
+
+                    drive.setControl(new SwerveRequest.FieldCentric()
+                            .withVelocityX(driveXSupplier.get())
+                            .withVelocityY(yOutput)
+                            .withRotationalRate(rotOutput));
+                }, drive)
+                .raceWith(LightCommands.showSnappingToAngleAndY(lights));
+    }
+
     public static Command snapToPose(SwerveDriveSubsystem drive, LightsSubsystem lights, Supplier<Pose2d> targetPoseSupplier) {
         PIDController driveXPid = new PIDController(0, 0, 0);
         PIDController driveYPid = new PIDController(0, 0, 0);

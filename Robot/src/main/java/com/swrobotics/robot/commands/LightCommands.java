@@ -79,6 +79,10 @@ public final class LightCommands {
         return showColor(lights, Color.kDarkCyan);
     }
 
+    public static Command showSnappingToAngleAndY(LightsSubsystem lights) {
+        return showColor(lights, Color.kBlueViolet);
+    }
+
     public static Command showSnappingToPose(LightsSubsystem lights) {
         return showColor(lights, Color.kCyan);
     }
