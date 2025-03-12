@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -260,5 +261,21 @@ public final class ControlBoard extends SubsystemBase {
     private double getDriveRotation() {
         double input = MathUtil.powerWithSign(-driver.rightStickX.get(), Constants.kDriveControlTurnPower);
         return Units.rotationsToRadians(input * Constants.kDriveControlMaxTurnSpeed);
+    }
+
+    private double getPivotAdjustDeg() {
+        return -operator.leftStickX.get() * Constants.kPivotAdjustMax.get();
+    }
+
+    private double getElevatorAdjust() {
+        return -operator.rightStickY.get() * Constants.kElevatorAdjustMax.get();
+    }
+
+    @Override
+    public void periodic() {
+        if (DriverStation.isTeleop()) {
+                robot.superstructure.setElevatorAdjust(getElevatorAdjust());
+                robot.superstructure.setPivotAdjust(getPivotAdjustDeg());
+        }
     }
 }

@@ -294,6 +294,10 @@ public final class Constants {
     // Motor tracking
     public static final double kOverheatingThreshold = 75; // Celsius
 
+    // Adjusts
+    public static final NTEntry<Double> kPivotAdjustMax = new NTDouble("Superstructure/Pivot/Adjust Max (deg)", 5.0).setPersistent(); // Degrees
+    public static final NTEntry<Double> kElevatorAdjustMax = new NTDouble("Superstructure/Elevator/Adjust Max", 0.05).setPersistent(); // Degrees
+
     // This must be at the bottom of the file so it happens last
     static {
         NTEntry.cleanPersistent();

@@ -45,6 +45,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
         private final Supplier<Double> elevatorHeightGetter;
         private final Supplier<Double> pivotAngleGetter;
+        private double pivotAdjustDeg = 0.0;
+        private double elevatorAdjust = 0.0;
 
         State(Supplier<Double> elevatorHeightGetter, Supplier<Double> pivotAngleGetter) {
             this.elevatorHeightGetter = elevatorHeightGetter;
@@ -52,11 +54,19 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         }
 
         public double getElevatorHeight() {
-            return elevatorHeightGetter.get();
+            return elevatorHeightGetter.get() + elevatorAdjust;
         }
 
         public double getPivotAngle() {
-            return Units.degreesToRotations(pivotAngleGetter.get());
+            return Units.degreesToRotations(pivotAngleGetter.get() + pivotAdjustDeg);
+        }
+
+        public void setPivotAdjust(double pivotAdjustDeg) {
+            this.pivotAdjustDeg = pivotAdjustDeg;
+        }
+
+        public void setElevatorAdjust(double elevatorAdjust) {
+            this.elevatorAdjust = elevatorAdjust;
         }
     }
 
@@ -69,6 +79,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
     private final Timer pivotSyncTimer;
     private State targetState;
+    private double pivotAdjustDeg;
+    private double elevatorAdjust;
 
     private TrapezoidProfile elevatorProfile;
     private TrapezoidProfile pivotProfile;
@@ -127,6 +139,14 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
     public State getTargetState() {
         return targetState;
+    }
+
+    public void setPivotAdjust(double pivotAdjustDeg) {
+        this.pivotAdjustDeg = pivotAdjustDeg;
+    }
+
+    public void setElevatorAdjust(double elevatorAdjust) {
+        this.elevatorAdjust = elevatorAdjust;
     }
 
     public Command commandSetState(State targetState) {
@@ -270,6 +290,10 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Set adjusts
+        targetState.setElevatorAdjust(elevatorAdjust);
+        targetState.setPivotAdjust(pivotAdjustDeg);
+
         elevatorIO.updateInputs(elevatorInputs);
         pivotIO.updateInputs(pivotInputs);
         Logger.processInputs("Elevator", elevatorInputs);
