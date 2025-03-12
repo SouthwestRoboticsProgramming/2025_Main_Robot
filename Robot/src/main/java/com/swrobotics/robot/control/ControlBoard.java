@@ -110,6 +110,13 @@ public final class ControlBoard extends SubsystemBase {
                 .onTrue(RumblePatternCommands.endgameAlert(driver, 0.75)
                         .alongWith(RumblePatternCommands.endgameAlert(operator, 0.75)));
 
+        new Trigger(
+                 () ->
+                        DriverStation.isTeleopEnabled()
+                                && DriverStation.getMatchTime() > 0
+                                && DriverStation.getMatchTime() <= Constants.kEndgameAlertTime)
+                .onTrue(RumblePatternCommands.endgameAlertFinalCountdown(driver, 0.75));
+
         driver.b.trigger()
                 .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(
                         robot.drive,

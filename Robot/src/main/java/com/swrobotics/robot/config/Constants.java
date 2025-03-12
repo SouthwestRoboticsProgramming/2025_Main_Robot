@@ -36,6 +36,7 @@ public final class Constants {
 
     public static final FieldInfo kField = FieldInfo.REEFSCAPE_2025;
     public static final int kEndgameAlertTime = 20;
+    public static final int kEndgameAlert2Time = 5;
 
     // Robot dimensions
     public static final double kFrameLength = Units.inchesToMeters(30); // m
