@@ -23,7 +23,7 @@ public final class DriveAccelFilter2d {
         double dt = timestamp - prevTimestamp;
         prevTimestamp = timestamp;
 
-        System.out.println("Current velocity: " + currentVelocity);
+//        System.out.println("Current velocity: " + currentVelocity);
 
         Translation2d desiredDeltaV = desiredVelocity.minus(currentVelocity);
         double desiredAccelMag = desiredDeltaV.getNorm() / dt;
@@ -33,7 +33,7 @@ public final class DriveAccelFilter2d {
         }
 
         double maxAccelMag = maxAccelGetter.applyAsDouble(desiredDeltaV);
-        System.out.println("Max acceleration: " + maxAccelMag + " m/s^2");
+//        System.out.println("Max acceleration: " + maxAccelMag + " m/s^2");
         double appliedAccelMag = Math.min(desiredAccelMag, maxAccelMag);
 
         currentVelocity = currentVelocity.plus(desiredDeltaV.div(desiredDeltaV.getNorm()).times(appliedAccelMag * dt));
