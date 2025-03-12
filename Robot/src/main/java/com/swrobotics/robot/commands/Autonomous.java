@@ -414,4 +414,29 @@ public final class Autonomous {
         return DriveCommands.driveRobotRelative(robot.drive, () -> new Translation2d(-1, 0), () -> 0.0)
                 .withTimeout(0.8);
     }
+
+    private static Command pushRobot(RobotContainer robot) {
+        return DriveCommands.driveFieldRelative(robot.drive, () -> new Translation2d(1, 0), () -> 0.0)
+                .withTimeout(1.5);
+    }
+
+    public static Command leftPushAnd2Piece(RobotContainer robot) {
+        return Commands.sequence(
+                pushRobot(robot),
+                scoreAt(robot, 9, 4),
+                humanPlayerPickupLeft(robot),
+                scoreAt(robot, 10, 4),
+                backUp(robot)
+        );
+    }
+
+    public static Command rightPushAnd2Piece(RobotContainer robot) {
+        return Commands.sequence(
+                pushRobot(robot),
+                scoreAt(robot, 4, 4),
+                humanPlayerPickupLeft(robot),
+                scoreAt(robot, 3, 4),
+                backUp(robot)
+        );
+    }
 }
