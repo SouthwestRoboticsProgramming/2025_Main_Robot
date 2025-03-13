@@ -114,7 +114,7 @@ public final class ControlBoard extends SubsystemBase {
                  () ->
                         DriverStation.isTeleopEnabled()
                                 && DriverStation.getMatchTime() > 0
-                                && DriverStation.getMatchTime() <= Constants.kEndgameAlertTime)
+                                && DriverStation.getMatchTime() <= Constants.kEndgameAlert2Time)
                 .onTrue(RumblePatternCommands.endgameAlertFinalCountdown(driver, 0.75));
 
         driver.b.trigger()
