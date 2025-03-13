@@ -20,6 +20,10 @@ public final class ElevatorIOSim implements ElevatorIO {
     public void updateInputs(Inputs inputs) {
         if (voltageControl) {
             position += volts * Constants.kPeriodicTime * 0.2;
+
+            if (volts == 0.0) {
+                position = 0.0; // Fall
+            }
         }
 
         inputs.currentHeightPct = position;

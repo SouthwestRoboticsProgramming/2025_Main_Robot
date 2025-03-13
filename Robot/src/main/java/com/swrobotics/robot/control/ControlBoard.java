@@ -125,8 +125,26 @@ public final class ControlBoard extends SubsystemBase {
                         () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
 
-        robot.superstructure.setDefaultCommand(
-                robot.superstructure.commandSetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER));
+        Trigger intakeAlgaeFloor = driver.leftTrigger.triggerOutside(0.25);
+        Trigger scoreAlgaeFloor = driver.rightTrigger.triggerOutside(0.25);
+        Trigger algaeIntakeOut = intakeAlgaeFloor.or(scoreAlgaeFloor);
+
+        robot.algaeIntake.setDefaultCommand(
+                robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
+        intakeAlgaeFloor
+                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
+        scoreAlgaeFloor
+                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
+
+//        robot.superstructure.setDefaultCommand(
+//                robot.superstructure.commandSetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER));
+        robot.superstructure.setDefaultCommand(Commands.run(() -> {
+            if (algaeIntakeOut.getAsBoolean() || robot.outtake.hasPiece()) {
+                robot.superstructure.setTargetState(SuperstructureSubsystem.State.BOTTOM);
+            } else {
+                robot.superstructure.setTargetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER);
+            }
+        }, robot.superstructure));
         operator.x.trigger()
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L1));
         operator.a.trigger()
@@ -152,29 +170,23 @@ public final class ControlBoard extends SubsystemBase {
                 ).andThen(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4))
         );
 
-        Trigger pickupLowAlgae = operator.dpad.down.trigger();
-        Trigger pickupHighAlgae = operator.dpad.up.trigger();
-        Trigger pickupAlgae = pickupLowAlgae.or(pickupHighAlgae);
-
-        pickupLowAlgae
-                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_LOW_ALGAE));
-        pickupHighAlgae
-                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_HIGH_ALGAE));
-
         // operator.dpad.up.trigger()
         //         .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
         // operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
         //         .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
 
-        robot.algaeIntake.setDefaultCommand(
-                robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
-        driver.leftTrigger.triggerOutside(0.25)
-                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
-        driver.rightTrigger.triggerOutside(0.25)
-                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
+        Trigger removeLowAlgae = operator.dpad.down.trigger();
+        Trigger removeHighAlgae = operator.dpad.up.trigger();
+        Trigger removeAlgae = removeLowAlgae.or(removeHighAlgae);
+
+        removeLowAlgae
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_LOW_ALGAE));
+        removeHighAlgae
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_HIGH_ALGAE));
+
 
         robot.outtake.setDefaultCommand(Commands.run(() -> {
-            if (pickupAlgae.getAsBoolean()) {
+            if (removeAlgae.getAsBoolean()) {
                 robot.outtake.setTargetState(OuttakeSubsystem.State.INTAKE_ALGAE);
             } else {
                 robot.outtake.setTargetState(OuttakeSubsystem.State.INTAKE_CORAL);

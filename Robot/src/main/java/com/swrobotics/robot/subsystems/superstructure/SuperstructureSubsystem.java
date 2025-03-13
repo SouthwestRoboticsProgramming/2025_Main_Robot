@@ -22,7 +22,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private static final NTBoolean SYNC_PIVOT = new NTBoolean("Superstructure/Pivot/Encoder/Sync", false);
 
     public enum State {
-        RECEIVE_CORAL_FROM_INDEXER(() -> 0.0, Constants.kOuttakePivotInAngle),
+        BOTTOM(() -> 0.0, Constants.kOuttakePivotInAngle),
+        RECEIVE_CORAL_FROM_INDEXER(Constants.kElevatorIndexerHeight, Constants.kOuttakePivotInAngle),
         SCORE_L1(Constants.kElevatorHeightL1, Constants.kOuttakePivotScoreL1Angle),
         SCORE_L2(Constants.kElevatorHeightL2, Constants.kOuttakePivotScoreL2Angle),
         SCORE_L3(Constants.kElevatorHeightL3, Constants.kOuttakePivotScoreL3Angle),
@@ -296,7 +297,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
             elevatorIO.setVoltage(volts);
         } else {
             double threshold = Constants.kElevatorNeutralThreshold.get();
-            if (elevatorInputs.currentHeightPct < threshold && targetState.getElevatorHeight() < threshold) {
+            if (targetState == State.BOTTOM && elevatorInputs.currentHeightPct < threshold) {
                 elevatorIO.setVoltage(0.0);
             } else {
                 elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);

@@ -207,7 +207,7 @@ public final class Constants {
     );
 
     // Elevator
-    public static final double kElevatorMaxHeightRotations = 24.639;
+    public static final double kElevatorMaxHeightRotations = 25;
     
     public static final NTSlot0Configs kElevatorPID =
             new NTSlot0Configs("Superstructure/Elevator/PID", 0.3, 0, 0.286, 0, 0.12, 0);
@@ -222,6 +222,7 @@ public final class Constants {
     public static final NTEntry<Double> kElevatorFrameCollisionHeight = new NTDouble("Superstructure/Elevator/Frame Collision Height", 0.060566).setPersistent();
     public static final NTEntry<Double> kElevatorStage2CollisionHeight = new NTDouble("Superstructure/Elevator/Stage 2 Collision Height", 0.324990).setPersistent();
     public static final NTEntry<Double> kElevatorNeutralThreshold = new NTDouble("Superstructure/Elevator/Neutral Threshold", 0.08).setPersistent();
+    public static final NTEntry<Double> kElevatorIndexerHeight = new NTDouble("Superstructure/Elevator/Indexer Height", 0.05).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL1 = new NTDouble("Superstructure/Elevator/L1 Height", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL2 = new NTDouble("Superstructure/Elevator/L2 Height", 0.27).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL3 = new NTDouble("Superstructure/Elevator/L3 Height", 0.535).setPersistent();
