@@ -1,7 +1,5 @@
 package com.swrobotics.robot.control;
 
-import com.ctre.phoenix6.swerve.SwerveModule;
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.input.XboxController;
 import com.swrobotics.lib.net.NTBoolean;
@@ -22,7 +20,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -70,6 +67,8 @@ public final class ControlBoard extends SubsystemBase {
 
     private final DriveAccelFilter driveControlFilter;
     private final DriveAccelFilter2d driveTippingFilter;
+
+    private int retriggerL4;
 
     public ControlBoard(RobotContainer robot) {
         this.robot = robot;
@@ -162,8 +161,11 @@ public final class ControlBoard extends SubsystemBase {
 //        operator.y.trigger()
 //                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
 
+        Trigger elevatorL4 = operator.y.trigger()
+                .and(() -> retriggerL4 == 0);
+        
         double[] startTimestamp = {0};
-        operator.y.trigger().whileTrue(
+        elevatorL4.whileTrue(
                 new FunctionalCommand(
                         () -> startTimestamp[0] = Timer.getTimestamp(),
                         () -> robot.superstructure.setTargetState(SuperstructureSubsystem.State.SCORE_L4),
@@ -201,11 +203,21 @@ public final class ControlBoard extends SubsystemBase {
             }
         }, robot.outtake));
         new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE));
+                .whileTrue(Commands.either(
+                        robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE_L4),
+                        robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE_NOT_L4),
+                        elevatorL4
+                ));
+//                .whileTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE));
         operator.leftBumper.trigger()
                .onTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.REVERSE)
                        .withTimeout(0.15));
 
+        double step = 0.0005;
+        driver.dpad.up.trigger()
+                .onTrue(Commands.runOnce(() -> Constants.kElevatorIndexerHeight.set(Constants.kElevatorIndexerHeight.get() + step)));
+        driver.dpad.down.trigger()
+                .onTrue(Commands.runOnce(() -> Constants.kElevatorIndexerHeight.set(Constants.kElevatorIndexerHeight.get() - step)));
 
         // Everything past here is for testing and should eventually be removed
 
@@ -292,9 +304,14 @@ public final class ControlBoard extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (DriverStation.isTeleop()) {
+        if (DriverStation.isTeleopEnabled()) {
                 robot.superstructure.setElevatorAdjust(getElevatorAdjust());
                 robot.superstructure.setPivotAdjust(getPivotAdjustDeg());
+
+                if (retriggerL4 > 0)
+                    retriggerL4--;
+        } else {
+            retriggerL4 = 3;
         }
     }
 }

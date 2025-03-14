@@ -197,7 +197,7 @@ public final class Autonomous {
                         // Continue snapping in case it got timed out above
                         DriveCommands.snapToPose(robot.drive, robot.lights, () -> Constants.kField.flipPoseForAlliance(scoringPosition)),
 
-                        robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE)
+                        robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE_L4)
                                 .until(() -> !robot.outtake.hasPiece() && RobotBase.isReal())
                                 .withTimeout(kScoreTimeout)
                 )
@@ -233,9 +233,16 @@ public final class Autonomous {
         Pose2d score4 = FieldPositions.getBlueReefScoringTarget(rightSide ? 4 : 9);
         Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, score1.getY()), Rotation2d.k180deg);
 
-        // Rotation targets are to prevent rotation when touching the reef
         PathConstraints constraints = getPathConstraints();
-        PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, constraints).build();
+        PathConstraints firstPartConstraints = new PathConstraints(
+                constraints.maxVelocityMPS() * 0.8,
+                constraints.maxAccelerationMPSSq() * 0.8,
+                constraints.maxAngularVelocityRadPerSec(),
+                constraints.maxAngularAccelerationRadPerSecSq()
+        );
+
+        // Rotation targets are to prevent rotation when touching the reef
+        PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, firstPartConstraints).build();
         PathPlannerPath score1ToHP = new SegmentBuilder(score1, hp, constraints)
                 .withCurveStart(rightSide ? 30 : -30)
                 .addRotationTarget(new RotationTarget(0.2, score1.getRotation()))
@@ -343,7 +350,7 @@ public final class Autonomous {
                         .withTimeout(Constants.kAutoToleranceTimeout),
                 Commands.print("SCOREY"),
 
-                robot.outtake.score(Constants.kAutoCoralEjectTime)
+                robot.outtake.score(Constants.kAutoCoralEjectTime, height == 4)
                 ,Commands.print("YAYYY")
         );
     }
