@@ -165,26 +165,43 @@ public final class Autonomous {
                 .orElseThrow()
                 .getTotalTimeSeconds();
 
+        boolean[] indexFailed = { false };
         return Commands.sequence(
                 Commands.parallel(
                         Commands.sequence(
                                 AutoBuilder.followPath(toScoringPosition),
                                 DriveCommands.snapToPose(robot.drive, robot.lights, () -> Constants.kField.flipPoseForAlliance(scoringPosition))
                         ),
+
+                        // Wait until have piece, then elevator up
+                        // Timeout: pathTime - earlyTime - travelTime
+                        //   if timed out, don't put up
+
                         Commands.sequence(
-                                Commands.parallel(
-                                        RobotBase.isReal()
+                                RobotBase.isReal()
                                             ? Commands.waitUntil(robot.outtake::hasPiece)
                                             : Commands.waitSeconds(0.2),
-
-                                        // Bring elevator up as late as possible
-                                        Commands.defer(() -> Commands.waitSeconds(
-                                                pathTime - kElevatorUpEarlyTime - robot.superstructure.calculateIndexerToL4TravelTime()
-                                        ), Collections.emptySet())
-                                ),
-
                                 robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4)
-                        )
+                        ).withDeadline(Commands.sequence(
+                                Commands.defer(() -> Commands.waitSeconds(
+                                        pathTime - kElevatorUpEarlyTime - robot.superstructure.calculateIndexerToL4TravelTime()
+                                ), Collections.emptySet()),
+                                Commands.runOnce(() -> indexFailed[0] = true)
+                        ))
+//                        Commands.sequence(
+//                                Commands.parallel(
+//                                        RobotBase.isReal()
+//                                            ? Commands.waitUntil(robot.outtake::hasPiece)
+//                                            : Commands.waitSeconds(0.2),
+//
+//                                        // Bring elevator up as late as possible
+//                                        Commands.defer(() -> Commands.waitSeconds(
+//                                                pathTime - kElevatorUpEarlyTime - robot.superstructure.calculateIndexerToL4TravelTime()
+//                                        ), Collections.emptySet())
+//                                ),
+//
+//                                robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4)
+//                        )
                 ).until(() -> {
                     Pose2d pose = robot.drive.getEstimatedPose();
 
@@ -209,7 +226,7 @@ public final class Autonomous {
                         robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE_L4)
                                 .until(() -> !robot.outtake.hasPiece() && RobotBase.isReal())
                                 .withTimeout(kScoreTimeout)
-                )
+                ).unless(() -> indexFailed[0])
         );
     }
 
