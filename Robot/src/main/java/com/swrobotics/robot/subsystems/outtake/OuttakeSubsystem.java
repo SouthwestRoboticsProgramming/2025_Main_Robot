@@ -18,7 +18,8 @@ public class OuttakeSubsystem extends SubsystemBase {
     public enum State {
         INTAKE_CORAL,
         INTAKE_ALGAE,
-        SCORE,
+        SCORE_NOT_L4,
+        SCORE_L4,
         HOLD,
         REVERSE
     }
@@ -55,15 +56,15 @@ public class OuttakeSubsystem extends SubsystemBase {
         return Commands.runOnce(() -> setTargetState(targetState), this);
     }
 
-    public Command score(double seconds) {
-        return commandSetState(State.SCORE)
+    public Command score(double seconds, boolean l4) {
+        return commandSetState(l4 ? State.SCORE_L4 : State.SCORE_NOT_L4)
                 .withTimeout(seconds)
                 .finallyDo(() -> setTargetState(State.HOLD));
     }
 
     @Override
     public void periodic() {
-        outtakeIO.setBeamBreakIgnored(targetState == State.SCORE || targetState == State.REVERSE);
+        outtakeIO.setBeamBreakIgnored(targetState == State.SCORE_NOT_L4 || targetState == State.SCORE_L4 || targetState == State.REVERSE);
 
         outtakeIO.updateInputs(outtakeInputs);
         Logger.processInputs("Outtake", outtakeInputs);
@@ -80,10 +81,11 @@ public class OuttakeSubsystem extends SubsystemBase {
         switch (targetState) {
             case INTAKE_CORAL -> outtakeIO.setVoltage(Constants.kOuttakeRollerIntakeCoralVoltage.get());
             case INTAKE_ALGAE -> outtakeIO.setVoltage(Constants.kOuttakeRollerIntakeAlgaeVoltage.get());
-            case SCORE -> outtakeIO.setVoltage(switch (heldPiece) {
+            case SCORE_NOT_L4 -> outtakeIO.setVoltage(switch (heldPiece) {
                 case CORAL -> Constants.kOuttakeRollerScoreCoralVoltage.get();
                 case ALGAE -> Constants.kOuttakeRollerScoreAlgaeVoltage.get();
             });
+            case SCORE_L4 -> outtakeIO.setVoltage(Constants.kOuttakeRollerScoreCoralL4Voltage.get());
             case HOLD -> {
                 switch (heldPiece) {
                     case CORAL -> outtakeIO.setHoldPosition(outtakeInputs.positionAtPieceDetect + Constants.kOuttakeHoldPositionOffset.get());

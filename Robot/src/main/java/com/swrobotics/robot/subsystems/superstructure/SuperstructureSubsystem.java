@@ -22,7 +22,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private static final NTBoolean SYNC_PIVOT = new NTBoolean("Superstructure/Pivot/Encoder/Sync", false);
 
     public enum State {
-        RECEIVE_CORAL_FROM_INDEXER(Constants.kElevatorHeightBottom, Constants.kOuttakePivotInAngle),
+        BOTTOM(() -> 0.0, Constants.kOuttakePivotInAngle),
+        RECEIVE_CORAL_FROM_INDEXER(Constants.kElevatorIndexerHeight, Constants.kOuttakePivotInAngle),
         SCORE_L1(Constants.kElevatorHeightL1, Constants.kOuttakePivotScoreL1Angle),
         SCORE_L2(Constants.kElevatorHeightL2, Constants.kOuttakePivotScoreL2Angle),
         SCORE_L3(Constants.kElevatorHeightL3, Constants.kOuttakePivotScoreL3Angle),
@@ -45,6 +46,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
         private final Supplier<Double> elevatorHeightGetter;
         private final Supplier<Double> pivotAngleGetter;
+        private double pivotAdjustDeg = 0.0;
+        private double elevatorAdjust = 0.0;
 
         State(Supplier<Double> elevatorHeightGetter, Supplier<Double> pivotAngleGetter) {
             this.elevatorHeightGetter = elevatorHeightGetter;
@@ -52,11 +55,19 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         }
 
         public double getElevatorHeight() {
-            return elevatorHeightGetter.get();
+            return elevatorHeightGetter.get() + elevatorAdjust;
         }
 
         public double getPivotAngle() {
-            return Units.degreesToRotations(pivotAngleGetter.get());
+            return Units.degreesToRotations(pivotAngleGetter.get() + pivotAdjustDeg);
+        }
+
+        public void setPivotAdjust(double pivotAdjustDeg) {
+            this.pivotAdjustDeg = pivotAdjustDeg;
+        }
+
+        public void setElevatorAdjust(double elevatorAdjust) {
+            this.elevatorAdjust = elevatorAdjust;
         }
     }
 
@@ -69,6 +80,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
     private final Timer pivotSyncTimer;
     private State targetState;
+    private double pivotAdjustDeg;
+    private double elevatorAdjust;
 
     private TrapezoidProfile elevatorProfile;
     private TrapezoidProfile pivotProfile;
@@ -127,6 +140,14 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
     public State getTargetState() {
         return targetState;
+    }
+
+    public void setPivotAdjust(double pivotAdjustDeg) {
+        this.pivotAdjustDeg = pivotAdjustDeg;
+    }
+
+    public void setElevatorAdjust(double elevatorAdjust) {
+        this.elevatorAdjust = elevatorAdjust;
     }
 
     public Command commandSetState(State targetState) {
@@ -270,6 +291,10 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Set adjusts
+        targetState.setElevatorAdjust(elevatorAdjust);
+        targetState.setPivotAdjust(pivotAdjustDeg);
+
         elevatorIO.updateInputs(elevatorInputs);
         pivotIO.updateInputs(pivotInputs);
         Logger.processInputs("Elevator", elevatorInputs);
@@ -295,7 +320,12 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
             elevatorIO.setVoltage(volts);
         } else {
-            elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);
+            double threshold = Constants.kElevatorNeutralThreshold.get();
+            if (targetState == State.BOTTOM && elevatorInputs.currentHeightPct < threshold) {
+                elevatorIO.setVoltage(0.0);
+            } else {
+                elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);
+            }
         }
 
         boolean hasCoral = outtakeSubsystem.hasPiece();

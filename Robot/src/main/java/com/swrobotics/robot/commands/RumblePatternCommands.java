@@ -5,6 +5,7 @@ import com.swrobotics.lib.input.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
@@ -22,6 +23,16 @@ public final class RumblePatternCommands {
             new WaitCommand(eightNoteSeconds),
             rumbleForTimeCommand(controller, RumbleType.kBothRumble, power, eightNoteSeconds * 2)
         );
+    }
+
+    public static Command endgameAlertFinalCountdown(XboxController controller, double power) {
+        // Pulse once per second
+        return Commands.sequence(
+            rumbleForTimeCommand(controller, RumbleType.kBothRumble, power, .5),
+            new WaitCommand(.5)
+        ).repeatedly()
+        .withTimeout(3.5)
+        .andThen(rumbleForTimeCommand(controller, RumbleType.kBothRumble, power, 1.5));
     }
 
     /**

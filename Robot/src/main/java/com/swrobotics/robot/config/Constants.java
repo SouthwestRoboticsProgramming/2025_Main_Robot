@@ -36,6 +36,7 @@ public final class Constants {
 
     public static final FieldInfo kField = FieldInfo.REEFSCAPE_2025;
     public static final int kEndgameAlertTime = 20;
+    public static final int kEndgameAlert2Time = 5;
 
     // Robot dimensions
     public static final double kFrameLength = Units.inchesToMeters(30); // m
@@ -207,7 +208,7 @@ public final class Constants {
     );
 
     // Elevator
-    public static final double kElevatorMaxHeightRotations = 100;
+    public static final double kElevatorMaxHeightRotations = 25;
     
     public static final NTSlot0Configs kElevatorPID =
             new NTSlot0Configs("Superstructure/Elevator/PID", 0.3, 0, 0.286, 0, 0.12, 0);
@@ -221,7 +222,8 @@ public final class Constants {
     public static final NTEntry<Double> kElevatorDeviationTolerance = new NTDouble("Superstructure/Elevator/Deviation Tolerance", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorFrameCollisionHeight = new NTDouble("Superstructure/Elevator/Frame Collision Height", 0.060566).setPersistent();
     public static final NTEntry<Double> kElevatorStage2CollisionHeight = new NTDouble("Superstructure/Elevator/Stage 2 Collision Height", 0.324990).setPersistent();
-    public static final NTEntry<Double> kElevatorHeightBottom = new NTDouble("Superstructure/Elevator/Bottom Height", 0.02).setPersistent();
+    public static final NTEntry<Double> kElevatorNeutralThreshold = new NTDouble("Superstructure/Elevator/Neutral Threshold", 0.08).setPersistent();
+    public static final NTEntry<Double> kElevatorIndexerHeight = new NTDouble("Superstructure/Elevator/Indexer Height", 0.05).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL1 = new NTDouble("Superstructure/Elevator/L1 Height", 0.01).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL2 = new NTDouble("Superstructure/Elevator/L2 Height", 0.27).setPersistent();
     public static final NTEntry<Double> kElevatorHeightL3 = new NTDouble("Superstructure/Elevator/L3 Height", 0.535).setPersistent();
@@ -277,6 +279,7 @@ public final class Constants {
     public static final int kOuttakeRefreshFreq = 100; // Hz
     public static final NTEntry<Double> kOuttakeRollerIntakeCoralVoltage = new NTDouble("Outtake/Intake Coral Voltage", 2).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreCoralVoltage = new NTDouble("Outtake/Score Coral Voltage", 3).setPersistent();
+    public static final NTEntry<Double> kOuttakeRollerScoreCoralL4Voltage = new NTDouble("Outtake/Score Coral L4 Voltage", 3).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerIntakeAlgaeVoltage = new NTDouble("Outtake/Intake Algae Voltage", 1).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreAlgaeVoltage = new NTDouble("Outtake/Score Algae Voltage", 1).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerHoldAlgaeVoltage = new NTDouble("Outtake/Hold Algae Voltage", 0).setPersistent();
@@ -293,6 +296,10 @@ public final class Constants {
 
     // Motor tracking
     public static final double kOverheatingThreshold = 75; // Celsius
+
+    // Adjusts
+    public static final NTEntry<Double> kPivotAdjustMax = new NTDouble("Superstructure/Pivot/Adjust Max (deg)", 5.0).setPersistent(); // Degrees
+    public static final NTEntry<Double> kElevatorAdjustMax = new NTDouble("Superstructure/Elevator/Adjust Max", 0.05).setPersistent(); // Degrees
 
     // This must be at the bottom of the file so it happens last
     static {

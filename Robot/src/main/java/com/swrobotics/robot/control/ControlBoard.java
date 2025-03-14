@@ -1,7 +1,5 @@
 package com.swrobotics.robot.control;
 
-import com.ctre.phoenix6.swerve.SwerveModule;
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.swrobotics.lib.field.FieldInfo;
 import com.swrobotics.lib.input.XboxController;
 import com.swrobotics.lib.net.NTBoolean;
@@ -70,6 +68,8 @@ public final class ControlBoard extends SubsystemBase {
     private final DriveAccelFilter driveControlFilter;
     private final DriveAccelFilter2d driveTippingFilter;
 
+    private int retriggerL4;
+
     public ControlBoard(RobotContainer robot) {
         this.robot = robot;
 
@@ -110,6 +110,13 @@ public final class ControlBoard extends SubsystemBase {
                 .onTrue(RumblePatternCommands.endgameAlert(driver, 0.75)
                         .alongWith(RumblePatternCommands.endgameAlert(operator, 0.75)));
 
+        new Trigger(
+                 () ->
+                        DriverStation.isTeleopEnabled()
+                                && DriverStation.getMatchTime() > 0
+                                && DriverStation.getMatchTime() <= Constants.kEndgameAlert2Time)
+                .onTrue(RumblePatternCommands.endgameAlertFinalCountdown(driver, 0.75));
+
         driver.b.trigger()
                 .whileTrue(DriveCommands.driveFieldRelativeSnapToAngle(
                         robot.drive,
@@ -125,8 +132,26 @@ public final class ControlBoard extends SubsystemBase {
                         () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
 
-        robot.superstructure.setDefaultCommand(
-                robot.superstructure.commandSetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER));
+        Trigger intakeAlgaeFloor = driver.leftTrigger.triggerOutside(0.25);
+        Trigger scoreAlgaeFloor = driver.rightTrigger.triggerOutside(0.25);
+        Trigger algaeIntakeOut = intakeAlgaeFloor.or(scoreAlgaeFloor);
+
+        robot.algaeIntake.setDefaultCommand(
+                robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
+        intakeAlgaeFloor
+                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
+        scoreAlgaeFloor
+                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
+
+//        robot.superstructure.setDefaultCommand(
+//                robot.superstructure.commandSetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER));
+        robot.superstructure.setDefaultCommand(Commands.run(() -> {
+            if (algaeIntakeOut.getAsBoolean() || robot.outtake.hasPiece()) {
+                robot.superstructure.setTargetState(SuperstructureSubsystem.State.BOTTOM);
+            } else {
+                robot.superstructure.setTargetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER);
+            }
+        }, robot.superstructure));
         operator.x.trigger()
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L1));
         operator.a.trigger()
@@ -136,8 +161,11 @@ public final class ControlBoard extends SubsystemBase {
 //        operator.y.trigger()
 //                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4));
 
+        Trigger elevatorL4 = operator.y.trigger()
+                .and(() -> retriggerL4 == 0);
+        
         double[] startTimestamp = {0};
-        operator.y.trigger().whileTrue(
+        elevatorL4.whileTrue(
                 new FunctionalCommand(
                         () -> startTimestamp[0] = Timer.getTimestamp(),
                         () -> robot.superstructure.setTargetState(SuperstructureSubsystem.State.SCORE_L4),
@@ -152,40 +180,44 @@ public final class ControlBoard extends SubsystemBase {
                 ).andThen(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4))
         );
 
-        Trigger pickupLowAlgae = operator.dpad.down.trigger();
-        Trigger pickupHighAlgae = operator.dpad.up.trigger();
-        Trigger pickupAlgae = pickupLowAlgae.or(pickupHighAlgae);
-
-        pickupLowAlgae
-                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_LOW_ALGAE));
-        pickupHighAlgae
-                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_HIGH_ALGAE));
-
         // operator.dpad.up.trigger()
         //         .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
         // operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
         //         .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
 
-        robot.algaeIntake.setDefaultCommand(
-                robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.STOW));
-        driver.leftTrigger.triggerOutside(0.25)
-                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.INTAKE));
-        driver.rightTrigger.triggerOutside(0.25)
-                .whileTrue(robot.algaeIntake.commandSetState(AlgaeIntakeSubsystem.State.OUTTAKE));
+        Trigger removeLowAlgae = operator.dpad.down.trigger();
+        Trigger removeHighAlgae = operator.dpad.up.trigger();
+        Trigger removeAlgae = removeLowAlgae.or(removeHighAlgae);
+
+        removeLowAlgae
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_LOW_ALGAE));
+        removeHighAlgae
+                .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_HIGH_ALGAE));
+
 
         robot.outtake.setDefaultCommand(Commands.run(() -> {
-            if (pickupAlgae.getAsBoolean()) {
+            if (removeAlgae.getAsBoolean()) {
                 robot.outtake.setTargetState(OuttakeSubsystem.State.INTAKE_ALGAE);
             } else {
                 robot.outtake.setTargetState(OuttakeSubsystem.State.INTAKE_CORAL);
             }
         }, robot.outtake));
         new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
-                .whileTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE));
+                .whileTrue(Commands.either(
+                        robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE_L4),
+                        robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE_NOT_L4),
+                        elevatorL4
+                ));
+//                .whileTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE));
         operator.leftBumper.trigger()
                .onTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.REVERSE)
                        .withTimeout(0.15));
 
+        double step = 0.0005;
+        driver.dpad.up.trigger()
+                .onTrue(Commands.runOnce(() -> Constants.kElevatorIndexerHeight.set(Constants.kElevatorIndexerHeight.get() + step)));
+        driver.dpad.down.trigger()
+                .onTrue(Commands.runOnce(() -> Constants.kElevatorIndexerHeight.set(Constants.kElevatorIndexerHeight.get() - step)));
 
         // Everything past here is for testing and should eventually be removed
 
@@ -260,5 +292,26 @@ public final class ControlBoard extends SubsystemBase {
     private double getDriveRotation() {
         double input = MathUtil.powerWithSign(-driver.rightStickX.get(), Constants.kDriveControlTurnPower);
         return Units.rotationsToRadians(input * Constants.kDriveControlMaxTurnSpeed);
+    }
+
+    private double getPivotAdjustDeg() {
+        return -operator.leftStickX.get() * Constants.kPivotAdjustMax.get();
+    }
+
+    private double getElevatorAdjust() {
+        return -operator.rightStickY.get() * Constants.kElevatorAdjustMax.get();
+    }
+
+    @Override
+    public void periodic() {
+        if (DriverStation.isTeleopEnabled()) {
+                robot.superstructure.setElevatorAdjust(getElevatorAdjust());
+                robot.superstructure.setPivotAdjust(getPivotAdjustDeg());
+
+                if (retriggerL4 > 0)
+                    retriggerL4--;
+        } else {
+            retriggerL4 = 3;
+        }
     }
 }
