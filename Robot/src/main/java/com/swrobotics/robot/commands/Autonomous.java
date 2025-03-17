@@ -257,7 +257,7 @@ public final class Autonomous {
 
         Pose2d score1 = FieldPositions.getBlueReefScoringTarget(rightSide ? 5 : 8);
         Pose2d score2 = FieldPositions.getBlueReefScoringTarget(rightSide ? 2 : 11);
-        score2 = new Pose2d(score2.getTranslation().plus(new Translation2d(0.1, Rotation2d.fromDegrees(30))), score2.getRotation());
+//        score2 = new Pose2d(score2.getTranslation().plus(new Translation2d(0.1, Rotation2d.fromDegrees(30))), score2.getRotation());
         Pose2d score3 = FieldPositions.getBlueReefScoringTarget(rightSide ? 3 : 10);
         Pose2d score4 = FieldPositions.getBlueReefScoringTarget(rightSide ? 4 : 9);
         Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, score1.getY()), Rotation2d.k180deg);
