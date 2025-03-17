@@ -166,7 +166,7 @@ public final class Autonomous {
                 .getTotalTimeSeconds();
 
         boolean[] indexFailed = { false };
-        return Commands.sequence(
+        Command cmd = Commands.sequence(
                 Commands.parallel(
                         Commands.sequence(
                                 AutoBuilder.followPath(toScoringPosition),
@@ -181,7 +181,7 @@ public final class Autonomous {
                                 RobotBase.isReal()
                                             ? Commands.waitUntil(robot.outtake::hasPiece)
                                             : Commands.waitSeconds(0.2),
-                                robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4)
+                                robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.SCORE_L4)
                         ).withDeadline(Commands.sequence(
                                 Commands.defer(() -> Commands.waitSeconds(
                                         pathTime - kElevatorUpEarlyTime - robot.superstructure.calculateIndexerToL4TravelTime()
@@ -226,8 +226,10 @@ public final class Autonomous {
                         robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE_L4)
                                 .until(() -> !robot.outtake.hasPiece() && RobotBase.isReal())
                                 .withTimeout(kScoreTimeout)
-                ).unless(() -> indexFailed[0])
+                )
         );
+
+        return cmd;
     }
 
     private static final double kElevatorDownDelay = 0.5;
@@ -255,6 +257,7 @@ public final class Autonomous {
 
         Pose2d score1 = FieldPositions.getBlueReefScoringTarget(rightSide ? 5 : 8);
         Pose2d score2 = FieldPositions.getBlueReefScoringTarget(rightSide ? 2 : 11);
+        score2 = new Pose2d(score2.getTranslation().plus(new Translation2d(0.1, Rotation2d.fromDegrees(30))), score2.getRotation());
         Pose2d score3 = FieldPositions.getBlueReefScoringTarget(rightSide ? 3 : 10);
         Pose2d score4 = FieldPositions.getBlueReefScoringTarget(rightSide ? 4 : 9);
         Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, score1.getY()), Rotation2d.k180deg);
