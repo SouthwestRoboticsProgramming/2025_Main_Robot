@@ -98,6 +98,9 @@ public abstract class AutoLoggedInputs implements LoggableInputs {
     }
 
     private int[] toInts(long[] longs) {
+        if (longs == null)
+            return null;
+
         int[] ints = new int[longs.length];
         for (int i = 0; i < ints.length; i++)
             ints[i] = (int) longs[i];
@@ -105,6 +108,9 @@ public abstract class AutoLoggedInputs implements LoggableInputs {
     }
 
     private long[] toLongs(int[] ints) {
+        if (ints == null)
+            return null;
+
         long[] longs = new long[ints.length];
         for (int i = 0; i < ints.length; i++)
             longs[i] = ints[i];
