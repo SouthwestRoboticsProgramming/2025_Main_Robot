@@ -51,6 +51,7 @@ public class RobotContainer {
     public static final Logging.SimMode SIM_MODE = Logging.SimMode.SIMULATE;
 //    public static final Logging.SimMode SIM_MODE = Logging.SimMode.SIMULATE_AND_LOG;
 //    public static final Logging.SimMode SIM_MODE = Logging.SimMode.REPLAY;
+    public static final boolean REPLAY_REAL_TIME = true;
 
     // Create dashboard choosers
     private final LoggedDashboardChooser<Command> autoSelector;

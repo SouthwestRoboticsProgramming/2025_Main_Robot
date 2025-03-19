@@ -23,6 +23,9 @@ public final class Robot extends LoggedRobot {
     @Override
     public void robotInit() {
         Logging.initialize(RobotContainer.SIM_MODE);
+        if (RobotBase.isSimulation() && RobotContainer.SIM_MODE == Logging.SimMode.REPLAY) {
+            setUseTiming(RobotContainer.REPLAY_REAL_TIME);
+        }
 
         // Create a RobotContainer to manage our subsystems and our buttons
         robotContainer = new RobotContainer();
