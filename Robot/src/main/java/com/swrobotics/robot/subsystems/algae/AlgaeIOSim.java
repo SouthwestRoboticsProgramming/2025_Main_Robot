@@ -16,6 +16,7 @@ public class AlgaeIOSim implements AlgaeIO {
     public void updateInputs(Inputs inputs) {
         currentAngle = MathUtil.lerp(currentAngle, targetAngle, 0.1);
         inputs.currentAngleRot = currentAngle;
+        inputs.statorCurrent = voltage; // good enough approximation
         inputs.voltageOut = voltage;
     }
 
@@ -31,5 +32,4 @@ public class AlgaeIOSim implements AlgaeIO {
 
     @Override
     public void calibrateEncoder() {}
-    
 }

@@ -8,7 +8,7 @@ public interface AlgaeIO {
     class Inputs extends AutoLoggedInputs {
         // Rotations, from horizontal
         public double currentAngleRot;
-
+        public double statorCurrent;
         public double voltageOut;
     }
 

@@ -1,16 +1,15 @@
 package com.swrobotics.robot.subsystems.algae;
 
-import static edu.wpi.first.units.Units.Degrees;
-
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
 
 import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.logging.RobotView;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -20,20 +19,14 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
     private static final NTBoolean CALIBRATE_PIVOT = new NTBoolean("Algae/Pivot/Calibrate", false);
 
     public enum State {
-        STOW(Constants.kAlgaeStowAngle, () -> 0.0),
-        INTAKE(Constants.kAlgaeIntakeAngle, Constants.kAlgaeIntakeVoltage),
-        OUTTAKE(Constants.kAlgaeIntakeAngle, () -> -Constants.kAlgaeOuttakeVoltage.get());
+        STOW(() -> 0.0),
+        INTAKE(Constants.kAlgaeIntakeVoltage),
+        OUTTAKE(() -> -Constants.kAlgaeOuttakeVoltage.get());
 
-        private final Supplier<Double> angleGetter;
         private final Supplier<Double> voltageGetter;
 
-        State(Supplier<Double> angleGetter, Supplier<Double> voltageGetter) {
-            this.angleGetter = angleGetter;
+        State(Supplier<Double> voltageGetter) {
             this.voltageGetter = voltageGetter;
-        }
-
-        public double getAngle() {
-            return Units.degreesToRotations(angleGetter.get());
         }
 
         public double getVoltage() {
@@ -43,6 +36,7 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
 
     private final AlgaeIO algaeIO;
     private final AlgaeIO.Inputs algaeInputs;
+    private final Debouncer algaeDetectDebounce;
 
     private State targetState;
 
@@ -54,9 +48,12 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
         }
         algaeInputs = new AlgaeIO.Inputs();
 
+        algaeDetectDebounce = new Debouncer(Constants.kAlgaeDetectDebounce.get(), Debouncer.DebounceType.kBoth);
+        Constants.kAlgaeDetectDebounce.onChange(
+                () -> algaeDetectDebounce.setDebounceTime(Constants.kAlgaeDetectDebounce.get()));
+
         targetState = State.STOW;
     }
-
 
     public void setTargetState(State targetState) {
         this.targetState = targetState;
@@ -82,7 +79,23 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
 
         RobotView.setAlgaeIntakeState(algaeInputs.currentAngleRot, algaeInputs.voltageOut);
 
-        algaeIO.setTargetAngle(targetState.getAngle());
+        boolean stalled = algaeInputs.statorCurrent > Constants.kAlgaeDetectCurrentThreshold.get();
+        boolean hasAlgae = algaeDetectDebounce.calculate(stalled);
+        Logger.recordOutput("Algae/Stalled", stalled);
+        Logger.recordOutput("Algae/Has Algae", hasAlgae);
+
+        double angleDeg;
+        if (targetState == State.STOW) {
+            angleDeg = Constants.kAlgaeStowAngle.get();
+        } else {
+            if (hasAlgae) {
+                angleDeg = Constants.kAlgaeIntakeHoldAngle.get();
+            } else {
+                angleDeg = Constants.kAlgaeIntakeAngle.get();
+            }
+        }
+
+        algaeIO.setTargetAngle(Units.degreesToRotations(angleDeg));
         algaeIO.setVoltage(targetState.getVoltage());
     }
 }

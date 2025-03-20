@@ -266,15 +266,18 @@ public final class Constants {
     public static final double kAlgaePivotCANcoderToArmRatio = (36.0 / 16.0);
     public static final NTEntry<Double> kAlgaeStowAngle = new NTDouble("Algae/Pivot/Stow Angle (deg)", 85).setPersistent();
     public static final NTEntry<Double> kAlgaeIntakeAngle = new NTDouble("Algae/Pivot/Intake Angle (deg)", 35.0).setPersistent();
+    public static final NTEntry<Double> kAlgaeIntakeHoldAngle = new NTDouble("Algae/Hold Angle (deg)", 60).setPersistent();
     public static final NTEntry<Double> kAlgaeIntakeVoltage = new NTDouble("Algae/Roller/Intake Voltage", 8).setPersistent();
     public static final NTEntry<Double> kAlgaeOuttakeVoltage = new NTDouble("Algae/Roller/Outtake Voltage", 8).setPersistent();
+    public static final NTEntry<Double> kAlgaeDetectCurrentThreshold = new NTDouble("Algae/Roller/Detect Current Threshold (A)", 15).setPersistent();
+    public static final NTEntry<Double> kAlgaeDetectDebounce = new NTDouble("Algae/Roller/Detect Debounce (s)", 0.4).setPersistent();
     public static final NTEntry<Double> kAlgaePivotEncoderOffset = new NTDouble("Algae/Pivot/Offset (rot)", -0.244141).setPersistent();
     public static final NTEntry<Double> kAlgaeIntakeCurrentLimit = new NTDouble("Algae/Roller/Current Limit (A)", 24).setPersistent();
     public static final NTSlot0Configs kAlgaePivotPID =
             new NTSlot0Configs("Algae/Pivot/PID", 50, 5, 0.122, 0.1, 17, 0.2);
     public static final NTMotionMagicConfigs kAlgaePivotMotionMagic =
             new NTMotionMagicConfigs("Algae/Pivot/Motion Magic", 20, 4, 0);
-    
+
     // Coral outtake
     public static final int kOuttakeRefreshFreq = 100; // Hz
     public static final NTEntry<Double> kOuttakeRollerIntakeCoralVoltage = new NTDouble("Outtake/Intake Coral Voltage", 2).setPersistent();

@@ -2,6 +2,7 @@ package com.swrobotics.robot.subsystems.algae;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.*;
+import edu.wpi.first.units.measure.Current;
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.StatusSignal;
@@ -29,6 +30,7 @@ public class AlgaeIOReal implements AlgaeIO {
 
     private final StatusSignal<Angle> pivotMotorPositionStatus;
     private final StatusSignal<Angle> canCoderPositionStatus;
+    private final StatusSignal<Current> statorCurrentStatus;
 
     private final MotionMagicVoltage positionControl;
     private final VoltageOut rollerControl;
@@ -68,6 +70,7 @@ public class AlgaeIOReal implements AlgaeIO {
 
         pivotMotorPositionStatus = pivotMotor.getPosition();
         canCoderPositionStatus = canCoder.getAbsolutePosition();
+        statorCurrentStatus = rollerMotor.getStatorCurrent();
 
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
 
@@ -100,8 +103,10 @@ public class AlgaeIOReal implements AlgaeIO {
         Logger.recordOutput("Algae/CANcoder Position", canCoderPositionStatus.getValueAsDouble());
 
         pivotMotorPositionStatus.refresh();
+        statorCurrentStatus.refresh();
         Logger.recordOutput("Algae/Motor Position", pivotMotorPositionStatus.getValueAsDouble());
         inputs.currentAngleRot = pivotMotorPositionStatus.getValueAsDouble();
+        inputs.statorCurrent = statorCurrentStatus.getValueAsDouble();
 
         Logger.recordOutput("Algae/Rotor Position", pivotMotor.getRotorPosition().getValueAsDouble());
     }
