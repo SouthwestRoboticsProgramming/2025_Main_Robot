@@ -37,7 +37,7 @@ public class OuttakeIOReal implements OuttakeIO {
 
     public OuttakeIOReal() {
         motor = IOAllocation.CAN.kOuttakeMotor.createTalonFX();
-        beamBreak = new DigitalInput(IOAllocation.RIO.kDIO_OuttakeBeamBreak);
+        beamBreak = new DigitalInput(IOAllocation.RIO.kDIO_CoralOuttakeBeamBreak);
 
         TalonFXConfigHelper config = new TalonFXConfigHelper();
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
