@@ -40,7 +40,7 @@ public class CoralOuttakeIOReal implements CoralOuttakeIO {
         beamBreak = new DigitalInput(IOAllocation.RIO.kDIO_CoralOuttakeBeamBreak);
 
         TalonFXConfigHelper config = new TalonFXConfigHelper();
-        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.addTunable(Constants.kOuttakeRollerPID);
         config.apply(motor);

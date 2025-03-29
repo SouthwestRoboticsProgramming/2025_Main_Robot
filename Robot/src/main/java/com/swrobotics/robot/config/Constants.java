@@ -280,6 +280,7 @@ public final class Constants {
 
     // Coral outtake
     public static final int kOuttakeRefreshFreq = 100; // Hz
+    public static final NTEntry<Double> kOuttakeRollerAlgaeDebounce = new NTDouble("Outtake/Algae Debounce", 0.5).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerIntakeCoralVoltage = new NTDouble("Outtake/Intake Coral Voltage", 2).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreCoralVoltage = new NTDouble("Outtake/Score Coral Voltage", 3).setPersistent();
     public static final NTEntry<Double> kOuttakeRollerScoreCoralL4Voltage = new NTDouble("Outtake/Score Coral L4 Voltage", 3).setPersistent();

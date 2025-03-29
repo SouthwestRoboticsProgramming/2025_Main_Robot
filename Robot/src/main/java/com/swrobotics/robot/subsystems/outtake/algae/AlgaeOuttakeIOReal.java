@@ -49,7 +49,7 @@ public class AlgaeOuttakeIOReal implements AlgaeOuttakeIO {
     @Override
     public void updateInputs(Inputs inputs) {
         inputs.voltage = 0;
-        inputs.hasPiece = beamBreak.get();
+        inputs.hasPiece = !beamBreak.get();
         inputs.successfulDaqs = successfulDaqs.get();
         inputs.failedDaqs = failedDaqs.get();
     }
