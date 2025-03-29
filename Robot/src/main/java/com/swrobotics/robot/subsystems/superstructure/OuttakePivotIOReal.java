@@ -111,7 +111,7 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
     @Override
     public void calibrateEncoder() {
         // Assumes that the arm is currently in vertical position
-        double calibrationAngle = 0.25; // Rotations from horizontal
+        double calibrationAngle = 0.75; // Rotations from horizontal
 
         CTREUtil.retryUntilOk(canCoder, () -> canCoderPositionStatus.waitForUpdate(1).getStatus());
         double canCoderPos = canCoderPositionStatus.getValue().in(Units.Rotations);

@@ -236,8 +236,8 @@ public final class Constants {
 
     // Coral outtake pivot
     // 60:24 CANcoder
-    public static final double kOuttakePivotMotorToArmRatio = (60.0 / 28.0) * (58.0 / 18.0) * (60.0 / 8.0);
-    public static final double kOuttakePivotCANcoderToArmRatio = 48.0 / 36.0;
+    public static final double kOuttakePivotMotorToArmRatio = (48.0 / 16.0) * (42.0 / 24.0) * (16.0);
+    public static final double kOuttakePivotCANcoderToArmRatio = 1.0;
     public static final NTEntry<Double> kOuttakePivotEncoderOffset = new NTDouble("Superstructure/Pivot/Encoder/Offset (rot)", 0.415609).setPersistent();
     public static final NTSlot0Configs kOuttakePivotPID =
             new NTSlot0Configs("Superstructure/Pivot/PID", 200, 0, 0.316, 0, 7.021702, 0);
