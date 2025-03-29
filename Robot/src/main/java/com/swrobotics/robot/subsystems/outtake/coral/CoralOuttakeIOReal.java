@@ -1,4 +1,4 @@
-package com.swrobotics.robot.subsystems.outtake;
+package com.swrobotics.robot.subsystems.outtake.coral;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.PositionVoltage;

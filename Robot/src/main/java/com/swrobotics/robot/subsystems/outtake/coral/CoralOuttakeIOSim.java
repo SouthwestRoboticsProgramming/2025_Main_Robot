@@ -1,4 +1,4 @@
-package com.swrobotics.robot.subsystems.outtake;
+package com.swrobotics.robot.subsystems.outtake.coral;
 
 public class CoralOuttakeIOSim implements CoralOuttakeIO {
     @Override

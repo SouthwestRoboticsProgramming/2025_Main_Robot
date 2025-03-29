@@ -1,4 +1,4 @@
-package com.swrobotics.robot.subsystems.outtake;
+package com.swrobotics.robot.subsystems.outtake.algae;
 
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;

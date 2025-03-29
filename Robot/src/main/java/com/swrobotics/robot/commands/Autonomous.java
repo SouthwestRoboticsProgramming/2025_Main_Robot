@@ -8,7 +8,7 @@ import com.swrobotics.robot.RobotContainer;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 import com.swrobotics.robot.config.PathEnvironments;
-import com.swrobotics.robot.subsystems.outtake.OuttakeSubsystem;
+import com.swrobotics.robot.subsystems.outtake.coral.CoralOuttakeSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -179,7 +179,7 @@ public final class Autonomous {
 
                         Commands.sequence(
                                 RobotBase.isReal()
-                                            ? Commands.waitUntil(robot.outtake::hasPiece)
+                                            ? Commands.waitUntil(robot.coralOuttake::hasPiece)
                                             : Commands.waitSeconds(0.2),
                                 robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.SCORE_L4)
                         ).withDeadline(Commands.sequence(
@@ -223,8 +223,8 @@ public final class Autonomous {
                         // Continue snapping in case it got timed out above
                         DriveCommands.snapToPose(robot.drive, robot.lights, () -> Constants.kField.flipPoseForAlliance(scoringPosition)),
 
-                        robot.outtake.commandSetCoralState(OuttakeSubsystem.CoralState.SCORE_L4)
-                                .until(() -> !robot.outtake.hasPiece() && RobotBase.isReal())
+                        robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE_L4)
+                                .until(() -> !robot.coralOuttake.hasPiece() && RobotBase.isReal())
                                 .withTimeout(kScoreTimeout)
                 )
         );
@@ -242,10 +242,10 @@ public final class Autonomous {
                         Commands.sequence(
                                 Commands.waitSeconds(kElevatorDownDelay),
                                 robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER),
-                                robot.outtake.commandSetCoralStateOnce(OuttakeSubsystem.CoralState.INTAKE_CORAL)
+                                robot.coralOuttake.commandSetStateOnce(CoralOuttakeSubsystem.State.INTAKE_CORAL)
                         )
                 ),
-                Commands.waitUntil(robot.outtake::hasPiece)
+                Commands.waitUntil(robot.coralOuttake::hasPiece)
                         .withTimeout(kHumanPlayerWaitTimeout)
         );
     }
@@ -379,7 +379,7 @@ public final class Autonomous {
                         .withTimeout(Constants.kAutoToleranceTimeout),
                 Commands.print("SCOREY"),
 
-                robot.outtake.score(Constants.kAutoCoralEjectTime, height == 4)
+                robot.coralOuttake.score(Constants.kAutoCoralEjectTime, height == 4)
                 ,Commands.print("YAYYY")
         );
     }
@@ -407,13 +407,13 @@ public final class Autonomous {
                         null
                 ).alongWith(Commands.sequence(
                         Commands.waitSeconds(Constants.kAutoElevatorDownDelay),
-                        robot.outtake.commandSetCoralStateOnce(OuttakeSubsystem.CoralState.INTAKE_CORAL),
+                        robot.coralOuttake.commandSetStateOnce(CoralOuttakeSubsystem.State.INTAKE_CORAL),
                         robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER)
                 )),
 
                 Commands.print("WAITING FOR HP"),
                 // No timeout because it's better to wait long then leave without coral
-                Commands.waitUntil(() -> robot.outtake.hasPiece() || RobotBase.isSimulation())
+                Commands.waitUntil(() -> robot.coralOuttake.hasPiece() || RobotBase.isSimulation())
 
                         // Quick fix for Week 0 since we weren't able to get the robot to drive to the right spot
                         // FIXME: Actually go to the spot
@@ -432,13 +432,13 @@ public final class Autonomous {
                         constraints
                 ).alongWith(Commands.sequence(
                         Commands.waitSeconds(Constants.kAutoElevatorDownDelay),
-                        robot.outtake.commandSetCoralStateOnce(OuttakeSubsystem.CoralState.INTAKE_CORAL),
+                        robot.coralOuttake.commandSetStateOnce(CoralOuttakeSubsystem.State.INTAKE_CORAL),
                         robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER)
                 )),
 
                 Commands.print("WAITING FOR HP"),
                 // No timeout because it's better to wait long then leave without coral
-                Commands.waitUntil(() -> robot.outtake.hasPiece() || RobotBase.isSimulation())
+                Commands.waitUntil(() -> robot.coralOuttake.hasPiece() || RobotBase.isSimulation())
 
                         // Quick fix for Week 0 since we weren't able to get the robot to drive to the right spot
                         // FIXME: Actually go to the spot

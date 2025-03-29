@@ -1,4 +1,4 @@
-package com.swrobotics.robot.subsystems.outtake;
+package com.swrobotics.robot.subsystems.outtake.algae;
 
 import com.swrobotics.robot.logging.AutoLoggedInputs;
 

@@ -32,7 +32,8 @@ import com.swrobotics.robot.logging.FieldView;
 import com.swrobotics.robot.logging.Logging;
 import com.swrobotics.robot.subsystems.lights.LightsSubsystem;
 import com.swrobotics.robot.subsystems.music.MusicSubsystem;
-import com.swrobotics.robot.subsystems.outtake.OuttakeSubsystem;
+import com.swrobotics.robot.subsystems.outtake.algae.AlgaeOuttakeSubsystem;
+import com.swrobotics.robot.subsystems.outtake.coral.CoralOuttakeSubsystem;
 import com.swrobotics.robot.subsystems.motortracker.MotorTrackerSubsystem;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -62,7 +63,8 @@ public class RobotContainer {
     public final VisionSubsystem vision;
     public final SuperstructureSubsystem superstructure;
     public final AlgaeIntakeSubsystem algaeIntake;
-    public final OuttakeSubsystem outtake;
+    public final CoralOuttakeSubsystem coralOuttake;
+    public final AlgaeOuttakeSubsystem algaeOuttake;
 
     public final LightsSubsystem lights;
     public final MusicSubsystem music;
@@ -84,8 +86,9 @@ public class RobotContainer {
         drive = new SwerveDriveSubsystem();
         vision = new VisionSubsystem(drive);
         algaeIntake = new AlgaeIntakeSubsystem();
-        outtake = new OuttakeSubsystem();
-        superstructure = new SuperstructureSubsystem(outtake);
+        coralOuttake = new CoralOuttakeSubsystem();
+        algaeOuttake = new AlgaeOuttakeSubsystem();
+        superstructure = new SuperstructureSubsystem(coralOuttake);
 
         lights = new LightsSubsystem(this);
         indexer = new IndexerSubsystem();

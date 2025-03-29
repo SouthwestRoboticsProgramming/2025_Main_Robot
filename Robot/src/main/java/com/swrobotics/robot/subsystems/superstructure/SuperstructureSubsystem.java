@@ -4,7 +4,8 @@ import com.swrobotics.lib.net.NTBoolean;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.logging.RobotView;
-import com.swrobotics.robot.subsystems.outtake.OuttakeSubsystem;
+import com.swrobotics.robot.subsystems.outtake.coral.CoralOuttakeSubsystem;
+
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -76,7 +77,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private final OuttakePivotIO pivotIO;
     private final OuttakePivotIO.Inputs pivotInputs;
 
-    private final OuttakeSubsystem outtakeSubsystem;
+    private final CoralOuttakeSubsystem outtakeSubsystem;
 
     private final Timer pivotSyncTimer;
     private State targetState;
@@ -88,7 +89,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private TrapezoidProfile.State elevatorSetpoint;
     private TrapezoidProfile.State pivotSetpoint;
 
-    public SuperstructureSubsystem(OuttakeSubsystem outtakeSubsystem) {
+    public SuperstructureSubsystem(CoralOuttakeSubsystem outtakeSubsystem) {
         if (RobotBase.isReal()) {
             elevatorIO = new ElevatorIOReal();
             pivotIO = new OuttakePivotIOReal();

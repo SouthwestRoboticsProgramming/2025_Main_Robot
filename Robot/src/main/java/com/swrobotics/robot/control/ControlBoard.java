@@ -14,7 +14,9 @@ import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
 
 import com.swrobotics.robot.subsystems.algae.AlgaeIntakeSubsystem;
-import com.swrobotics.robot.subsystems.outtake.OuttakeSubsystem;
+import com.swrobotics.robot.subsystems.outtake.algae.AlgaeOuttakeSubsystem;
+import com.swrobotics.robot.subsystems.outtake.algae.AlgaeOuttakeSubsystem.State;
+import com.swrobotics.robot.subsystems.outtake.coral.CoralOuttakeSubsystem;
 import com.swrobotics.robot.subsystems.superstructure.SuperstructureSubsystem;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -146,7 +148,7 @@ public final class ControlBoard extends SubsystemBase {
 //        robot.superstructure.setDefaultCommand(
 //                robot.superstructure.commandSetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER));
         robot.superstructure.setDefaultCommand(Commands.run(() -> {
-            if (algaeIntakeOut.getAsBoolean() || robot.outtake.hasPiece()) {
+            if (algaeIntakeOut.getAsBoolean() || robot.coralOuttake.hasPiece()) {
                 robot.superstructure.setTargetState(SuperstructureSubsystem.State.BOTTOM);
             } else {
                 robot.superstructure.setTargetState(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER);
@@ -180,33 +182,35 @@ public final class ControlBoard extends SubsystemBase {
                 ).andThen(robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4))
         );
 
-        // operator.dpad.up.trigger()
-        //         .toggleOnTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PREP_CLIMB));
-        // operator.dpad.down.trigger().and(() -> robot.superstructure.getTargetState() == SuperstructureSubsystem.State.PREP_CLIMB)
-        //         .onTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.CLIMB));
-
         Trigger removeLowAlgae = operator.dpad.down.trigger();
         Trigger removeHighAlgae = operator.dpad.up.trigger();
-        Trigger removeAlgae = removeLowAlgae.or(removeHighAlgae);
+        Trigger removeAlgae = removeHighAlgae.or(removeLowAlgae);
 
         removeLowAlgae
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_LOW_ALGAE));
         removeHighAlgae
                 .whileTrue(robot.superstructure.commandSetState(SuperstructureSubsystem.State.PICKUP_HIGH_ALGAE));
 
+        robot.algaeOuttake.setDefaultCommand(Commands.run(() -> {
+                robot.algaeOuttake.setTargetState(AlgaeOuttakeSubsystem.State.IDLE);
+        }, robot.algaeOuttake));
 
-        robot.outtake.setDefaultCommand(Commands.run(() -> {
-                robot.outtake.setTargetCoralState(OuttakeSubsystem.CoralState.INTAKE_CORAL);
-        }, robot.outtake));
+        removeAlgae.whileTrue(robot.algaeOuttake.commandSetState(State.INTAKE));
+        
+
+        robot.coralOuttake.setDefaultCommand(Commands.run(() -> {
+                robot.coralOuttake.setTargetState(CoralOuttakeSubsystem.State.INTAKE_CORAL);
+        }, robot.coralOuttake));
+
         new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
                 .whileTrue(Commands.either(
-                        robot.outtake.commandSetCoralState(OuttakeSubsystem.CoralState.SCORE_L4),
-                        robot.outtake.commandSetCoralState(OuttakeSubsystem.CoralState.SCORE_NOT_L4),
+                        robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE_L4),
+                        robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.SCORE_NOT_L4),
                         elevatorL4
                 ));
-//                .whileTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE));
+//                .whileTrue(robot.outtake.commandSetState(CoralOuttakeSubsystem.State.SCORE));
         operator.leftBumper.trigger()
-               .onTrue(robot.outtake.commandSetCoralState(OuttakeSubsystem.CoralState.REVERSE)
+               .onTrue(robot.coralOuttake.commandSetState(CoralOuttakeSubsystem.State.REVERSE)
                        .withTimeout(0.15));
 
         double step = 0.0005;
