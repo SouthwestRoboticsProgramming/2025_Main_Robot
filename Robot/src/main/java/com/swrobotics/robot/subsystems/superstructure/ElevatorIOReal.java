@@ -84,13 +84,13 @@ public final class ElevatorIOReal implements ElevatorIO {
         double positionRot = heightPct * Constants.kElevatorMaxHeightRotations;
         double velocityRot = ffVelocityPctPerSec * Constants.kElevatorMaxHeightRotations;
 
-        motor1.setControl(positionControl
-                .withPosition(positionRot)
-                .withVelocity(velocityRot));
+        // motor1.setControl(positionControl
+        //         .withPosition(positionRot)
+        //         .withVelocity(velocityRot));
     }
 
     @Override
     public void setVoltage(double volts) {
-        motor1.setControl(voltageControl.withOutput(volts));
+        // motor1.setControl(voltageControl.withOutput(volts));
     }
 }

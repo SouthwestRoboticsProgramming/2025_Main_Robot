@@ -98,9 +98,9 @@ public final class OuttakePivotIOReal implements OuttakePivotIO {
                 ? positionControl
                 : positionControlWithCoral;
 
-        motor.setControl(control
-                .withPosition(targetAngleRot - motorPositionOffset)
-                .withVelocity(ffVelocityRotPerSec));
+        // motor.setControl(control
+        //         .withPosition(targetAngleRot - motorPositionOffset)
+        //         .withVelocity(ffVelocityRotPerSec));
     }
 
     @Override

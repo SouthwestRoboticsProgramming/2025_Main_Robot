@@ -113,12 +113,12 @@ public class AlgaeIOReal implements AlgaeIO {
 
     @Override
     public void setTargetAngle(double targetAngleRot) {
-         pivotMotor.setControl(positionControl.withPosition(targetAngleRot));
+        //  pivotMotor.setControl(positionControl.withPosition(targetAngleRot));
     }
 
     @Override
     public void setVoltage(double targetVoltage) {
-        rollerMotor.setControl(rollerControl.withOutput(targetVoltage));
+        // rollerMotor.setControl(rollerControl.withOutput(targetVoltage));
     }
 
     @Override
