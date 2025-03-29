@@ -196,21 +196,17 @@ public final class ControlBoard extends SubsystemBase {
 
 
         robot.outtake.setDefaultCommand(Commands.run(() -> {
-            if (removeAlgae.getAsBoolean()) {
-                robot.outtake.setTargetState(OuttakeSubsystem.State.INTAKE_ALGAE);
-            } else {
-                robot.outtake.setTargetState(OuttakeSubsystem.State.INTAKE_CORAL);
-            }
+                robot.outtake.setTargetCoralState(OuttakeSubsystem.CoralState.INTAKE_CORAL);
         }, robot.outtake));
         new Trigger(() -> operator.rightTrigger.isOutside(Constants.kTriggerThreshold))
                 .whileTrue(Commands.either(
-                        robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE_L4),
-                        robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE_NOT_L4),
+                        robot.outtake.commandSetCoralState(OuttakeSubsystem.CoralState.SCORE_L4),
+                        robot.outtake.commandSetCoralState(OuttakeSubsystem.CoralState.SCORE_NOT_L4),
                         elevatorL4
                 ));
 //                .whileTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE));
         operator.leftBumper.trigger()
-               .onTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.REVERSE)
+               .onTrue(robot.outtake.commandSetCoralState(OuttakeSubsystem.CoralState.REVERSE)
                        .withTimeout(0.15));
 
         double step = 0.0005;

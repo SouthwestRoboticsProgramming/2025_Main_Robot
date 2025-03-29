@@ -29,7 +29,7 @@ public final class IOAllocation {
 
         public static final CanId kOuttakePivotMotor = new CanId(1, kRIO);
         public static final CanId kOuttakePivotEncoder = new CanId(2, kRIO);
-        public static final CanId kOuttakeMotor = new CanId(3, kRIO);
+        public static final CanId kCoralOuttakeMotor = new CanId(3, kRIO);
         public static final CanId kAlgaeOuttakeMotor = new CanId(4, kRIO);
 
         public static final CanId kPDP = new CanId(62, kRIO);

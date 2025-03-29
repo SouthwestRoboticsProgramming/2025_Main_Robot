@@ -21,7 +21,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class OuttakeIOReal implements OuttakeIO {
+public class CoralOuttakeIOReal implements CoralOuttakeIO {
     private final TalonFX motor;
     private final DigitalInput beamBreak;
 
@@ -35,8 +35,8 @@ public class OuttakeIOReal implements OuttakeIO {
     private final VoltageOut voltageControl;
     private final PositionVoltage positionVoltage;
 
-    public OuttakeIOReal() {
-        motor = IOAllocation.CAN.kOuttakeMotor.createTalonFX();
+    public CoralOuttakeIOReal() {
+        motor = IOAllocation.CAN.kCoralOuttakeMotor.createTalonFX();
         beamBreak = new DigitalInput(IOAllocation.RIO.kDIO_CoralOuttakeBeamBreak);
 
         TalonFXConfigHelper config = new TalonFXConfigHelper();
@@ -45,7 +45,7 @@ public class OuttakeIOReal implements OuttakeIO {
         config.addTunable(Constants.kOuttakeRollerPID);
         config.apply(motor);
 
-        MotorTrackerSubsystem.getInstance().addMotor("Outtake", motor);
+        MotorTrackerSubsystem.getInstance().addMotor("Coral Outtake", motor);
         MusicSubsystem.getInstance().addInstrument(motor);
 
         // Better solution to the goofy reverse thing
@@ -99,14 +99,14 @@ public class OuttakeIOReal implements OuttakeIO {
 
     @Override
     public void setVoltage(double voltage) {
-        Logger.recordOutput("Outtake/State", "Voltage");
-        Logger.recordOutput("Outtake/Voltage Out", voltage);
+        Logger.recordOutput("Coral Outtake/State", "Voltage");
+        Logger.recordOutput("Coral Outtake/Voltage Out", voltage);
         motor.setControl(voltageControl.withOutput(voltage));
     }
 
     @Override
     public void setHoldPosition(double position) {
-        Logger.recordOutput("Outtake/State", "Hold");
+        Logger.recordOutput("Coral Outtake/State", "Hold");
         motor.setControl(positionVoltage.withPosition(position));
     }
 

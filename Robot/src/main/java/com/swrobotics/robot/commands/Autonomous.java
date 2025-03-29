@@ -223,7 +223,7 @@ public final class Autonomous {
                         // Continue snapping in case it got timed out above
                         DriveCommands.snapToPose(robot.drive, robot.lights, () -> Constants.kField.flipPoseForAlliance(scoringPosition)),
 
-                        robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE_L4)
+                        robot.outtake.commandSetCoralState(OuttakeSubsystem.CoralState.SCORE_L4)
                                 .until(() -> !robot.outtake.hasPiece() && RobotBase.isReal())
                                 .withTimeout(kScoreTimeout)
                 )
@@ -242,7 +242,7 @@ public final class Autonomous {
                         Commands.sequence(
                                 Commands.waitSeconds(kElevatorDownDelay),
                                 robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER),
-                                robot.outtake.commandSetStateOnce(OuttakeSubsystem.State.INTAKE_CORAL)
+                                robot.outtake.commandSetCoralStateOnce(OuttakeSubsystem.CoralState.INTAKE_CORAL)
                         )
                 ),
                 Commands.waitUntil(robot.outtake::hasPiece)
@@ -407,7 +407,7 @@ public final class Autonomous {
                         null
                 ).alongWith(Commands.sequence(
                         Commands.waitSeconds(Constants.kAutoElevatorDownDelay),
-                        robot.outtake.commandSetStateOnce(OuttakeSubsystem.State.INTAKE_CORAL),
+                        robot.outtake.commandSetCoralStateOnce(OuttakeSubsystem.CoralState.INTAKE_CORAL),
                         robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER)
                 )),
 
@@ -432,7 +432,7 @@ public final class Autonomous {
                         constraints
                 ).alongWith(Commands.sequence(
                         Commands.waitSeconds(Constants.kAutoElevatorDownDelay),
-                        robot.outtake.commandSetStateOnce(OuttakeSubsystem.State.INTAKE_CORAL),
+                        robot.outtake.commandSetCoralStateOnce(OuttakeSubsystem.CoralState.INTAKE_CORAL),
                         robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.RECEIVE_CORAL_FROM_INDEXER)
                 )),
 

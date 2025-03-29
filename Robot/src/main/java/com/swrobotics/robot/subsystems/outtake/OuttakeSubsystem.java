@@ -15,83 +15,87 @@ public class OuttakeSubsystem extends SubsystemBase {
         ALGAE
     }
 
-    public enum State {
+    public enum CoralState {
         INTAKE_CORAL,
-        INTAKE_ALGAE,
         SCORE_NOT_L4,
         SCORE_L4,
         HOLD,
         REVERSE
     }
 
-    private final OuttakeIO outtakeIO;
-    private final OuttakeIO.Inputs outtakeInputs;
+    public enum AlgaeState {
+        OFF,
+        INTAKE,
+        HOLD,
+        SCORE
+    }
 
-    private GamePiece heldPiece;
-    private State targetState;
+    private final CoralOuttakeIO outtakeIO;
+    private final CoralOuttakeIO.Inputs outtakeInputs;
+
+    private CoralState targetCoralState;
+    private AlgaeState targetAlgaeState;
     private double holdPosition;
 
     public OuttakeSubsystem() {
         if (RobotBase.isReal()) {
-            outtakeIO = new OuttakeIOReal();
+            outtakeIO = new CoralOuttakeIOReal();
         } else {
-            outtakeIO = new OuttakeIOSim();
+            outtakeIO = new CoralOuttakeIOSim();
         }
 
-        outtakeInputs = new OuttakeIO.Inputs();
+        outtakeInputs = new CoralOuttakeIO.Inputs();
 
-        heldPiece = GamePiece.CORAL;
-        targetState = State.HOLD;
+        targetCoralState = CoralState.HOLD;
+        targetAlgaeState = AlgaeState.OFF;
     }
 
-    public void setTargetState(State targetState) {
-        this.targetState = targetState;
+    public void setTargetCoralState(CoralState targetCoralState) {
+        this.targetCoralState = targetCoralState;
     }
 
-    public Command commandSetState(State targetState) {
-        return Commands.run(() -> setTargetState(targetState), this);
+    public void setTargetAlgaeState(AlgaeState targetCoralState) {
+        this.targetAlgaeState = targetCoralState;
     }
 
-    public Command commandSetStateOnce(State targetState) {
-        return Commands.runOnce(() -> setTargetState(targetState), this);
+    public Command commandSetCoralState(CoralState targetCoralState) {
+        return Commands.run(() -> setTargetCoralState(targetCoralState), this);
+    }
+
+    public Command commandSetAlgaeState(AlgaeState targetCoralState) {
+        return Commands.run(() -> setTargetAlgaeState(targetCoralState), this);
+    }
+
+    public Command commandSetCoralStateOnce(CoralState targetCoralState) {
+        return Commands.runOnce(() -> setTargetCoralState(targetCoralState), this);
+    }
+
+    public Command commandSetAlgaeStateOnce(AlgaeState targetCoralState) {
+        return Commands.runOnce(() -> setTargetAlgaeState(targetCoralState), this);
     }
 
     public Command score(double seconds, boolean l4) {
-        return commandSetState(l4 ? State.SCORE_L4 : State.SCORE_NOT_L4)
+        return commandSetCoralState(l4 ? CoralState.SCORE_L4 : CoralState.SCORE_NOT_L4)
                 .withTimeout(seconds)
-                .finallyDo(() -> setTargetState(State.HOLD));
+                .finallyDo(() -> setTargetCoralState(CoralState.HOLD));
     }
 
     @Override
     public void periodic() {
-        outtakeIO.setBeamBreakIgnored(targetState == State.SCORE_NOT_L4 || targetState == State.SCORE_L4 || targetState == State.REVERSE);
+        outtakeIO.setBeamBreakIgnored(targetCoralState == CoralState.SCORE_NOT_L4 || targetCoralState == CoralState.SCORE_L4 || targetCoralState == CoralState.REVERSE);
 
         outtakeIO.updateInputs(outtakeInputs);
         Logger.processInputs("Outtake", outtakeInputs);
 
-        if (targetState == State.INTAKE_CORAL)
-            heldPiece = GamePiece.CORAL;
-        else if (targetState == State.INTAKE_ALGAE)
-            heldPiece = GamePiece.ALGAE;
-
-        if (targetState == State.INTAKE_CORAL && outtakeInputs.hasPiece) {
-            targetState = State.HOLD;
+        if (targetCoralState == CoralState.INTAKE_CORAL && outtakeInputs.hasPiece) {
+            targetCoralState = CoralState.HOLD;
         }
 
-        switch (targetState) {
+        switch (targetCoralState) {
             case INTAKE_CORAL -> outtakeIO.setVoltage(Constants.kOuttakeRollerIntakeCoralVoltage.get());
-            case INTAKE_ALGAE -> outtakeIO.setVoltage(Constants.kOuttakeRollerIntakeAlgaeVoltage.get());
-            case SCORE_NOT_L4 -> outtakeIO.setVoltage(switch (heldPiece) {
-                case CORAL -> Constants.kOuttakeRollerScoreCoralVoltage.get();
-                case ALGAE -> Constants.kOuttakeRollerScoreAlgaeVoltage.get();
-            });
+            case SCORE_NOT_L4 -> outtakeIO.setVoltage(Constants.kOuttakeRollerScoreCoralVoltage.get());
             case SCORE_L4 -> outtakeIO.setVoltage(Constants.kOuttakeRollerScoreCoralL4Voltage.get());
-            case HOLD -> {
-                switch (heldPiece) {
-                    case CORAL -> outtakeIO.setHoldPosition(outtakeInputs.positionAtPieceDetect + Constants.kOuttakeHoldPositionOffset.get());
-                    case ALGAE -> outtakeIO.setVoltage(-Constants.kOuttakeRollerHoldAlgaeVoltage.get());
-                }
-            }
+            case HOLD -> outtakeIO.setHoldPosition(outtakeInputs.positionAtPieceDetect + Constants.kOuttakeHoldPositionOffset.get());
             case REVERSE -> outtakeIO.setVoltage(-Constants.kOuttakeRollerIntakeCoralVoltage.get());
         }
     }
