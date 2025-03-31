@@ -211,7 +211,7 @@ public final class ControlBoard extends SubsystemBase {
 //                .whileTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.SCORE));
         operator.leftBumper.trigger()
                .onTrue(robot.outtake.commandSetState(OuttakeSubsystem.State.REVERSE)
-                       .withTimeout(0.15));
+                       .withTimeout(0.1));
 
         double step = 0.0005;
         driver.dpad.up.trigger()

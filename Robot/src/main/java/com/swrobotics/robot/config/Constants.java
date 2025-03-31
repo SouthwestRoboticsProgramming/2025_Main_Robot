@@ -219,7 +219,7 @@ public final class Constants {
 
     public static final NTEntry<Double> kElevatorTolerance = new NTDouble("Superstructure/Elevator/Tolerance", 0.04).setPersistent();
     public static final NTEntry<Double> kElevatorCollisionTolerance = new NTDouble("Superstructure/Elevator/Collision Tolerance", 0.005).setPersistent();
-    public static final NTEntry<Double> kElevatorDeviationTolerance = new NTDouble("Superstructure/Elevator/Deviation Tolerance", 0.01).setPersistent();
+    public static final NTEntry<Double> kElevatorDeviationTolerance = new NTDouble("Superstructure/Elevator/Deviation Tolerance", 0.03).setPersistent();
     public static final NTEntry<Double> kElevatorFrameCollisionHeight = new NTDouble("Superstructure/Elevator/Frame Collision Height", 0.060566).setPersistent();
     public static final NTEntry<Double> kElevatorStage2CollisionHeight = new NTDouble("Superstructure/Elevator/Stage 2 Collision Height", 0.324990).setPersistent();
     public static final NTEntry<Double> kElevatorNeutralThreshold = new NTDouble("Superstructure/Elevator/Neutral Threshold", 0.08).setPersistent();
@@ -262,7 +262,7 @@ public final class Constants {
     public static final NTEntry<Double> kOuttakePivotNetAngle = new NTDouble("Superstructure/Pivot/Net Angle (deg)", 75).setPersistent();
 
     // Algae floor intake
-    public static final double kAlgaePivotMotorToArmRatio = (36.0 / 16.0) * (56.0 / 24.0) * 25;
+    public static final double kAlgaePivotMotorToArmRatio = (36.0 / 16.0) * (56.0 / 24.0) * 20;
     public static final double kAlgaePivotCANcoderToArmRatio = (36.0 / 16.0);
     public static final NTEntry<Double> kAlgaeStowAngle = new NTDouble("Algae/Pivot/Stow Angle (deg)", 85).setPersistent();
     public static final NTEntry<Double> kAlgaeIntakeAngle = new NTDouble("Algae/Pivot/Intake Angle (deg)", 35.0).setPersistent();

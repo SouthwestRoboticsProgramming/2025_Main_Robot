@@ -276,6 +276,12 @@ public final class SuperstructureSubsystem extends SubsystemBase {
                 }
             }
 
+            // Stupid simple collision check for upside down pivot
+            // FIXME: Probably has broken edge cases
+            if (pivotTarget < 0 && (elevatorSetpoint.position < 0.38 || elevatorTarget < 0.38))
+                pivotTarget = 0;
+            if ((pivotSetpoint.position < 0 || pivotTarget < 0) && elevatorTarget < 0.38)
+                elevatorTarget = 0.38;
         }
 
         RobotView.setTargetSuperstructureState(elevatorTarget, pivotTarget);
@@ -321,7 +327,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
             elevatorIO.setVoltage(volts);
         } else {
             double threshold = Constants.kElevatorNeutralThreshold.get();
-            if (targetState == State.BOTTOM && elevatorInputs.currentHeightPct < threshold) {
+            if (targetState.getElevatorHeight() < threshold && elevatorInputs.currentHeightPct < threshold) {
                 elevatorIO.setVoltage(0.0);
             } else {
                 elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);
