@@ -304,6 +304,11 @@ public final class Constants {
     public static final NTEntry<Double> kPivotAdjustMax = new NTDouble("Superstructure/Pivot/Adjust Max (deg)", 5.0).setPersistent(); // Degrees
     public static final NTEntry<Double> kElevatorAdjustMax = new NTDouble("Superstructure/Elevator/Adjust Max", 0.05).setPersistent(); // Degrees
 
+    // Aiming
+    public static final NTEntry<Double> kAimArmCoefficient = new NTDouble("Superstructure/Aim/Pivot Coefficient (deg / m)", 2.5).setPersistent(); // Degrees
+    public static final NTEntry<Double> kAimElevatorCoefficient = new NTDouble("Superstructure/Elevator Coefficient (percent / m)", 0.005).setPersistent(); // Degrees
+
+
     // This must be at the bottom of the file so it happens last
     static {
         NTEntry.cleanPersistent();
