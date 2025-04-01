@@ -359,6 +359,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
 
         boolean hasCoral = outtakeSubsystem.hasPiece();
         pivotIO.setTarget(pivotSetpoint.position, pivotSetpoint.velocity, hasCoral);
+
+        outtakeSubsystem.setReverseScore(pivotInputs.currentAngleRot < 0);
     }
 
     // For auto
