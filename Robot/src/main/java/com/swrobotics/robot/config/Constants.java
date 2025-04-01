@@ -208,7 +208,7 @@ public final class Constants {
     );
 
     // Elevator
-    public static final double kElevatorMaxHeightRotations = 25;
+    public static final double kElevatorMaxHeightRotations = 26;
     
     public static final NTSlot0Configs kElevatorPID =
             new NTSlot0Configs("Superstructure/Elevator/PID", 0.3, 0, 0.286, 0, 0.12, 0);

@@ -287,7 +287,7 @@ public final class Autonomous {
 
         Command sequence = Commands.sequence(
                 robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.SCORE_L4),
-                Commands.waitSeconds(0.5),
+//                Commands.waitSeconds(0.5),
                 doScore(robot, startToScore1, score1),
                 doHumanPlayerPickup(robot, score1ToHP),
                 doScore(robot, hpToScore2, score2),
