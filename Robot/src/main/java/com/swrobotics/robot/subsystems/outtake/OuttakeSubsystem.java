@@ -29,7 +29,7 @@ public class OuttakeSubsystem extends SubsystemBase {
 
     private GamePiece heldPiece;
     private State targetState;
-    private double holdPosition;
+    private boolean reverseScore;
 
     public OuttakeSubsystem() {
         if (RobotBase.isReal()) {
@@ -42,6 +42,7 @@ public class OuttakeSubsystem extends SubsystemBase {
 
         heldPiece = GamePiece.CORAL;
         targetState = State.HOLD;
+        reverseScore = false;
     }
 
     public void setTargetState(State targetState) {
@@ -78,14 +79,15 @@ public class OuttakeSubsystem extends SubsystemBase {
             targetState = State.HOLD;
         }
 
+        double flip = reverseScore ? -1 : 1;
         switch (targetState) {
             case INTAKE_CORAL -> outtakeIO.setVoltage(Constants.kOuttakeRollerIntakeCoralVoltage.get());
             case INTAKE_ALGAE -> outtakeIO.setVoltage(Constants.kOuttakeRollerIntakeAlgaeVoltage.get());
-            case SCORE_NOT_L4 -> outtakeIO.setVoltage(switch (heldPiece) {
+            case SCORE_NOT_L4 -> outtakeIO.setVoltage(flip * switch (heldPiece) {
                 case CORAL -> Constants.kOuttakeRollerScoreCoralVoltage.get();
                 case ALGAE -> Constants.kOuttakeRollerScoreAlgaeVoltage.get();
             });
-            case SCORE_L4 -> outtakeIO.setVoltage(Constants.kOuttakeRollerScoreCoralL4Voltage.get());
+            case SCORE_L4 -> outtakeIO.setVoltage(flip * Constants.kOuttakeRollerScoreCoralL4Voltage.get());
             case HOLD -> {
                 switch (heldPiece) {
                     case CORAL -> outtakeIO.setHoldPosition(outtakeInputs.positionAtPieceDetect + Constants.kOuttakeHoldPositionOffset.get());
@@ -94,6 +96,10 @@ public class OuttakeSubsystem extends SubsystemBase {
             }
             case REVERSE -> outtakeIO.setVoltage(-Constants.kOuttakeRollerIntakeCoralVoltage.get());
         }
+    }
+
+    public void setReverseScore(boolean reverseScore) {
+        this.reverseScore = reverseScore;
     }
 
     public boolean hasPiece() {
