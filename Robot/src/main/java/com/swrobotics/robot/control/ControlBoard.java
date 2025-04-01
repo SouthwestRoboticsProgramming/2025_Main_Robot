@@ -7,6 +7,7 @@ import com.swrobotics.lib.net.NTEntry;
 import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
 import com.swrobotics.robot.RobotPhysics;
+import com.swrobotics.robot.commands.AimArmCommand;
 import com.swrobotics.robot.commands.CharacterizeWheelsCommand;
 import com.swrobotics.robot.commands.DriveCommands;
 import com.swrobotics.robot.commands.RumblePatternCommands;
@@ -131,6 +132,8 @@ public final class ControlBoard extends SubsystemBase {
                         robot.lights,
                         () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
+
+        driver.a.trigger().and(operator.a.trigger().or(operator.b.trigger().or(operator.y.trigger()))).whileTrue(new AimArmCommand(robot));
 
         Trigger intakeAlgaeFloor = driver.leftTrigger.triggerOutside(0.25);
         Trigger scoreAlgaeFloor = driver.rightTrigger.triggerOutside(0.25);

@@ -48,6 +48,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         private final Supplier<Double> pivotAngleGetter;
         private double pivotAdjustDeg = 0.0;
         private double elevatorAdjust = 0.0;
+        private double pivotAimDeg = 0.0;
+        private double elevatorAim = 0.0;
 
         State(Supplier<Double> elevatorHeightGetter, Supplier<Double> pivotAngleGetter) {
             this.elevatorHeightGetter = elevatorHeightGetter;
@@ -55,15 +57,23 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         }
 
         public double getElevatorHeight() {
-            return elevatorHeightGetter.get() + elevatorAdjust;
+            return elevatorHeightGetter.get() + elevatorAdjust + elevatorAim;
         }
 
         public double getPivotAngle() {
-            return Units.degreesToRotations(pivotAngleGetter.get() + pivotAdjustDeg);
+            return Units.degreesToRotations(pivotAngleGetter.get() + pivotAdjustDeg + pivotAimDeg);
         }
 
         public void setPivotAdjust(double pivotAdjustDeg) {
             this.pivotAdjustDeg = pivotAdjustDeg;
+        }
+
+        public void setElevatorAim(double elevatorAim) {
+            this.elevatorAim = elevatorAim;
+        }
+
+        public void setPivotAim(double pivotAimDeg) {
+            this.pivotAimDeg = pivotAimDeg;
         }
 
         public void setElevatorAdjust(double elevatorAdjust) {
@@ -81,7 +91,9 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private final Timer pivotSyncTimer;
     private State targetState;
     private double pivotAdjustDeg;
+    private double pivotAim;
     private double elevatorAdjust;
+    private double elevatorAim;
 
     private TrapezoidProfile elevatorProfile;
     private TrapezoidProfile pivotProfile;
@@ -146,8 +158,16 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         this.pivotAdjustDeg = pivotAdjustDeg;
     }
 
+    public void setPivotAim(double pivotAim) {
+        this.pivotAim = pivotAim;
+    }
+
     public void setElevatorAdjust(double elevatorAdjust) {
         this.elevatorAdjust = elevatorAdjust;
+    }
+
+    public void setElevatorAim(double elevatorAim) {
+        this.elevatorAim = elevatorAim;
     }
 
     public Command commandSetState(State targetState) {
@@ -300,6 +320,9 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         // Set adjusts
         targetState.setElevatorAdjust(elevatorAdjust);
         targetState.setPivotAdjust(pivotAdjustDeg);
+
+        targetState.setElevatorAim(elevatorAim);
+        targetState.setPivotAim(pivotAim);
 
         elevatorIO.updateInputs(elevatorInputs);
         pivotIO.updateInputs(pivotInputs);
