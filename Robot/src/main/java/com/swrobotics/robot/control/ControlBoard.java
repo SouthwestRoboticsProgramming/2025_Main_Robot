@@ -133,7 +133,8 @@ public final class ControlBoard extends SubsystemBase {
                         () -> FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose())
                 ));
 
-        driver.a.trigger().and(operator.a.trigger().or(operator.b.trigger().or(operator.y.trigger()))).whileTrue(new AimArmCommand(robot));
+//        driver.a.trigger().and(
+//                operator.a.trigger().or(operator.b.trigger().or(operator.y.trigger())).whileTrue(new AimArmCommand(robot));
 
         Trigger intakeAlgaeFloor = driver.leftTrigger.triggerOutside(0.25);
         Trigger scoreAlgaeFloor = driver.rightTrigger.triggerOutside(0.25);
@@ -282,11 +283,20 @@ public final class ControlBoard extends SubsystemBase {
                 .rotateBy(FieldInfo.getAllianceForwardAngle()); // Account for driver's perspective
     }
 
+    private boolean getIgnoreTippingAccelLimit() {
+        return driver.leftBumper.get() || driver.rightBumper.get();
+    }
+
     /**
      * @return translation input for the drive base, in meters/sec
      */
     private Translation2d getDriveTranslation() {
-        return driveTippingFilter.calculate(getDesiredDriveTranslation());
+        Translation2d desired = getDesiredDriveTranslation();
+        Translation2d filtered = driveTippingFilter.calculate(desired);
+
+        return getIgnoreTippingAccelLimit()
+                ? desired
+                : filtered;
     }
 
     /**

@@ -70,10 +70,10 @@ public final class Robot extends LoggedRobot {
                 });
 
         // For timing tests in simulator
-        if (RobotBase.isSimulation()) {
-            autonomousCommand = autonomousCommand
-                    .withTimeout(15);
-        }
+//        if (RobotBase.isSimulation()) {
+//            autonomousCommand = autonomousCommand
+//                    .withTimeout(15);
+//        }
 
         // Measure elapsed time
         double startTimestamp = Timer.getTimestamp();

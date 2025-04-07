@@ -1,5 +1,6 @@
 package com.swrobotics.robot.commands;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.*;
 import com.swrobotics.lib.pathfinding.pathplanner.AutoBuilderExt;
@@ -208,6 +209,7 @@ public final class Autonomous {
                     Pose2d allianceTarget = Constants.kField.flipPoseForAlliance(scoringPosition);
                     boolean xy = pose.getTranslation().getDistance(allianceTarget.getTranslation())
                             < Constants.kAutoScoreXYTolerance.get();
+                    // This is wrong but it makes the auto work
                     boolean angle = MathUtil.absDiffRad(pose.getRotation().getDegrees(), allianceTarget.getRotation().getDegrees())
                             < Constants.kAutoScoreAngleTolerance.get();
                     boolean superstructure = robot.superstructure.isInTolerance();
@@ -250,6 +252,20 @@ public final class Autonomous {
         );
     }
 
+    private static Command doRemoveAlgae(RobotContainer robot) {
+        // Assume superstructure is in L4 position currently
+        return Commands.sequence(
+                        DriveCommands.driveRobotRelative(robot.drive, () -> new Translation2d(-0.3, -0.5), () -> 0.0)
+                                .withTimeout(0.3),
+                        Commands.runOnce(() -> {
+                            robot.drive.setControl(new SwerveRequest.Idle());
+                        }, robot.drive),
+                        robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.PICKUP_LOW_ALGAE),
+                        robot.outtake.commandSetStateOnce(OuttakeSubsystem.State.INTAKE_ALGAE),
+                        Commands.waitSeconds(0.7)
+                );
+    }
+
     public static Command fourPieceV2(RobotContainer robot, boolean rightSide) {
         Pose2d hp = rightSide
                 ? new Pose2d(new Translation2d(1.371, Constants.kField.getHeight() - 7.289), Rotation2d.fromDegrees(54.013))
@@ -263,7 +279,7 @@ public final class Autonomous {
         Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, score1.getY()), Rotation2d.k180deg);
 
         PathConstraints constraints = getPathConstraints();
-        PathConstraints firstPartConstraints = new PathConstraints(
+        PathConstraints slowerConstraints = new PathConstraints(
                 constraints.maxVelocityMPS() * 0.8,
                 constraints.maxAccelerationMPSSq() * 0.8,
                 constraints.maxAngularVelocityRadPerSec(),
@@ -271,12 +287,12 @@ public final class Autonomous {
         );
 
         // Rotation targets are to prevent rotation when touching the reef
-        PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, firstPartConstraints).build();
+        PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, slowerConstraints).build();
         PathPlannerPath score1ToHP = new SegmentBuilder(score1, hp, constraints)
                 .withCurveStart(rightSide ? 30 : -30)
                 .addRotationTarget(new RotationTarget(0.2, score1.getRotation()))
                 .build();
-        PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, constraints).build();
+        PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, slowerConstraints).build();
         PathPlannerPath score2ToHP = new SegmentBuilder(score2, hp, constraints).build();
         PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, constraints).build();
         PathPlannerPath score3ToHP = new SegmentBuilder(score3, hp, constraints).build();
@@ -295,6 +311,110 @@ public final class Autonomous {
                 doScore(robot, hpToScore3, score3),
                 doHumanPlayerPickup(robot, score3ToHP),
                 doScore(robot, hpToScore4, score4),
+                backUp(robot)
+        );
+
+        if (RobotBase.isSimulation()) {
+            sequence = sequence.beforeStarting(Commands.runOnce(
+                    () -> robot.drive.resetPose(Constants.kField.flipPoseForAlliance(start))));
+        }
+
+        return sequence;
+    }
+
+    public static Command fourPieceToFront(RobotContainer robot, boolean rightSide) {
+        Pose2d hp = rightSide
+                ? new Pose2d(new Translation2d(1.371, Constants.kField.getHeight() - 7.289), Rotation2d.fromDegrees(54.013))
+                : new Pose2d(new Translation2d(1.371, 7.289), Rotation2d.fromDegrees(-54.013));
+
+        Pose2d score1 = FieldPositions.getBlueReefScoringTarget(rightSide ? 5 : 8);
+        Pose2d score2 = FieldPositions.getBlueReefScoringTarget(rightSide ? 2 : 11);
+//        score2 = new Pose2d(score2.getTranslation().plus(new Translation2d(0.1, Rotation2d.fromDegrees(30))), score2.getRotation());
+        Pose2d score3 = FieldPositions.getBlueReefScoringTarget(rightSide ? 3 : 10);
+        Pose2d score4 = FieldPositions.getBlueReefScoringTarget(rightSide ? 1 : 0);
+        Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, score1.getY()), Rotation2d.k180deg);
+
+        PathConstraints constraints = getPathConstraints();
+        PathConstraints slowerConstraints = new PathConstraints(
+                constraints.maxVelocityMPS() * 0.8,
+                constraints.maxAccelerationMPSSq() * 0.8,
+                constraints.maxAngularVelocityRadPerSec(),
+                constraints.maxAngularAccelerationRadPerSecSq()
+        );
+
+        // Rotation targets are to prevent rotation when touching the reef
+        PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, slowerConstraints).build();
+        PathPlannerPath score1ToHP = new SegmentBuilder(score1, hp, constraints)
+                .withCurveStart(rightSide ? 30 : -30)
+                .addRotationTarget(new RotationTarget(0.2, score1.getRotation()))
+                .build();
+        PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, slowerConstraints).build();
+        PathPlannerPath score2ToHP = new SegmentBuilder(score2, hp, constraints).build();
+        PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, constraints).build();
+        PathPlannerPath score3ToHP = new SegmentBuilder(score3, hp, constraints).build();
+        PathPlannerPath hpToScore4 = new SegmentBuilder(hp, score4, constraints)
+                .withCurveStart(rightSide ? -20 : 20)
+                .withCurveEnd(rightSide ? -30 : 30)
+                .addRotationTarget(new RotationTarget(0.8, score4.getRotation()))
+                .build();
+
+        Command sequence = Commands.sequence(
+                robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.SCORE_L4),
+//                Commands.waitSeconds(0.5),
+                doScore(robot, startToScore1, score1),
+                doHumanPlayerPickup(robot, score1ToHP),
+                doScore(robot, hpToScore2, score2),
+                doHumanPlayerPickup(robot, score2ToHP),
+                doScore(robot, hpToScore3, score3),
+                doHumanPlayerPickup(robot, score3ToHP),
+                doScore(robot, hpToScore4, score4),
+                backUp(robot)
+        );
+
+        if (RobotBase.isSimulation()) {
+            sequence = sequence.beforeStarting(Commands.runOnce(
+                    () -> robot.drive.resetPose(Constants.kField.flipPoseForAlliance(start))));
+        }
+
+        return sequence;
+    }
+
+    public static Command threePieceAndAlgae(RobotContainer robot, boolean rightSide) {
+        Pose2d hp = rightSide
+                ? new Pose2d(new Translation2d(1.371, Constants.kField.getHeight() - 7.289), Rotation2d.fromDegrees(54.013))
+                : new Pose2d(new Translation2d(1.371, 7.289), Rotation2d.fromDegrees(-54.013));
+
+        Pose2d score1 = FieldPositions.getBlueReefScoringTarget(rightSide ? 5 : 8);
+        Pose2d score2 = FieldPositions.getBlueReefScoringTarget(rightSide ? 2 : 11);
+        Pose2d score3 = FieldPositions.getBlueReefScoringTarget(rightSide ? 3 : 10);
+        Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, score1.getY()), Rotation2d.k180deg);
+
+        PathConstraints constraints = getPathConstraints();
+        PathConstraints slowerConstraints = new PathConstraints(
+                constraints.maxVelocityMPS() * 0.8,
+                constraints.maxAccelerationMPSSq() * 0.8,
+                constraints.maxAngularVelocityRadPerSec(),
+                constraints.maxAngularAccelerationRadPerSecSq()
+        );
+
+        // Rotation targets are to prevent rotation when touching the reef
+        PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, slowerConstraints).build();
+        PathPlannerPath score1ToHP = new SegmentBuilder(score1, hp, constraints)
+                .withCurveStart(rightSide ? 30 : -30)
+                .addRotationTarget(new RotationTarget(0.2, score1.getRotation()))
+                .build();
+        PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, slowerConstraints).build();
+        PathPlannerPath score2ToHP = new SegmentBuilder(score2, hp, constraints).build();
+        PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, constraints).build();
+
+        Command sequence = Commands.sequence(
+                robot.superstructure.commandSetStateOnce(SuperstructureSubsystem.State.SCORE_L4),
+                doScore(robot, startToScore1, score1),
+                doHumanPlayerPickup(robot, score1ToHP),
+                doScore(robot, hpToScore2, score2),
+                doHumanPlayerPickup(robot, score2ToHP),
+                doScore(robot, hpToScore3, score3),
+                doRemoveAlgae(robot),
                 backUp(robot)
         );
 

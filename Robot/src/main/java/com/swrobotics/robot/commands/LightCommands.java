@@ -80,6 +80,7 @@ public final class LightCommands {
     }
 
     public static Command showSnappingToPose(LightsSubsystem lights) {
-        return showColor(lights, Color.kCyan);
+        return showColor(lights, Color.kWhite)
+                .alongWith(Commands.run(() -> lights.setFullBright(true)));
     }
 }

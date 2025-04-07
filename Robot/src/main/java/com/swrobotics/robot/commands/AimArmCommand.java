@@ -1,5 +1,6 @@
 package com.swrobotics.robot.commands;
 
+import com.swrobotics.lib.utils.MathUtil;
 import com.swrobotics.robot.RobotContainer;
 import com.swrobotics.robot.config.Constants;
 import com.swrobotics.robot.config.FieldPositions;
@@ -22,8 +23,14 @@ public class AimArmCommand extends Command {
         Pose2d position = FieldPositions.getClosestSnapTarget(robot.drive.getEstimatedPose());
         double distance = robot.drive.getEstimatedPose().getTranslation().getDistance(position.getTranslation());
 
-        robot.superstructure.setElevatorAim(getElevatorAdjust(distance- STANDARD_DISTANCE));
-        robot.superstructure.setPivotAim(getArmAngle(distance - STANDARD_DISTANCE));
+        distance -= STANDARD_DISTANCE;
+
+        double maxDistance = 0.15;
+        distance = MathUtil.clamp(distance, 0, maxDistance);
+        double distancePct = distance / maxDistance;
+
+        robot.superstructure.setElevatorAim(getElevatorAdjust(distancePct));
+        robot.superstructure.setPivotAim(getArmAngle(distancePct));
     }
 
     @Override
@@ -32,17 +39,11 @@ public class AimArmCommand extends Command {
         robot.superstructure.setPivotAim(0.0);
     }
 
-    private double getArmAngle(double distance) {
-        if (distanceNotStandard(distance))  { return 0; }
-        return Constants.kAimArmCoefficient.get() * distance;
+    private double getArmAngle(double distancePct) {
+        return Constants.kAimArmCoefficient.get() * distancePct;
     }
 
-    private double getElevatorAdjust(double distance) {
-        if (distanceNotStandard(distance))  { return 0; }
-        return Constants.kAimElevatorCoefficient.get() * distance;
-    }
-
-    private boolean distanceNotStandard(double distance) {
-        return distance > 0 && distance < 0.2286; // Two coral thick
+    private double getElevatorAdjust(double distancePct) {
+        return Constants.kAimElevatorCoefficient.get() * distancePct;
     }
 }

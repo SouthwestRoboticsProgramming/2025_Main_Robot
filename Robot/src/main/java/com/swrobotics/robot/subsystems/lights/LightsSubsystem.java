@@ -22,6 +22,7 @@ public final class LightsSubsystem extends SubsystemBase {
     private final PrideSequencer prideSequencer;
 
     private Color commandRequest = null;
+    private boolean fullBright = false;
 
     public LightsSubsystem(RobotContainer robot) {
         this.robot = robot;
@@ -81,6 +82,7 @@ public final class LightsSubsystem extends SubsystemBase {
         }
 
         commandRequest = null;
+        fullBright = false;
     }
 
     /** Sets all the LEDs to the same color */
@@ -181,9 +183,11 @@ public final class LightsSubsystem extends SubsystemBase {
             return new Color8Bit(desiredColor);
         }
 
-        int r = GAMMA_CORRECTION[(int) (desiredColor.red * kBrightness * 255.0)];
-        int g = GAMMA_CORRECTION[(int) (desiredColor.green * kBrightness * 255.0)];
-        int b = GAMMA_CORRECTION[(int) (desiredColor.blue * kBrightness * 255.0)];
+        double brightness = fullBright ? 1.0 : kBrightness;
+
+        int r = GAMMA_CORRECTION[(int) (desiredColor.red * brightness * 255.0)];
+        int g = GAMMA_CORRECTION[(int) (desiredColor.green * brightness * 255.0)];
+        int b = GAMMA_CORRECTION[(int) (desiredColor.blue * brightness * 255.0)];
         return new Color8Bit(r, g, b);
     }
 
@@ -199,5 +203,9 @@ public final class LightsSubsystem extends SubsystemBase {
      */
     public void setCommandRequest(Color color) {
         commandRequest = color;
+    }
+
+    public void setFullBright(boolean fullBright) {
+        this.fullBright = fullBright;
     }
 }

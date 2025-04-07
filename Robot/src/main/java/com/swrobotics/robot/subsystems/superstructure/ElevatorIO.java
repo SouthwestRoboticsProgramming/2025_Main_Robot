@@ -10,7 +10,7 @@ public interface ElevatorIO {
 
     void updateInputs(Inputs inputs);
 
-    void setTarget(double heightPct, double ffVelocityPctPerSec);
+    void setTarget(double heightPct, double ffVelocityPctPerSec, double ffAccelPctPerSecSq);
 
     // Positive up, negative down
     void setVoltage(double volts);

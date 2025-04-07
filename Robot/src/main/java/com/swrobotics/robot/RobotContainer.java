@@ -103,10 +103,14 @@ public class RobotContainer {
         autoSelector.addDefaultOption("None", Commands.none());
         autoSelector.addOption("One Left", Autonomous.behindReef1PieceLeft(this));
         autoSelector.addOption("One Right", Autonomous.behindReef1PieceRight(this));
-        autoSelector.addOption("Four Left", Autonomous.leftSide4Piece(this));
-        autoSelector.addOption("Four Right", Autonomous.rightSide4Piece(this));
+//        autoSelector.addOption("Four Left", Autonomous.leftSide4Piece(this));
+//        autoSelector.addOption("Four Right", Autonomous.rightSide4Piece(this));
         autoSelector.addOption("Four Left v2", Autonomous.fourPieceV2(this, false));
         autoSelector.addOption("Four Right v2", Autonomous.fourPieceV2(this, true));
+        autoSelector.addOption("Four Left Front", Autonomous.fourPieceToFront(this, false));
+        autoSelector.addOption("Four Right Front", Autonomous.fourPieceToFront(this, true));
+        autoSelector.addOption("Three + Algae Left", Autonomous.threePieceAndAlgae(this, false));
+        autoSelector.addOption("Three + Algae Right", Autonomous.threePieceAndAlgae(this, true));
         autoSelector.addOption("Everything Randomly", Autonomous.everythingRandomly(this));
 
         for (AutoEntry auto : autos)
@@ -126,6 +130,9 @@ public class RobotContainer {
         // Play startup song
         CommandScheduler.getInstance().schedule(musicCommand = Commands.waitSeconds(5)
                 .andThen(new PlaySongCommand(music, "music" + File.separator + "xp.chrp")));
+
+//        PathEnvironments.kFieldWithAutoGamePieces.getDebug().plot(FieldView.pathfindingDebug);
+
     }
 
     private record AutoEntry(String name, Command cmd) {}

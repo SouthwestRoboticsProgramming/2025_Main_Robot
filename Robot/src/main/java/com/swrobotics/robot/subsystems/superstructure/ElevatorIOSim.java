@@ -33,7 +33,7 @@ public final class ElevatorIOSim implements ElevatorIO {
     }
 
     @Override
-    public void setTarget(double heightPct, double ffVelocityPctPerSec) {
+    public void setTarget(double heightPct, double ffVelocityPctPerSec, double ffAccelPctPerSecSq) {
         voltageControl = false;
         position = heightPct;
     }

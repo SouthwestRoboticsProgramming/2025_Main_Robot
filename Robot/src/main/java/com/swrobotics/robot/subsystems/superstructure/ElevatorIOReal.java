@@ -20,6 +20,7 @@ import com.swrobotics.robot.subsystems.music.MusicSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import org.littletonrobotics.junction.Logger;
 
 public final class ElevatorIOReal implements ElevatorIO {
     private static final NTBoolean BRAKE_MODE = new NTBoolean("Superstructure/Elevator/Brake Mode", true);
@@ -78,15 +79,18 @@ public final class ElevatorIOReal implements ElevatorIO {
     }
 
     @Override
-    public void setTarget(double heightPct, double ffVelocityPctPerSec) {
+    public void setTarget(double heightPct, double ffVelocityPctPerSec, double ffAccelPctPerSecSq) {
+        Logger.recordOutput("Elevator/Target Height Percent", heightPct);
         heightPct = MathUtil.clamp(heightPct, 0, 1);
 
         double positionRot = heightPct * Constants.kElevatorMaxHeightRotations;
         double velocityRot = ffVelocityPctPerSec * Constants.kElevatorMaxHeightRotations;
+        double accelRot = ffAccelPctPerSecSq * Constants.kElevatorMaxHeightRotations;
 
         motor1.setControl(positionControl
                 .withPosition(positionRot)
-                .withVelocity(velocityRot));
+                .withVelocity(velocityRot)
+                .withFeedForward(accelRot * Constants.kElevatorKa.get()));
     }
 
     @Override

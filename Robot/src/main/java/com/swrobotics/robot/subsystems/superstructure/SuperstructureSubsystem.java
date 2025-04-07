@@ -57,7 +57,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         }
 
         public double getElevatorHeight() {
-            return elevatorHeightGetter.get() + elevatorAdjust + elevatorAim;
+            return MathUtil.clamp(elevatorHeightGetter.get() + elevatorAdjust + elevatorAim, 0.0, 1.0);
         }
 
         public double getPivotAngle() {
@@ -99,6 +99,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
     private TrapezoidProfile pivotProfile;
     private TrapezoidProfile.State elevatorSetpoint;
     private TrapezoidProfile.State pivotSetpoint;
+
+    private double prevElevatorSetpointVelocity;
 
     public SuperstructureSubsystem(OuttakeSubsystem outtakeSubsystem) {
         if (RobotBase.isReal()) {
@@ -196,7 +198,7 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         // Reset setpoints to sensor values
         double elevatorMaxDev = Constants.kElevatorDeviationTolerance.get();
         double pivotMaxDev = Units.degreesToRotations(Constants.kOuttakePivotDeviationTolerance.get());
-        if (elevatorSetpoint == null || Math.abs(elevatorSetpoint.position - elevatorCurrent) > elevatorMaxDev) {
+        if (elevatorSetpoint == null/* || Math.abs(elevatorSetpoint.position - elevatorCurrent) > elevatorMaxDev*/) {
             elevatorSetpoint = new TrapezoidProfile.State(elevatorCurrent, elevatorInputs.currentVelocityPctPerSec);
         }
         if (pivotSetpoint == null || Math.abs(pivotSetpoint.position - pivotCurrent) > pivotMaxDev) {
@@ -353,7 +355,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
             if (targetState.getElevatorHeight() < threshold && elevatorInputs.currentHeightPct < threshold) {
                 elevatorIO.setVoltage(0.0);
             } else {
-                elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity);
+                double accel = (elevatorSetpoint.velocity - prevElevatorSetpointVelocity) / Constants.kPeriodicTime;
+                elevatorIO.setTarget(elevatorSetpoint.position, elevatorSetpoint.velocity, accel);
             }
         }
 
@@ -361,6 +364,8 @@ public final class SuperstructureSubsystem extends SubsystemBase {
         pivotIO.setTarget(pivotSetpoint.position, pivotSetpoint.velocity, hasCoral);
 
         outtakeSubsystem.setReverseScore(pivotInputs.currentAngleRot < 0);
+
+        prevElevatorSetpointVelocity = elevatorSetpoint.velocity;
     }
 
     // For auto
