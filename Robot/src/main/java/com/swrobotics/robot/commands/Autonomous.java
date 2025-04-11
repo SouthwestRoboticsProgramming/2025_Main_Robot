@@ -189,20 +189,6 @@ public final class Autonomous {
                                 ), Collections.emptySet()),
                                 Commands.runOnce(() -> indexFailed[0] = true)
                         ))
-//                        Commands.sequence(
-//                                Commands.parallel(
-//                                        RobotBase.isReal()
-//                                            ? Commands.waitUntil(robot.outtake::hasPiece)
-//                                            : Commands.waitSeconds(0.2),
-//
-//                                        // Bring elevator up as late as possible
-//                                        Commands.defer(() -> Commands.waitSeconds(
-//                                                pathTime - kElevatorUpEarlyTime - robot.superstructure.calculateIndexerToL4TravelTime()
-//                                        ), Collections.emptySet())
-//                                ),
-//
-//                                robot.superstructure.commandSetState(SuperstructureSubsystem.State.SCORE_L4)
-//                        )
                 ).until(() -> {
                     Pose2d pose = robot.drive.getEstimatedPose();
 
@@ -210,8 +196,8 @@ public final class Autonomous {
                     boolean xy = pose.getTranslation().getDistance(allianceTarget.getTranslation())
                             < Constants.kAutoScoreXYTolerance.get();
                     // This is wrong but it makes the auto work
-                    boolean angle = MathUtil.absDiffRad(pose.getRotation().getDegrees(), allianceTarget.getRotation().getDegrees())
-                            < Constants.kAutoScoreAngleTolerance.get();
+                    boolean angle = MathUtil.absDiffRad(pose.getRotation().getRadians(), allianceTarget.getRotation().getRadians())
+                            < Math.toRadians(Constants.kAutoScoreAngleTolerance.get());
                     boolean superstructure = robot.superstructure.isInTolerance();
 
                     Logger.recordOutput("Auto/XY In Tolerance", xy);
@@ -285,6 +271,7 @@ public final class Autonomous {
                 constraints.maxAngularVelocityRadPerSec(),
                 constraints.maxAngularAccelerationRadPerSecSq()
         );
+//        PathConstraints slowerConstraints = constraints;
 
         // Rotation targets are to prevent rotation when touching the reef
         PathPlannerPath startToScore1 = new SegmentBuilder(start, score1, slowerConstraints).build();
