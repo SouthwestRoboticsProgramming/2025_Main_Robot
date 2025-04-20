@@ -73,7 +73,7 @@ public final class Constants {
     public static final NTEntry<Double> kAutoTurnKd = new NTDouble("Drive/Auto/Turn PID/kD", 0).setPersistent();
 
     public static final double kAutoMaxDriveSpeed = 4;//Units.feetToMeters(18);
-    public static final double kAutoMaxDriveAccel = 3.4;//5;
+    public static final double kAutoMaxDriveAccel = 3;//5;
     public static final double kAutoMaxTurnSpeed = 1.25;
     public static final double kAutoMaxTurnAccel = 2;
 
@@ -133,7 +133,7 @@ public final class Constants {
                     .withDriveMotorGearRatio((50.0/16) * (16.0/28) * (45.0/15))
                     .withSteerMotorGearRatio(150.0 / 7)
                     .withCouplingGearRatio(50.0 / 16)
-                    .withWheelRadius(Meters.of(0.04905134))//0.048218 ))
+                    .withWheelRadius(Meters.of(0.0485603333))//0.048218 ))
                     .withSteerMotorGains(new Slot0Configs().withKP(50).withKD(0.01).withKV(0.1))
                     .withDriveMotorGains(new Slot0Configs().withKP(0.35).withKD(0).withKV(0.012621).withKS(0.22109))
 //                    .withDriveMotorGains(new Slot0Configs().withKP(0.4).withKD(0).withKV(0.012621 * 17.675293 / 13.515625 * 17.675293 / 2.136719 * 19.378906 / 17.676758 * 17.675293 / 21.419922).withKS(0.22109))

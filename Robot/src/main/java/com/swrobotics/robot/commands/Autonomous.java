@@ -252,7 +252,7 @@ public final class Autonomous {
                 );
     }
 
-    public static Command fourPieceV2(RobotContainer robot, boolean rightSide) {
+    public static Command fourPieceV2(RobotContainer robot, boolean rightSide, boolean away) {
         Pose2d hp = rightSide
                 ? new Pose2d(new Translation2d(1.371, Constants.kField.getHeight() - 7.289), Rotation2d.fromDegrees(54.013))
                 : new Pose2d(new Translation2d(1.371, 7.289), Rotation2d.fromDegrees(-54.013));
@@ -262,7 +262,9 @@ public final class Autonomous {
 //        score2 = new Pose2d(score2.getTranslation().plus(new Translation2d(0.1, Rotation2d.fromDegrees(30))), score2.getRotation());
         Pose2d score3 = FieldPositions.getBlueReefScoringTarget(rightSide ? 3 : 10);
         Pose2d score4 = FieldPositions.getBlueReefScoringTarget(rightSide ? 4 : 9);
-        Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, score1.getY()), Rotation2d.k180deg);
+
+        double startY = away ? (rightSide ? Constants.kField.getHeight() - 6.127 : 6.127) : score1.getY();
+        Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, startY), Rotation2d.k180deg);
 
         PathConstraints constraints = getPathConstraints();
         PathConstraints slowerConstraints = new PathConstraints(
@@ -309,7 +311,7 @@ public final class Autonomous {
         return sequence;
     }
 
-    public static Command fourPieceToFront(RobotContainer robot, boolean rightSide) {
+    public static Command fourPieceToFront(RobotContainer robot, boolean rightSide, boolean away) {
         Pose2d hp = rightSide
                 ? new Pose2d(new Translation2d(1.371, Constants.kField.getHeight() - 7.289), Rotation2d.fromDegrees(54.013))
                 : new Pose2d(new Translation2d(1.371, 7.289), Rotation2d.fromDegrees(-54.013));
@@ -319,7 +321,9 @@ public final class Autonomous {
 //        score2 = new Pose2d(score2.getTranslation().plus(new Translation2d(0.1, Rotation2d.fromDegrees(30))), score2.getRotation());
         Pose2d score3 = FieldPositions.getBlueReefScoringTarget(rightSide ? 3 : 10);
         Pose2d score4 = FieldPositions.getBlueReefScoringTarget(rightSide ? 1 : 0);
-        Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, score1.getY()), Rotation2d.k180deg);
+
+        double startY = away ? (rightSide ? Constants.kField.getHeight() - 6.127 : 6.127) : score1.getY();
+        Pose2d start = new Pose2d(new Translation2d(FieldPositions.kStartingLineX, startY), Rotation2d.k180deg);
 
         PathConstraints constraints = getPathConstraints();
         PathConstraints slowerConstraints = new PathConstraints(
