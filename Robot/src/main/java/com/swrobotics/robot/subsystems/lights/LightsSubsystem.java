@@ -76,6 +76,8 @@ public final class LightsSubsystem extends SubsystemBase {
         } else if (commandRequest != null) {
             applySolid(commandRequest);
         } else if (DriverStation.isDisabled()) {
+            //fullBright = true;
+            //applySolid(Color.kWhite);
             prideSequencer.apply(this);
         } else {
             showIdle();

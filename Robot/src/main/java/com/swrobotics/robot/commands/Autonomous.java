@@ -283,7 +283,9 @@ public final class Autonomous {
                 .build();
         PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, slowerConstraints).build();
         PathPlannerPath score2ToHP = new SegmentBuilder(score2, hp, constraints).build();
-        PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, constraints).build();
+        PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, constraints)
+                .withCurveEnd(rightSide ? 20 : -20)
+                .build();
         PathPlannerPath score3ToHP = new SegmentBuilder(score3, hp, constraints).build();
         PathPlannerPath hpToScore4 = new SegmentBuilder(hp, score4, constraints)
                 .withCurveEnd(rightSide ? 30 : -30)
@@ -341,7 +343,9 @@ public final class Autonomous {
                 .build();
         PathPlannerPath hpToScore2 = new SegmentBuilder(hp, score2, slowerConstraints).build();
         PathPlannerPath score2ToHP = new SegmentBuilder(score2, hp, constraints).build();
-        PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, constraints).build();
+        PathPlannerPath hpToScore3 = new SegmentBuilder(hp, score3, constraints)
+                .withCurveEnd(rightSide ? 20 : -20)
+                .build();
         PathPlannerPath score3ToHP = new SegmentBuilder(score3, hp, constraints).build();
         PathPlannerPath hpToScore4 = new SegmentBuilder(hp, score4, constraints)
                 .withCurveStart(rightSide ? -20 : 20)
