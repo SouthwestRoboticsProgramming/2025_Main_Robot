@@ -62,7 +62,8 @@ public final class Constants {
     public static final double kTriggerThreshold = 0.3;
 
     public static final double kDriveControlMaxAccel = 3.5; // m/s^2
-    public static final double kDriveControlMaxTurnSpeed = 1; // rot/s
+    // public static final double kDriveControlMaxTurnSpeed = 1; // rot/s
+    public static final double kDriveControlMaxTurnSpeed = 0.5; // rot/s
     public static final double kDriveControlDrivePower = 2; // Exponent input is raised to
     public static final double kDriveControlTurnPower = 2;
 
@@ -95,7 +96,8 @@ public final class Constants {
     public static final NTEntry<Double> kSnapThetaDeadzone = new NTDouble("Drive/Snap/Theta Deadzone (deg)", 0.2).setPersistent();
 
     // Drive
-    public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
+    // public static final double kDriveMaxAchievableSpeed = Units.feetToMeters(18.9); // m/s  TODO: Measure
+    public static final double kDriveMaxAchievableSpeed = 2.0; // m/s  TODO: Measure
 
     // Subtracted from calculated max acceleration to get tipping acceleration limit
     public static final double kDriveTippingAccelTolerance = 1; // m/s^2
@@ -213,7 +215,8 @@ public final class Constants {
     public static final NTSlot0Configs kElevatorPID =
             new NTSlot0Configs("Superstructure/Elevator/PID", 0.3, 0, 0.4, 0, 0.13, 0);
     public static final NTEntry<Double> kElevatorKa = new NTDouble("Superstructure/Elevator/Real kA", 0.003).setPersistent();
-    public static final NTEntry<Double> kElevatorMaxVelocity = new NTDouble("Superstructure/Elevator/Max Velocity", 45).setPersistent();
+    // public static final NTEntry<Double> kElevatorMaxVelocity = new NTDouble("Superstructure/Elevator/Max Velocity", 45).setPersistent();
+    public static final NTEntry<Double> kElevatorMaxVelocity = new NTDouble("Superstructure/Elevator/Max Velocity", 20).setPersistent();
     public static final NTEntry<Double> kElevatorMaxAccel = new NTDouble("Superstructure/Elevator/Max Acceleration", 250).setPersistent();
     public static final NTEntry<Double> kElevatorClimbHoldVolts = new NTDouble("Superstructure/Elevator/Climb Hold Voltage", 2).setPersistent();
     public static final NTEntry<Double> kElevatorClimbPullVolts = new NTDouble("Superstructure/Elevator/Climb Pull Voltage", 2).setPersistent();
