@@ -49,11 +49,11 @@ deploy {
                 }
 
                  // Pathfinding binary artifact
-                 pathfindingLibDeploy(getArtifactTypeClass('FileArtifact')) {
+                 /*pathfindingLibDeploy(getArtifactTypeClass('FileArtifact')) {
                     //  dependsOn('buildPathfindingRoborioRelease')
                      file = project.file('target/arm-unknown-linux-gnueabi/release/libpathfinding_jni.so')
                      filename = 'libpathfinding_jni.so'
-                 }
+                 }*/
             }
         }
     }
@@ -69,6 +69,7 @@ repositories {
     }
 }
 
+/*
 task buildPathfindingRoborioRelease(type: Exec) {
     commandLine 'cross', 'build', '--release', '--target', 'arm-unknown-linux-gnueabi'
 }
@@ -81,6 +82,7 @@ task buildPathfindingSimRelease(type: Exec) {
 
 simulateJavaDebug.dependsOn(buildPathfindingSimDebug)
 simulateJavaRelease.dependsOn(buildPathfindingSimRelease)
+*/
 
 def deployArtifact = deploy.targets.roborio.artifacts.frcJava
 

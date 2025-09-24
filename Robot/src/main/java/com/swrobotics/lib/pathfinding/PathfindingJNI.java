@@ -49,19 +49,19 @@ public final class PathfindingJNI {
         ROBORIO {
             @Override
             Path getLibraryPath() {
-                return Paths.get("/home/lvuser/lib" + LIBRARY_NAME + ".so");
+                return Paths.get("/home/lvuser/libpathfinding_jni_roborio.so");
             }
         },
         SIMULATION_WINDOWS {
             @Override
             Path getLibraryPath() {
-                return Paths.get("target\\release\\" + LIBRARY_NAME + ".dll");
+                return Paths.get("src\\main\\deploy\\libpathfinding_jni_windows.dll");
             }
         },
         SIMULATION_LINUX {
             @Override
             Path getLibraryPath() {
-                return Paths.get("target/release/lib" + LIBRARY_NAME + ".so");
+                return Paths.get("src/main/deploy/libpathfinding_jni_linux_x86_64.so");
             }
         };
 
