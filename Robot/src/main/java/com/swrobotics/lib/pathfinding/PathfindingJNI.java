@@ -49,7 +49,7 @@ public final class PathfindingJNI {
         ROBORIO {
             @Override
             Path getLibraryPath() {
-                return Paths.get("/home/lvuser/libpathfinding_jni_roborio.so");
+                return Paths.get("/home/lvuser/deploy/libpathfinding_jni_roborio.so");
             }
         },
         SIMULATION_WINDOWS {
