@@ -260,8 +260,7 @@ public final class ControlBoard extends SubsystemBase {
     }
 
     private Translation2d getDesiredDriveTranslation() {
-        double maxSpeed = Constants.kDriveMaxAchievableSpeed;
-
+        double maxSpeed = 12;
         Translation2d leftStick = driver.getLeftStick();
 
         // Apply an exponential curve to the driver's input. This allows the
