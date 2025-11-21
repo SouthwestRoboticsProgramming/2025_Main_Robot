@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public final class FieldView {
     private static final Field2d field = new Field2d();
+    private static final Field2d left = new Field2d();
+    private static final Field2d right = new Field2d();
 
     public static final FieldObject2d robotPose = field.getRobotObject();
     public static final FieldObject2d visionEstimates = field.getObject("Vision estimates");
@@ -33,5 +35,7 @@ public final class FieldView {
      */
     public static void publish() {
         SmartDashboard.putData("Field View", field);
+        SmartDashboard.putData("Left", left);
+        SmartDashboard.putData("Right", right);
     }
 }
