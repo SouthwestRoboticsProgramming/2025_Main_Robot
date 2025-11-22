@@ -33,12 +33,21 @@ public final class PrideSequencer {
             createFlag("078d70,26ceaa,98e8c1,ffffff,7bade2,5049cc,3d1a78", 2), // Gay
             createFlag("fa4288,ffffff,71197f,000000,071195", 2), // Genderfluid
             createFlag("e38d00,e7c601,ffffff,5faad7,1f3554", 2), // Aroace
+            createFlag("74deff,ffe1ed,ffb5d6,ff8cbf,ffb5d6,ffe1ed,74deff", 2), //Transfem
 
+            //Other flags :3
             createFlag("000000,bcc6c7,ffffff,a6fa6e,ffffff,bcc6c7,000000"), // Agender
             createFlag("d42c00,fd9855,ffffff,d161a2,a20161"), // Lesbian
             createFlag("b57edc,ffffff,4a8122"), // Bigender
             createFlag("ffffff*4,7e287f,a3a3a3*4"), // Demisexual
             createFlag("fe218b,fed700,21b0fe"), // Pansexual
+            createFlag("7e7e7e,c3c3c3,ffadca,ffffff,ffadca,c3c3c3,7e7e7e"), //Demiboy
+            createFlag("7e7e7e,c3c3c3,9ad9f2,ffffff,9ad9f2,c3c3c3,7e7e7e"), //Demigirl
+            createFlag("f61bb9,07d669,1c92f5"), //Polyromantic
+            createFlag("00c2ff,ff006a,0a1027,ffffff,fcbf00"), //Polyamorous
+            createFlag("7f7f7f,c4c4c4,f3f691,ffffff,f3f691,c4c4c4,7f7f7f"), //Demigender
+            createFlag("000000,99d9ea,00a2e8,b5e61d,ffffff,ffc90e,fd6666,ffaec9,000000"), //Queer
+            createFlag("fe9ace,ff53bf,200044,6760fe,8ea6ff"), //Omnisexual
     };
 
     private static Flag createFlag(String colors) { return createFlag(colors, 1); }
